@@ -1,7 +1,7 @@
-from pokebot.sv.pokeDB import PokeDB
-from pokebot.sv.pokeDB import Pokemon
-from pokebot.sv.pokeDB import Battle
-from pokebot.sv.pokeDB import Player
+from pokebot.sv.core.pokeDB import PokeDB
+from pokebot.sv.core.pokemon import Pokemon
+from pokebot.sv.battle import Battle
+from pokebot.sv.player import Player
 
 
 PokeDB.init()
