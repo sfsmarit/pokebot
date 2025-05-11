@@ -2,7 +2,7 @@
 # 致死率計算 (ダメージ計算)
 #######################################################
 
-from pokejpy.sv.battle import *
+from pokebot import Pokemon, Battle, RandomPlayer
 
 
 # ---------------------------------------
@@ -10,42 +10,43 @@ from pokejpy.sv.battle import *
 # ---------------------------------------
 p1 = Pokemon('カイリュー')
 p1.nature = 'いじっぱり'
-# p1.initial_ability = ''
-p1.item = Item('')
-# p1.Ttype, p1.terastal = 'ステラ', True
+# p1.ability = ""
+p1.item = ""
+# p1.Ttype = "ステラ"
+# p1.terastallize()
 p1.effort = [0, 252, 0, 0, 0, 0]
 # p1.rank = [0, 0, 0, 0, 0, 0]
-# p1.ailment = 'BRN'
 
 p2 = Pokemon('ガチグマ(アカツキ)')
 # p2.nature = 'ずぶとい'
-# p2.initial_ability = ''
+# p2.ability = ""
 # p2.item = Item('オボンのみ')
-# p2.Ttype, p2.terastal = 'フェアリー', True
+# p2.Ttype = "フェアリー"
+# p2.terastallize()
 p2.effort = [252, 0, 0, 0, 0, 0]
 # p2.rank = [0, 0, 0, 0, 0, 0]
-# p2.ailment = 'PSN'
-# p2.condition['shiozuke'] = 1
 
+# プレイヤーをセット
+battle = Battle(RandomPlayer([p1]), RandomPlayer([p2]))
+battle.init_game()
 
-# ポケモンをセット
-battle = Battle()
-battle.pokemon[0] = p1
-battle.pokemon[1] = p2
+# ポケモンを場に出す
+battle.player[0].team[0].active = True
+battle.player[1].team[0].active = True
 
 # 攻撃側のプレイヤーindex
-pidx = 0
+idx = 0
 
 # 攻撃技
-move_list = ['しんそく']                    # 単発計算
-# move_list = ['スケイルショット']           # 単発計算
-# move_list = ['スケイルショット','じしん']   # 加算計算
+# moves = ['しんそく']
+moves = ['スケイルショット']
+# moves = ['スケイルショット','じしん']
 
-critical = False                            # 急所
-n_combo = 5                                 # 連続技のヒット数
+critical = False
+combo_hits = 5
 
 # 盤面の状態
-# battle.condition['sandstorm'] = 1         # 砂嵐
+# battle.field_mgr.set_weather(Weather.SAND)
 # battle.condition['glassfield'] = 1        # グラスフィールド
 # battle.condition['reflector'] = [1, 1]    # リフレクター
 
@@ -55,16 +56,16 @@ n_combo = 5                                 # 連続技のヒット数
 # ---------------------------------------
 print(f"{p1}\n{'-'*50}")
 print(f"{p2}\n{'-'*50}")
-print(move_list)
-print('\t', battle.lethal(pidx=pidx, move_list=move_list, n_combo=n_combo))
-print(f"\t{battle.damage_dict.keys()=}")
-print(f"\t{battle.damage_dict.values()=}")
-print(f"\t{battle.lethal_num=}")
-print(f"\t{battle.lethal_prob=:.3f}")
-print(f"\t{battle.damage_log[pidx]=}")
+print(moves)
+print(f"結果\t\t{battle.damage_mgr.lethal(idx, move_list=moves, combo_hits=combo_hits)}")
+print(f"ダメージ\t{battle.damage_mgr.damage_dstr.keys()}")
+print(f"ダメージ分布\t{battle.damage_mgr.damage_dstr.values()}")
+print(f"確定数\t\t{battle.damage_mgr.lethal_num}")
+print(f"致死率\t\t{battle.damage_mgr.lethal_prob:.3f}")
+print(f"計算ログ\t{battle.damage_mgr.log.notes}")
 
 # ---------------------------------------
 # 1発あたりのダメージ
 # ---------------------------------------
-print('\n', move_list[0])
-print('\t', '単発ダメージ', battle.oneshot_damages(pidx=pidx, move=move_list[0]))
+print('\n', moves[0])
+print('\t', '単発ダメージ', battle.damage_mgr.single_hit_damages(idx, moves[0]))

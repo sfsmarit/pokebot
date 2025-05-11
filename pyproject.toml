@@ -1,13 +1,21 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "pokejpy"
+name = "your_project_name"
 version = "0.1.0"
-description = "A Python library for handling Pokemon data"
-authors = [{ name = "Your Name", email = "your_email@example.com" }]
-license = { file = "LICENSE" }
+description = "A Japansese python package for Pokemon battle simulation / bot developent"
+authors = [
+    { name = "Tomoo Mari", email = "tmtm.holmes@email.com" }
+]
+license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.7"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = [
+    "unicodedata",
+]
+
+[project.urls]
+Homepage = "https://github.com/tmwork1/pokebot"
+Repository = "https://github.com/tmwork1/pokebot"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

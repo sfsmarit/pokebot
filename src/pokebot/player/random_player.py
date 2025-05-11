@@ -1,0 +1,224 @@
+from __future__ import annotations
+
+import random
+import json
+import time
+
+from pokebot.common.types import PlayerIndex
+from pokebot.common.enums import Command, Mode
+import pokebot.common.utils as ut
+from pokebot.core import Pokemon
+from pokebot.battle import Battle
+
+from .methods.game import _game
+from .methods.replay import _replay
+from .methods.complement import _complement_opponent_selection, \
+    _complement_opponent_switch, _complement_opponent_move, _complement_opponent_kata
+from .methods.estimate import _update_rejected_items, \
+    _estimate_AC, _estimate_BD, _estimate_S
+
+
+class RandomPlayer:
+    """プレイヤーを表現するクラス"""
+
+    def __init__(self):
+        self.team: list[Pokemon] = []
+        self.n_game: int = 0
+        self.n_won: int = 0
+        self.rating: float = 1500
+        self.idx: PlayerIndex
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
+        return new
+
+    def game(self,
+             opponent: RandomPlayer,
+             mode: Mode = Mode.SIM,
+             n_selection: int = 3,
+             open_sheet: bool = False,
+             seed: int | None = None,
+             max_turn: int = 100,
+             video_id: int = 0,
+             mute: bool = False) -> Battle:
+        """
+        試合を行う
+
+        Parameters
+        ----------
+        opponent : Player
+            対戦相手のプレイヤー
+        mode : BattleMode, optional
+            対戦モード, by default BattleMode.SIM
+        n_selection : int, optional
+            選出するポケモンの数, by default 3
+        open_sheet : bool, optional
+            Trueならパーティの情報を開示する, by default False
+        seed : int | None, optional
+            乱数シード, by default None
+        video_id : int, optional
+            ビデオキャプチャのデバイスID
+            BattleMode.OFFLINE/ONLINEでのみ使用, by default 0
+        mute : bool, optional
+            Falseならログを表示しない, by default False
+
+        Returns
+        -------
+        Battle
+            試合終了後の盤面
+        """
+        if seed is None:
+            seed = int(time.time())
+
+        return _game(self, opponent, mode, n_selection, open_sheet, seed, max_turn, video_id, mute)
+
+    def selection_command(self, battle: Battle) -> list[Command]:
+        """選出の方策関数"""
+        return self._random_select(battle)
+
+    def battle_command(self, battle: Battle) -> Command:
+        """ターン行動の方策関数"""
+        return self._random_command(battle)
+
+    def switch_command(self, battle: Battle) -> Command:
+        """自由交代の方策関数"""
+        return self._random_command(battle)
+
+    def _random_select(self, battle: Battle) -> list[Command]:
+        return random.sample(Command.selection_commands()[:len(self.team)], battle.n_selection)
+
+    def _random_command(self, battle: Battle) -> Command:
+        return random.choice(battle.available_commands(self.idx))
+
+    def complement_opponent_selection(self, battle: Battle):
+        return _complement_opponent_selection(self, battle)
+
+    def complement_opponent_switch(self, battle: Battle):
+        return _complement_opponent_switch(self, battle)
+
+    def complement_opponent_move(self, battle: Battle):
+        return _complement_opponent_move(self, battle)
+
+    def complement_opponent_kata(self,
+                                 poke: Pokemon,
+                                 kata: str = '',
+                                 overwrite_nature: bool = True,
+                                 overwrite_ability: bool = True,
+                                 overwrite_item: bool = True,
+                                 overwrite_terastal: bool = True,
+                                 overwrite_move: bool = True,
+                                 overwrite_effort: bool = True):
+        return _complement_opponent_kata(poke, kata, overwrite_nature, overwrite_ability, overwrite_item,
+                                         overwrite_terastal, overwrite_move, overwrite_effort)
+
+    def update_rejected_items(self: RandomPlayer, battle: Battle):
+        return _update_rejected_items(self, battle)
+
+    def estimate_opponent_stats(self, battle: Battle):
+        """相手が選出したポケモンのステータスとアイテムを推定値に置き換える
+        Parameters
+        ----------
+        battle: Battle
+
+        Returns
+        ----------
+            True: 更新が行われた、または現状のままで矛盾しない
+            False: 推定失敗
+        """
+        opp = PlayerIndex(not self.idx)
+
+        # 相手が選出した全ポケモンを推定
+        for p in battle.selected_pokemons(opp):
+            # 素早さ、火力、耐久の順に推定
+            for stat_idx in [5, 1, 3, 2, 4]:
+                # print(f"{p.name} {PokeDB.stats_kanji[stat_idx]} {p.nature} {p.effort[stat_idx]} {p.item=}")
+                match stat_idx:
+                    case 1 | 3:
+                        return self.estimate_AC(battle=battle, poke=p, stat_idx=stat_idx)
+                    case 2 | 4:
+                        return self.estimate_BD(battle=battle, poke=p, stat_idx=stat_idx)
+                    case 5:
+                        self.estimate_S(p)
+                # print(f"\t---> {p.nature} {p.effort[stat_idx]} {p.item=}")
+
+    def estimate_AC(self,
+                    battle: Battle,
+                    poke: Pokemon,
+                    stat_idx: int,
+                    recursive: bool = False) -> bool:
+        return _estimate_AC(self, battle, poke, stat_idx, recursive)
+
+    def estimate_BD(self,
+                    battle: Battle,
+                    poke: Pokemon,
+                    stat_idx: int,
+                    recursive: bool = False) -> bool:
+        return _estimate_BD(self, battle, poke, stat_idx, recursive)
+
+    def estimate_S(self, poke: Pokemon):
+        return _estimate_S(self, poke)
+
+    def save_team(self, filename: str):
+        with open(filename, 'w', encoding='utf-8') as fout:
+            d = {}
+            for i, p in enumerate(self.team):
+                d[str(i)] = p.dump()
+                print(f"{i+1} {p}\n")
+            fout.write(json.dumps(d, ensure_ascii=False))
+
+    def load_team(self, filename: str):
+        with open(filename, encoding='utf-8') as fin:
+            dict = json.load(fin)
+            self.team = []
+            for i, d in enumerate(dict.values()):
+                p = Pokemon()
+                p.load(d)
+                self.team.append(p)
+                print(f"{i+1} {p}\n")
+
+    def update_rating(self, opponent: RandomPlayer, won: bool = True):
+        players = [self, opponent]
+        EAs = [1 / (1+10**((players[not i].rating-players[i].rating)/400)) for i in range(2)]
+        for i in range(2):
+            players[i].rating += 32 * ((won+i) % 2 - EAs[i])
+
+    @classmethod
+    def advance_turn(cls, battle: Battle, mute: bool):
+        """
+        盤面を1ターン進める
+
+        Parameters
+        ----------
+        battle : Battle
+        mute : bool
+            Trueなら画面にログを表示する
+        """
+        battle.advance_turn()
+
+        # ログ表示
+        if not mute:
+            print(f"ターン{battle.turn}")
+            for idx in battle.action_order:
+                print(f"\tPlayer {int(idx)}", battle.logger.summary(battle.turn, idx))
+
+    @classmethod
+    def replay(cls, filepath: str, mute: bool = False) -> Battle:
+        """
+        ログファイルの対戦をリプレイする
+
+        Parameters
+        ----------
+        filepath : str
+            ログファイルのパス
+        mute : bool, optional
+            Player.advance_turn()のmute設定, by default True
+
+        Returns
+        -------
+        Battle
+            リプレイ後の盤面
+        """
+        return _replay(cls, filepath, mute)
