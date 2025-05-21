@@ -7,7 +7,7 @@ from pokebot.common.types import PlayerIndex
 from pokebot.common import PokeDB
 import pokebot.common.utils as ut
 
-from ..image_utils import BGR2BIN, OCR
+from pokebot.player.image import image_utils as iut
 
 
 def _read_ability_text(self: BotPlayer, idx: PlayerIndex | int, capture: bool = True):
@@ -20,13 +20,13 @@ def _read_ability_text(self: BotPlayer, idx: PlayerIndex | int, capture: bool = 
     # 行ごとにOCR
     for i in range(2):
         img1 = self.img[498+dy*i:540+dy*i, 300+dx*idx:600+dx*idx]
-        img1 = BGR2BIN(img1, threshold=250, bitwise_not=True)
+        img1 = iut.BGR2BIN(img1, threshold=250, bitwise_not=True)
         lang = 'all' if i == 0 else 'jpn'
 
         # 「急所」の黄色テキストを読み取るために、閾値を下げて再度OCRする
         if i == 0 and 0 not in img1:
             img1 = self.img[798+dy*i:842+dy*i, 285:1000]
-            img1 = BGR2BIN(img1, threshold=190, bitwise_not=True)
+            img1 = iut.BGR2BIN(img1, threshold=190, bitwise_not=True)
 
             # テキストがなければ中断
             if 0 not in img1:
@@ -34,7 +34,7 @@ def _read_ability_text(self: BotPlayer, idx: PlayerIndex | int, capture: bool = 
 
             lang = 'jpn'
 
-        s = OCR(img1, lang=lang, log_dir=type(self).ocr_log_dir / "bottom_text")
+        s = iut.OCR(img1, lang=lang, log_dir=type(self).ocr_log_dir / "bottom_text")
         words += s.split()
 
         # 形式が不適切なら中断

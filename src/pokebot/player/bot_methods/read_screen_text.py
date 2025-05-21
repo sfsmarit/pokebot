@@ -12,7 +12,7 @@ import pokebot.common.utils as ut
 from pokebot.model import Pokemon, Item, Move
 from pokebot.core.move_utils import move_speed
 
-from ..image_utils import BGR2BIN, OCR
+from pokebot.player.image import image_utils as iut
 
 
 def _read_screen_text(self: BotPlayer, capture: bool = True):
@@ -29,21 +29,21 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
     dy = 63
     for i in range(2):
         img = self.img[798+dy*i:842+dy*i, 285:1400]
-        img = BGR2BIN(img, threshold=250, bitwise_not=True)
+        img = iut.BGR2BIN(img, threshold=250, bitwise_not=True)
         lang = 'all' if i == 0 else 'jpn'
 
         # 枠内に白文字が含まれていなければ
         # 「急所」の黄文字を狙って再OCR
         if (re_ocr := i == 0 and 0 not in img):
             img = self.img[798+dy*i:842+dy*i, 285:1000]
-            img = BGR2BIN(img, threshold=190, bitwise_not=True)
+            img = iut.BGR2BIN(img, threshold=190, bitwise_not=True)
             lang = 'jpn'
 
         # 二値化後に黒いピクセルがなければ中断
         if 0 not in img:
             return False
 
-        s = OCR(img, lang=lang, log_dir=type(self).ocr_log_dir / "bottom_text")
+        s = iut.OCR(img, lang=lang, log_dir=type(self).ocr_log_dir / "bottom_text")
 
         # 文字が少なければ中断
         if len(s) < 3:

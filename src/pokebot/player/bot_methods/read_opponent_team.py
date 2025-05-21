@@ -10,8 +10,7 @@ from pokebot.common import PokeDB
 import pokebot.common.utils as ut
 from pokebot.model import Pokemon
 
-from ..image import TemplateImage
-from ..image_utils import box_trim, template_match_score
+from pokebot.player.image import TemplateImage, image_utils as iut
 
 
 def _read_opponent_team(self: BotPlayer, capture: bool = True):
@@ -27,7 +26,7 @@ def _read_opponent_team(self: BotPlayer, capture: bool = True):
     # アイコン
     for i in range(6):
         y0 = 236+101*i-(i < 2)*2
-        trims.append(box_trim(self.img[y0:(y0+94), 1246:(1246+94)], threshold=200))
+        trims.append(iut.box_trim(self.img[y0:(y0+94), 1246:(1246+94)], threshold=200))
         trims[i] = cv2.cvtColor(trims[i], cv2.COLOR_BGR2GRAY)
 
     candidates = list(PokeDB.home.keys())
@@ -46,8 +45,7 @@ def _read_opponent_team(self: BotPlayer, capture: bool = True):
             ht = int(w*template.shape[0]/template.shape[1])
             if abs(ht-h) > 3:
                 continue
-            score = template_match_score(
-                trims[i], cv2.resize(template, (w, ht)))
+            score = iut.template_match_score(trims[i], cv2.resize(template, (w, ht)))
             if scores[i] < score:
                 scores[i] = score
                 names[i] = s

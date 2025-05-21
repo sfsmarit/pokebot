@@ -10,14 +10,12 @@ import nxbt  # type: ignore
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Time, Command, Phase, Ailment, Condition, SideField, GlobalField
 from pokebot.common import PokeDB
-import pokebot.common.utils as ut
 from pokebot.model import Pokemon
 from pokebot.core import Battle
 
-
 from .player import Player
 from .image import TemplateImage
-from .image_utils import BGR2BIN, OCR, template_match_score
+from .image import image_utils as iut
 
 from .bot_methods.command import _input_selection_command, _input_move_command, _input_switch_command
 from .bot_methods.read_opponent_team import _read_opponent_team
@@ -172,37 +170,37 @@ class BotPlayer(Player):
         """オンライン対戦の待機画面ならTrue"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[10:70, 28:88], threshold=100, bitwise_not=True)
-        return template_match_score(img, TemplateImage.phase["standby"]) > 0.99
+        img = iut.BGR2BIN(self.img[10:70, 28:88], threshold=100, bitwise_not=True)
+        return iut.template_match_score(img, TemplateImage.phase["standby"]) > 0.99
 
     def _is_selection_window(self, capture: bool = True) -> bool:
         """選出画面ならTrue"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[14:64, 856:906], threshold=100, bitwise_not=True)
-        return template_match_score(img, TemplateImage.phase["selection"]) > 0.99
+        img = iut.BGR2BIN(self.img[14:64, 856:906], threshold=100, bitwise_not=True)
+        return iut.template_match_score(img, TemplateImage.phase["selection"]) > 0.99
 
     def _is_action_window(self, capture: bool = True) -> bool:
         """ターン開始時の画面ならTrue"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[997:1039, 827:869], threshold=200, bitwise_not=True)
+        img = iut.BGR2BIN(self.img[997:1039, 827:869], threshold=200, bitwise_not=True)
         # 黄色点滅時にも読み取れるように閾値を下げている
-        return template_match_score(img, TemplateImage.phase["action"]) > 0.95
+        return iut.template_match_score(img, TemplateImage.phase["action"]) > 0.95
 
     def _is_switch_window(self, capture: bool = True) -> bool:
         """交代画面ならTrue"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[140:200, 770:860], threshold=150, bitwise_not=True)
-        return template_match_score(img, TemplateImage.phase["switch"]) > 0.99
+        img = iut.BGR2BIN(self.img[140:200, 770:860], threshold=150, bitwise_not=True)
+        return iut.template_match_score(img, TemplateImage.phase["switch"]) > 0.99
 
     def _is_condition_window(self, capture: bool = True) -> bool:
         """場の状態の確認画面ならTrue"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[76:132, 1112:1372], threshold=200, bitwise_not=True)
-        return template_match_score(img, TemplateImage.condition_window) > 0.99
+        img = iut.BGR2BIN(self.img[76:132, 1112:1372], threshold=200, bitwise_not=True)
+        return iut.template_match_score(img, TemplateImage.condition_window) > 0.99
 
     def _selection_cursor_position(self, capture: bool = True) -> int:
         if capture:
@@ -241,8 +239,8 @@ class BotPlayer(Player):
         if capture:
             type(self).capture()
         for thr in [200, 150, 120]:
-            img = BGR2BIN(self.img[660+112*move_idx:700+112*move_idx, 1755:1800], threshold=thr, bitwise_not=True)
-            s = OCR(img, lang='num', log_dir=self.ocr_log_dir / "pp")
+            img = iut.BGR2BIN(self.img[660+112*move_idx:700+112*move_idx, 1755:1800], threshold=thr, bitwise_not=True)
+            s = iut.OCR(img, lang='num', log_dir=self.ocr_log_dir / "pp")
             if s and not s[-1].isdigit():
                 s = s[:-1]
             if s.isdigit():
@@ -253,9 +251,9 @@ class BotPlayer(Player):
         """交代画面でポケモンの状態(alive/fainting/in_battle)を読み取る"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[140:200, 1060:1260], threshold=150, bitwise_not=True)
+        img = iut.BGR2BIN(self.img[140:200, 1060:1260], threshold=150, bitwise_not=True)
         for s, img in TemplateImage.switch_state.items():
-            if template_match_score(img, img) > 0.99:
+            if iut.template_match_score(img, img) > 0.99:
                 return s
         return ""
 
@@ -263,9 +261,9 @@ class BotPlayer(Player):
         """交代画面で自分のポケモンの表示名を読み取る"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[171+126*switch_idx:212+126*switch_idx, 94:300], threshold=100)
+        img = iut.BGR2BIN(self.img[171+126*switch_idx:212+126*switch_idx, 94:300], threshold=100)
         labels = [PokeDB.jpn_to_foreign_labels[p.label] for p in self.team]
-        s = OCR(img, candidates=sum(labels, []), lang='all', log_dir=self.ocr_log_dir / "change_name")
+        s = iut.OCR(img, candidates=sum(labels, []), lang='all', log_dir=self.ocr_log_dir / "change_name")
         label = PokeDB.foreign_to_jpn_label[s]  # 和訳
         return label
 
@@ -273,8 +271,8 @@ class BotPlayer(Player):
         """交代画面で自分のポケモンの残りHPを読み取る"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[232+126*switch_idx:268+126*switch_idx, 110:298], threshold=220, bitwise_not=True)
-        s = OCR(img, lang='eng')
+        img = iut.BGR2BIN(self.img[232+126*switch_idx:268+126*switch_idx, 110:298], threshold=220, bitwise_not=True)
+        s = iut.OCR(img, lang='eng')
         s = s[:s.find('/')].replace('T', '7')
         return int(s) if s.isdigit() else 0
 
@@ -285,8 +283,8 @@ class BotPlayer(Player):
         # ボックスのポケモンを取得
         for i in range(6):
             type(self).capture()
-            img = BGR2BIN(self.img[1020:1060, 1372:1482], threshold=128)
-            if template_match_score(img, TemplateImage.box_window) < 0.95:
+            img = iut.BGR2BIN(self.img[1020:1060, 1372:1482], threshold=128)
+            if iut.template_match_score(img, TemplateImage.box_window) < 0.95:
                 print('Invalid screen')
                 break
             team.append(self._read_pokemon_from_box())
@@ -301,9 +299,9 @@ class BotPlayer(Player):
         """勝敗を読み取る"""
         if capture:
             type(self).capture()
-        img = BGR2BIN(self.img[940:1060, 400:750], threshold=140, bitwise_not=True)
+        img = iut.BGR2BIN(self.img[940:1060, 400:750], threshold=140, bitwise_not=True)
         for s, template in TemplateImage.win_loss.items():
-            if template_match_score(img, template) > 0.99:
+            if iut.template_match_score(img, template) > 0.99:
                 print(f"ゲーム終了 {s}")
                 return s
 
