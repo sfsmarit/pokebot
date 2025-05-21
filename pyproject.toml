@@ -5,7 +5,7 @@ description = "A Japansese python package for Pokemon battle simulation / bot de
 authors = [
     { name = "Tomoo Mari", email = "tmtm.holmes@email.com" }
 ]
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

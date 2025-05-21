@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pokebot.battle.battle import Battle
+    from pokebot.core.battle import Battle
 
 from copy import deepcopy
 
 from pokebot.common.types import PlayerIndex
-from pokebot.core import Pokemon
-from pokebot.core import Move
+import pokebot.common.utils as ut
+from pokebot.model import Move
 
 
 class DamageLog:
@@ -15,18 +15,26 @@ class DamageLog:
                  battle: Battle,
                  atk: PlayerIndex | int,
                  move: Move):
+
         self.turn: int = battle.turn
-        self.atk: PlayerIndex = PlayerIndex(atk)
-        self.pokemons: list[Pokemon] = battle.pokemon  # deepcopy(battle.pokemon)
-        self.move_name: str = move.name
+        self.atk: PlayerIndex | int = atk
+        self.pokemons: list[dict] = [p.dump() for p in battle.pokemons]
+        self.poke_mgrs: list[dict] = [mgr.dump() for mgr in battle.poke_mgrs]
+        self.move: str = move.name
         self.damage_dealt: int = battle.turn_mgr.damage_dealt[atk]
-        self.damage_ratio: float = battle.turn_mgr.damage_dealt[atk] / battle.pokemon[not atk].stats[0]
+        self.damage_ratio: float = self.damage_dealt / battle.pokemons[not atk].stats[0]
         self.critical: bool = battle.damage_mgr.critical
-        self.stellar_boost: bool = move.type not in battle.poke_mgr[atk].consumed_stellar_types
-        self.field_count: dict = battle.field_mgr.count.copy()
+        self.field_mgr: dict = battle.field_mgr.dump()
 
         self.notes: list[str] = []
         self.item_consumed: list[bool] = [False, False]
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        ut.selective_deepcopy(self, new)
+        return new
 
     def mask(self):
         pass

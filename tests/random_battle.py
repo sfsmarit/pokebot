@@ -1,4 +1,4 @@
-from pokebot import PokeDB, Pokemon, RandomPlayer
+from pokebot import PokeDB, Pokemon, Player
 import time
 import random
 
@@ -8,10 +8,19 @@ random.seed(1)
 M = 6  # 匹から
 N = random.randint(1, M)  # 匹選ぶ
 
+
+item_pool = PokeDB.items()
+# item_pool = ["だっしゅつボタン", "だっしゅつパック", "レッドカード"]
+
+ability_pool = PokeDB.abilities
+
+move_pool = list(PokeDB.move_data.keys())
+
+
 while True:
     # 2人のプレイヤーを生成
-    player = RandomPlayer()
-    opponent = RandomPlayer()
+    player = Player()
+    opponent = Player()
 
     # ポケモンをM匹ずつパーティに追加
     for i, pl in enumerate([player, opponent]):
@@ -19,11 +28,10 @@ while True:
 
         for j, name in enumerate(names):
             pl.team.append(Pokemon(name))
-            pl.team[-1].ability = random.choice(PokeDB.abilities)
-            pl.team[-1].item = random.choice(list(PokeDB.item_data.keys()))
+            pl.team[-1].ability = random.choice(ability_pool)
+            pl.team[-1].item = random.choice(item_pool)
             pl.team[-1].moves.clear()
-            pl.team[-1].add_moves(random.sample(list(PokeDB.moves.keys()),
-                                                random.randint(1, 10)))
+            pl.team[-1].add_moves(random.sample(move_pool, random.randint(1, 10)))
 
     # 表示
     for i, pl in enumerate([player, opponent]):
@@ -35,6 +43,7 @@ while True:
     t0 = time.time()
     battle = player.game(opponent, n_selection=N, seed=0)
     print(f"{time.time() - t0:.2f}s")
+    print('-'*50)
 
     # リプレイ
     if False:
@@ -45,4 +54,4 @@ while True:
         print(f"\n{'-'*50}\nリプレイ {filepath}\n{'-'*50}")
         player.replay(filepath)
 
-    # break
+    break

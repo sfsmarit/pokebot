@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from pokebot.common.types import PlayerIndex
+import pokebot.common.utils as ut
 
 from .command_log import CommandLog
 from .turn_log import TurnLog
@@ -20,17 +21,12 @@ class Logger:
 
     def __deepcopy__(self, memo):
         cls = self.__class__
-        result = cls.__new__(cls)
-        memo[id(self)] = result
-        for key, val in self.__dict__.items():
-            if key in ['turn_logs', 'command_logs', 'damage_logs']:
-                setattr(result, key, [v for v in val])  # ログは複製しない
-            else:
-                setattr(result, key, deepcopy(val))
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        ut.selective_deepcopy(self, new)
+        return new
 
-        return result
-
-    def summary(self, turn: int, idx: PlayerIndex) -> str:
+    def summary(self, turn: int, idx: PlayerIndex | int) -> str:
         logs = []
         for log in self.turn_logs:
             if log.turn == turn and log.idx in [idx, None]:

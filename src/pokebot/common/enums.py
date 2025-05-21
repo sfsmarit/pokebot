@@ -26,68 +26,107 @@ class Ailment(BaseEnum):
 
 
 class Condition(BaseEnum):
-    AQUA_RING = ["アクアリング", 1, True]
-    AME_MAMIRE = ["あめまみれ", 3, False]
-    ENCORE = ["アンコール", 3, False]
-    ANTI_AIR = ["うちおとす", 1, False]
-    HEAL_BLOCK = ["かいふくふうじ", 5, True]
-    KANASHIBARI = ["かなしばり", 3, False]
-    CRITICAL = ["急所ランク", 3, True]
-    CONFUSION = ["こんらん", 5, True]
-    SHIOZUKE = ["しおづけ", 1, False]
-    JIGOKUZUKI = ["じごくづき", 2, False]
-    CHARGE = ["じゅうでん", 1, False]
-    STOCK = ["たくわえる", 3, False]
-    CHOHATSU = ["ちょうはつ", 3, False]
-    MAGNET_RISE = ["でんじふゆう", 5, True]
-    SWITCH_BLOCK = ["にげられない", 1, False]
-    NEMUKE = ["ねむけ", 2, False]
-    NEOHARU = ["ねをはる", 1, False]
-    NOROI = ["のろい", 1, True]
-    BIND = ["バインド", 5, False]
-    HOROBI = ["ほろびのうた", 3, True]
-    MICHIZURE = ["みちづれ", 1, False]
-    MEROMERO = ["メロメロ", 1, False]
-    BAD_POISON = ["もうどく", 15, False]
-    YADORIGI = ["やどりぎのタネ", 1, True]
+    AQUA_RING = ["アクアリング", 1, True, False]
+    AME_MAMIRE = ["あめまみれ", 3, False, True]
+    ENCORE = ["アンコール", 3, False, True]
+    ANTI_AIR = ["うちおとす", 1, False, False]
+    HEAL_BLOCK = ["かいふくふうじ", 5, True, True]
+    KANASHIBARI = ["かなしばり", 3, False, True]
+    CRITICAL = ["急所ランク", 3, True, False]
+    CONFUSION = ["こんらん", 5, True, True]
+    SHIOZUKE = ["しおづけ", 1, False, False]
+    JIGOKUZUKI = ["じごくづき", 2, False, True]
+    CHARGE = ["じゅうでん", 1, False, False]
+    STOCK = ["たくわえる", 3, False, False]
+    CHOHATSU = ["ちょうはつ", 3, False, True]
+    MAGNET_RISE = ["でんじふゆう", 5, True, True]
+    SWITCH_BLOCK = ["にげられない", 1, False, False]
+    NEMUKE = ["ねむけ", 2, False, True]
+    NEOHARU = ["ねをはる", 1, False, False]
+    NOROI = ["のろい", 1, True, False]
+    BIND = ["バインド", 5, False, True]
+    HOROBI = ["ほろびのうた", 3, True, True]
+    MICHIZURE = ["みちづれ", 1, False, False]
+    MEROMERO = ["メロメロ", 1, False, False]
+    BAD_POISON = ["もうどく", 15, False, False]
+    YADORIGI = ["やどりぎのタネ", 1, True, False]
 
     def __str__(self):
         return str(self.value[0])
 
     @property
-    def max_count(self):
+    def max_count(self) -> int:
         return self.value[1]
 
     @property
-    def is_baton(self):
+    def is_baton(self) -> bool:
         return self.value[2]
+
+    @property
+    def is_expirable(self) -> bool:
+        return self.value[3]
 
 
 class GlobalField(BaseEnum):
-    WEATHER = ["天候", 8]
-    TERRAIN = ["フィールド", 8]
-    TRICKROOM = ["トリックルーム", 5]
-    GRAVITY = ["じゅうりょく", 5]
+    WEATHER = ["天候", 8, False]
+    TERRAIN = ["フィールド", 8, False]
+    TRICKROOM = ["トリックルーム", 5, True]
+    GRAVITY = ["じゅうりょく", 5, True]
 
     def __str__(self):
         return self.value[0]
 
     @property
     def max_count(self) -> int:
+        return self.value[1]
+
+    @property
+    def is_expirable(self) -> bool:
+        return self.value[2]
+
+
+class Weather(BaseEnum):
+    NONE = [None, False]
+    SUNNY = ["はれ", True]
+    RAINY = ["あめ", True]
+    SNOW = ["ゆき", True]
+    SAND = ["すなあらし", True]
+
+    def __str__(self):
+        return self.value[0]
+
+    @property
+    def is_expirable(self) -> bool:
+        return self.value[1]
+
+
+class Terrain(BaseEnum):
+    NONE = [None, False]
+    ELEC = ["エレキフィールド", True]
+    GRASS = ["グラスフィールド", True]
+    PSYCO = ["サイコフィールド", True]
+    MIST = ["ミストフィールド", True]
+
+    def __str__(self):
+        return self.value[0]
+
+    @property
+    def is_expirable(self) -> bool:
         return self.value[1]
 
 
 class SideField(BaseEnum):
-    REFLECTOR = ["リフレクター", 8]
-    LIGHTWALL = ["ひかりのかべ", 8]
-    SHINPI = ["しんぴのまもり", 5]
-    WHITE_MIST = ["しろいきり", 5]
-    OIKAZE = ["おいかぜ", 3]
-    WISH = ["ねがいごと", 2]
-    MAKIBISHI = ["まきびし", 3]
-    DOKUBISHI = ["どくびし", 2]
-    STEALTH_ROCK = ["ステルスロック", 1]
-    NEBA_NET = ["ねばねばネット", 1]
+    REFLECTOR = ["リフレクター", 8, True]
+    LIGHTWALL = ["ひかりのかべ", 8, True]
+    AURORA_VEIL = ["オーロラベール", 8, True]
+    SHINPI = ["しんぴのまもり", 5, True]
+    WHITE_MIST = ["しろいきり", 5, True]
+    OIKAZE = ["おいかぜ", 3, True]
+    WISH = ["ねがいごと", 2, True]
+    MAKIBISHI = ["まきびし", 3, False]
+    DOKUBISHI = ["どくびし", 2, False]
+    STEALTH_ROCK = ["ステルスロック", 1, False]
+    NEBA_NET = ["ねばねばネット", 1, False]
 
     def __str__(self):
         return self.value[0]
@@ -96,21 +135,9 @@ class SideField(BaseEnum):
     def max_count(self) -> int:
         return self.value[1]
 
-
-class Weather(BaseEnum):
-    NONE = None
-    SUNNY = "はれ"
-    RAINY = "あめ"
-    SNOW = "ゆき"
-    SAND = "すなあらし"
-
-
-class Terrain(BaseEnum):
-    NONE = None
-    ELEC = "エレキフィールド"
-    GRASS = "グラスフィールド"
-    PSYCO = "サイコフィールド"
-    MIST = "ミストフィールド"
+    @property
+    def is_expirable(self) -> bool:
+        return self.value[2]
 
 
 class MoveCategory(BaseEnum):
@@ -129,17 +156,12 @@ class BoostSource(BaseEnum):
     FIELD = auto()
 
 
-class Mode(BaseEnum):
-    SIM = "Simulation"
-    OFFLINE = "Offline"
-    ONLINE = "Online"
-
-
 class Phase(BaseEnum):
     NONE = None
     SELECTION = "選出"
-    BATTLE = "バトル"
+    ACTION = "行動"
     SWITCH = "交代"
+    STAND_BY = "待機"
 
 
 class Time(BaseEnum):
@@ -149,6 +171,7 @@ class Time(BaseEnum):
     COMMAND = 45                # コマンド入力
     CAPTURE = 0.1               # キャプチャ遅延
     TRANSITION_CAPTURE = 0.3    # 画面遷移を伴うキャプチャ遅延
+    OUT = 60
 
 
 class Command(BaseEnum):
@@ -228,7 +251,7 @@ class Command(BaseEnum):
         return self.value[0] == "MEGAEVOL"
 
     @property
-    def is_battle(self) -> bool:
+    def is_action(self) -> bool:
         return self.value[0] in ["MOVE", "TERASTAL", "MEGAEVOL"]
 
     @classmethod
@@ -240,7 +263,7 @@ class Command(BaseEnum):
         return [x for x in cls if x.value[0] == "SWITCH" in x.name]
 
     @classmethod
-    def battle_commands(cls):
+    def action_commands(cls):
         return [x for x in cls if x.value[0] not in ["SELECT", "SPECIAL"]]
 
     @classmethod

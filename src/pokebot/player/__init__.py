@@ -1,1 +1,1 @@
-from .random_player import RandomPlayer
+from .player import Player

@@ -17,4 +17,7 @@
         ".",
         "--capture=no"
     ],
+    "python.analysis.extraPaths": [
+        "./examples/ex011_connect_"
+    ],
 }

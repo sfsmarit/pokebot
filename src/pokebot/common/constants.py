@@ -1,7 +1,7 @@
 from .enums import Weather, Terrain
 
 STAT_CODES = ('H', 'A', 'B', 'C', 'D', 'S', 'Hit', 'Eva')
-STAT_HIRAGANA = ('HP', 'こうげき', 'ぼうぎょ', 'とくこう', 'とくぼう', 'すばやさ', 'めいちゅう', 'かいひ')
+STAT_CODES_HIRAGANA = ('HP', 'こうげき', 'ぼうぎょ', 'とくこう', 'とくぼう', 'すばやさ', 'めいちゅう', 'かいひ')
 STAT_CODES_KANJI = ('HP', '攻撃', '防御', '特攻', '特防', '素早さ', '命中', '回避')
 
 HEAL_BERRIES = ('オレンのみ', 'オボンのみ', 'フィラのみ', 'ウイのみ', 'マゴのみ', 'バンジのみ', 'イアのみ')
