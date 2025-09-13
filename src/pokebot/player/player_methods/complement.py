@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..player import Player
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Phase, Command
 from pokebot.common import PokeDB
 from pokebot.model import Pokemon, Ability, Item, Move
@@ -59,20 +58,20 @@ def _complement_opponent_kata(poke: Pokemon,
     name = poke.name
 
     # 型データに登録されている名前に変換する
-    if name in PokeDB.name_to_kata_name:
-        name = PokeDB.name_to_kata_name[name]
+    if name in PokeDB.valid_kata_name:
+        name = PokeDB.valid_kata_name[name]
 
     # 型データがあれば優先して参照し、なければポケモンHOMEの統計データを参照する
     if name in PokeDB.name_to_kata_list:
         # 指定された型が見つからなければ、最も数が多い型を参照する
-        if kata not in PokeDB.kata_data:
+        if kata not in PokeDB.kata:
             kata = list(PokeDB.name_to_kata_list[name].keys())[0]
 
         nature = poke.nature
-        ability = Ability(list(PokeDB.kata_data[kata]['abilities'].keys())[0])
-        item = Item(list(PokeDB.kata_data[kata]['items'].keys())[0])
-        terastal = list(PokeDB.kata_data[kata]['terastals'].keys())[0]
-        moves = PokeDB.kata_data[kata]['moves']
+        ability = Ability(list(PokeDB.kata[kata]['abilities'].keys())[0])
+        item = Item(list(PokeDB.kata[kata]['items'].keys())[0])
+        terastal = list(PokeDB.kata[kata]['terastals'].keys())[0]
+        moves = PokeDB.kata[kata]['moves']
         effort = poke.effort
 
     elif name in PokeDB.home:

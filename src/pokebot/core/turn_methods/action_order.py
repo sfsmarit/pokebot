@@ -9,6 +9,8 @@ from pokebot.model import Move
 from pokebot.logger import TurnLog
 from pokebot.core.move_utils import move_speed
 
+import time
+
 
 def _update_action_order(self: TurnManager):
     """場のポケモンの行動順を更新する"""
@@ -86,19 +88,23 @@ def update_speed_order(self: TurnManager):
     self.speed_order = [first, int(not first)]
 
 
-def _estimate_opponent_speed(self: TurnManager, idx: PlayerIndex | int):
+def _update_opponent_speed_limit(self: TurnManager, idx: PlayerIndex | int) -> None:
     """行動順から相手のポケモンの素早さを推定する"""
-    battle = self.battle
+    opp = PlayerIndex(not idx)
+    opponent = self.battle.pokemons[opp]
 
-    opp = int(not idx)
-    opponent = battle.pokemons[opp]
-    masked_opp = opponent if battle.open_sheet else opponent.masked()
+    if self.battle.open_sheet:
+        observed_effective_speed = self.battle.poke_mgrs[opp].effective_speed(masked=False)
+        observed_stats = self.battle.pokemons[opp].stats
+    else:
+        observed_effective_speed = self.battle.poke_mgrs[opp].effective_speed(masked=True)
+        observed_stats = self.battle.pokemons[opp].masked().stats
 
-    # 観測可能な相手のS補正値
-    r_speed = battle.masked(idx).poke_mgrs[opp].effective_speed() / masked_opp.stats[5]
+    # 相手ポケモンのS補正の観測値
+    speed_modifier = observed_effective_speed / observed_stats[5]
 
-    # 相手のS = 自分のS / 相手のS補正値
-    speed = int(battle.poke_mgrs[idx].effective_speed() / r_speed)
+    # 相手のSリミット = 自分のS / 相手のS補正値
+    speed_limit = int(self.battle.poke_mgrs[idx].effective_speed() / speed_modifier)
 
     # S推定値を更新
-    opponent.set_speed_limit(speed, first_act=battle.poke_mgrs[opp].first_act)
+    opponent.set_speed_limit(speed_limit, first_act=self.battle.poke_mgrs[opp].first_act)

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..turn_manager import TurnManager
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Weather, Terrain, \
     Condition, GlobalField, SideField
 from pokebot.logger import TurnLog
@@ -226,7 +225,7 @@ def _end_turn(self: TurnManager):
 
     # 場の効果のカウント消費
     for idx in self.speed_order:
-        for cond in [SideField.REFLECTOR, SideField.LIGHTWALL, SideField.SHINPI,
+        for cond in [SideField.REFLECTOR, SideField.LIGHT_WALL, SideField.SHINPI,
                      SideField.WHITE_MIST, SideField.OIKAZE]:
             battle.field_mgr.add_count(cond, idx, -1)
 

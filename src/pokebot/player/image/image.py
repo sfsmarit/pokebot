@@ -65,7 +65,8 @@ class TemplateImage:
 
         cls.ailment = {}
         for x in Ailment:
-            cls.ailment[x] = (BGR2BIN(cv2.imread(ut.path_str("assets", "ailment", f"{x.name}.png")), threshold=200, bitwise_not=True))
+            if x.value:
+                cls.ailment[x] = (BGR2BIN(cv2.imread(ut.path_str("assets", "ailment", f"{x.name}.png")), threshold=200, bitwise_not=True))
 
         cls.condition = {}
         enum_dir = [
@@ -79,11 +80,11 @@ class TemplateImage:
             for x in enum:
                 if x.name in ["NONE", "WEATHER", "TERRAIN"]:
                     continue
-                img = BGR2BIN(cv2.imread(ut.path_str("assets", dir, f"{x.name}.png")), threshold=128)
+                img = BGR2BIN(cv2.imread(ut.path_str("assets", "condition", dir, f"{x.name}.png")), threshold=128)
                 if cv2.countNonZero(img)/img.size < 0.5:
                     img = cv2.bitwise_not(img)
                 cls.condition[x] = img
 
-        cls.expirable_conditions = [x.name for enum in [Condition, Weather, Terrain, GlobalField, SideField]
+        cls.expirable_conditions = [x for enum in [Condition, Weather, Terrain, GlobalField, SideField]
                                     for x in enum if x.is_expirable]
         cls.accumulative_conditions = [Condition.STOCK, SideField.MAKIBISHI, SideField.DOKUBISHI]

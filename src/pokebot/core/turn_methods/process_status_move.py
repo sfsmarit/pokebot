@@ -124,13 +124,13 @@ def _process_status_move(self: TurnManager,
                         self.move_succeeded[atk] = defender.ability.active
                         defender.ability.active = False
                     case 'シンプルビーム':
-                        self.move_succeeded[atk] = defender.ability != 'たんじゅん'
+                        self.move_succeeded[atk] = defender.ability.name != 'たんじゅん'
                         defender.ability.name = 'たんじゅん'
                     case 'なかまづくり':
-                        self.move_succeeded[atk] = attacker.ability != defender.ability
+                        self.move_succeeded[atk] = attacker.ability.name != defender.ability.name
                         defender.ability.name = attacker.ability.name
                     case 'なやみのタネ':
-                        self.move_succeeded[atk] = defender.ability != 'ふみん'
+                        self.move_succeeded[atk] = defender.ability.name != 'ふみん'
                         defender.ability.name = 'ふみん'
             self.move_succeeded[atk] &= dfn == org_dfn
         case 'いたみわけ':
@@ -192,7 +192,7 @@ def _process_status_move(self: TurnManager,
             if self.move_succeeded[atk]:
                 count = 8 if attacker.item.name == 'ひかりのねんど' else 5
                 self.move_succeeded[atk] = battle.field_mgr.set_field(SideField.REFLECTOR, count=count)
-                self.move_succeeded[atk] |= battle.field_mgr.set_field(SideField.LIGHTWALL, count=count)
+                self.move_succeeded[atk] |= battle.field_mgr.set_field(SideField.LIGHT_WALL, count=count)
         case 'おかたづけ' | 'りゅうのまい':
             self.move_succeeded[atk] = any(attacker_mgr.add_rank(values=[0, 1, 0, 0, 0, 1]))
             if move.name == 'おかたづけ':
@@ -227,7 +227,7 @@ def _process_status_move(self: TurnManager,
         case 'きりばらい':
             self.move_succeeded[atk] = any(defender_mgr.add_rank(7, -1, by_opponent=True))
             self.move_succeeded[atk] |= battle.field_mgr.set_terrain(Terrain.NONE, atk)
-            for field in [SideField.REFLECTOR, SideField.LIGHTWALL, SideField.SHINPI, SideField.WHITE_MIST]:
+            for field in [SideField.REFLECTOR, SideField.LIGHT_WALL, SideField.SHINPI, SideField.WHITE_MIST]:
                 self.move_succeeded[atk] |= battle.field_mgr.set_field(field, dfn, 0)
             for field in [SideField.MAKIBISHI, SideField.DOKUBISHI, SideField.STEALTH_ROCK, SideField.NEBA_NET]:
                 self.move_succeeded[atk] |= battle.field_mgr.set_field(field, atk, count=0)
@@ -413,7 +413,7 @@ def _process_status_move(self: TurnManager,
                 self.move_succeeded[atk] &= any(attacker_mgr.add_rank(1, 12))
         case 'ひかりのかべ' | 'リフレクター':
             count = 8 if attacker.item.name == 'ひかりのねんど' else 5
-            field = SideField.LIGHTWALL if move.name == "ひかりのかべ" else SideField.REFLECTOR
+            field = SideField.LIGHT_WALL if move.name == "ひかりのかべ" else SideField.REFLECTOR
             self.move_succeeded[atk] = battle.field_mgr.set_field(field, atk, count)
         case 'ひっくりかえす':
             self.move_succeeded[atk] = any(defender_mgr.rank)

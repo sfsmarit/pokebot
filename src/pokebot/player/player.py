@@ -13,7 +13,8 @@ from .player_methods.game import _game
 from .player_methods.replay import _replay
 from .player_methods.complement import _complement_opponent_selection, \
     _complement_opponent_switch, _complement_opponent_move, _complement_opponent_kata
-from .player_methods.estimate import _estimate_AC, _estimate_BD, _estimate_S
+from .player_methods.estimate import estimate_attack, estimate_defence, estimate_speed
+from .player_methods.max_damage_command import _max_damage_command
 
 
 class Player:
@@ -32,6 +33,10 @@ class Player:
         memo[id(self)] = new
         ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
         return new
+
+    def init_game(self):
+        for poke in self.team:
+            poke.init_game()
 
     def game(self,
              opponent: Self,
@@ -66,6 +71,8 @@ class Player:
         Battle
             試合終了後の盤面
         """
+        n_selection = min(n_selection, len(self.team), len(opponent.team))
+
         if seed is None:
             seed = int(time.time())
 
@@ -107,6 +114,9 @@ class Player:
     def _random_command(self, battle: Battle) -> Command:
         return random.choice(battle.available_commands(self.idx))
 
+    def max_damage_command(self, battle: Battle) -> Command:
+        return _max_damage_command(self, battle)
+
     def complement_opponent_selection(self, battle: Battle):
         return _complement_opponent_selection(self, battle)
 
@@ -127,50 +137,6 @@ class Player:
                                  overwrite_effort: bool = True):
         return _complement_opponent_kata(poke, kata, overwrite_nature, overwrite_ability, overwrite_item,
                                          overwrite_terastal, overwrite_move, overwrite_effort)
-
-    def estimate_opponent_stats(self, battle: Battle):
-        """相手が選出したポケモンのステータスとアイテムを推定値に置き換える
-        Parameters
-        ----------
-        battle: Battle
-
-        Returns
-        ----------
-            True: 更新が行われた、または現状のままで矛盾しない
-            False: 推定失敗
-        """
-        opp = int(not self.idx)
-
-        # 相手が選出した全ポケモンを推定
-        for p in battle.selected_pokemons(opp):
-            # 素早さ、火力、耐久の順に推定
-            for stat_idx in [5, 1, 3, 2, 4]:
-                # print(f"{p.name} {PokeDB.stats_kanji[stat_idx]} {p.nature} {p.effort[stat_idx]} {p.item=}")
-                match stat_idx:
-                    case 1 | 3:
-                        return self.estimate_AC(battle=battle, poke=p, stat_idx=stat_idx)
-                    case 2 | 4:
-                        return self.estimate_BD(battle=battle, poke=p, stat_idx=stat_idx)
-                    case 5:
-                        self.estimate_S(p)
-                # print(f"\t---> {p.nature} {p.effort[stat_idx]} {p.item=}")
-
-    def estimate_AC(self,
-                    battle: Battle,
-                    poke: Pokemon,
-                    stat_idx: int,
-                    recursive: bool = False) -> bool:
-        return _estimate_AC(self, battle, poke, stat_idx, recursive)
-
-    def estimate_BD(self,
-                    battle: Battle,
-                    poke: Pokemon,
-                    stat_idx: int,
-                    recursive: bool = False) -> bool:
-        return _estimate_BD(self, battle, poke, stat_idx, recursive)
-
-    def estimate_S(self, poke: Pokemon):
-        return _estimate_S(self, poke)
 
     def update_rating(self, opponent: Self, won: bool = True):
         players = [self, opponent]
@@ -195,7 +161,11 @@ class Player:
         if not mute:
             print(f"ターン{battle.turn}")
             for idx in battle.action_order:
-                print(f"\tPlayer {int(idx)}", battle.logger.summary(battle.turn, idx))
+                print(
+                    f"\tPlayer {int(idx)}",
+                    battle.logger.get_turn_summary(battle.turn, idx),
+                    battle.logger.get_damage_summary(battle.turn, idx),
+                )
 
     @classmethod
     def replay(cls, filepath: str, mute: bool = False) -> Battle:
@@ -215,3 +185,30 @@ class Player:
             リプレイ後の盤面
         """
         return _replay(cls, filepath, mute)
+
+    def estimate_opponent_stats(self, battle: Battle):
+        """相手が選出したポケモンのステータスとアイテムを推定値に置き換える
+        Parameters
+        ----------
+        battle: Battle
+
+        Returns
+        ----------
+            True: 更新が行われた、または現状のままで矛盾しない
+            False: 推定失敗
+        """
+        opp = int(not self.idx)
+
+        # 相手の全選出を対象とする
+        for poke in battle.selected_pokemons(opp):
+            # 素早さ、火力、耐久の順に推定
+            print(f"\t\tステータス推定\t{poke.name} : {poke.nature} {poke.effort} {poke.item}", end='')
+            for stat_idx in [5, 1, 3, 2, 4]:
+                match stat_idx:
+                    case 1 | 3:
+                        estimate_attack(self, battle, poke, stat_idx, False)
+                    case 2 | 4:
+                        estimate_defence(self, battle, poke, stat_idx, False)
+                    case 5:
+                        estimate_speed(poke)
+            print(f" -> {poke.nature} {poke.effort} {poke.item}")

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..player import Player
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import MoveCategory
 from pokebot.common.constants import NATURE_MODIFIER, STAT_CODES_KANJI
 import pokebot.common.utils as ut
@@ -12,11 +11,11 @@ from pokebot.core.battle import Battle
 from pokebot.core.move_utils import effective_move_category
 
 
-def _estimate_AC(self: Player,
-                 battle: Battle,
-                 poke: Pokemon,
-                 stat_idx: int,
-                 recursive: bool) -> bool:
+def estimate_attack(self: Player,
+                    battle: Battle,
+                    poke: Pokemon,
+                    stat_idx: int,
+                    recursive: bool) -> bool:
 
     opp = int(not self.idx)
     move_category = MoveCategory.PHY if stat_idx == 1 else MoveCategory.SPE
@@ -26,13 +25,13 @@ def _estimate_AC(self: Player,
     # ダメージ履歴を参照する
     for log in battle.logger.damage_logs:
         # 推定に使えないログを除外
-        if log.atk != opp or \
-                log.pokemons[opp]['name'] != poke.name or \
+        if log.idx != opp or \
+                log.pokemons[opp]['_name'] != poke.name or \
                 effective_move_category(battle, opp, log.move) != move_category or \
                 log.move in ['イカサマ', 'ボディプレス']:
             continue
 
-        if recursive == 0:
+        if not recursive:
             # 1度目の計算では、ダメージが発生した状況を再現する
             btl = battle.restore_from_damage_log(log)
 
@@ -72,7 +71,7 @@ def _estimate_AC(self: Player,
     if recursive:
         return False
 
-    # 探索範囲 (低->高火力)
+    # 探索候補 (低火力順)
     # 0
     # 252
     # +252
@@ -142,7 +141,7 @@ def _estimate_AC(self: Player,
                 continue
 
         # 探索条件がダメージ履歴に合致すれば、元のポケモンを更新する
-        if self.estimate_AC(btl, pc, stat_idx, recursive=True):
+        if estimate_attack(self, btl, pc, stat_idx, recursive=True):
             poke.nature = nature
             poke.set_effort(stat_idx, effort)
             poke.item = item
@@ -151,23 +150,23 @@ def _estimate_AC(self: Player,
     return False
 
 
-def _estimate_BD(self: Player,
-                 battle: Battle,
-                 poke: Pokemon,
-                 stat_idx: int,
-                 recursive: bool) -> bool:
+def estimate_defence(self: Player,
+                     battle: Battle,
+                     poke: Pokemon,
+                     stat_idx: int,
+                     recursive: bool) -> bool:
     opp = int(not self.idx)
-    move_category = MoveCategory.PHY if stat_idx == 1 else MoveCategory.SPE
+    move_category = MoveCategory.PHY if stat_idx == 2 else MoveCategory.SPE
 
     errors = []
 
     # ダメージ履歴を参照する
     for log in battle.logger.damage_logs:
         # 推定に使えない条件
-        if log.atk == opp or \
-                log.pokemons[opp]['name'] != poke.name or \
+        if log.idx == opp or \
+                log.pokemons[opp]['_name'] != poke.name or \
                 effective_move_category(battle, self.idx, log.move) != move_category or \
-                "physical" in Move(log.move).tags:
+                (stat_idx != 2 and "physical" in Move(log.move).tags):
             continue
 
         if not recursive:
@@ -206,9 +205,9 @@ def _estimate_BD(self: Player,
     if not any(errors):
         return True
 
-    # 評価結果が不自然なら中止
+    # 評価結果に一貫性がなければ中止
     if +1 in errors and -1 in errors:
-        print(f"{STAT_CODES_KANJI[stat_idx]}を推定できません")
+        # print(f"{STAT_CODES_KANJI[stat_idx]}を推定できません")
         return False
 
     if recursive:
@@ -282,16 +281,14 @@ def _estimate_BD(self: Player,
         if +1 in errors:
             # 耐久を過大評価していれば、現状以上の耐久指数は検証しない
             if st > eff_stats:
-                print("スキップ 過大")
                 continue
         else:
             # 耐久を過小評価していれば、現状以下の耐久指数は検証しない
             if st < eff_stats:
-                print("スキップ 過小")
                 continue
 
         # 探索条件がダメージ履歴に整合すればポケモンを更新する
-        if self.estimate_BD(btl, pc, stat_idx, recursive=True):
+        if estimate_defence(self, btl, pc, stat_idx, recursive=True):
             poke.nature = nature
             poke.set_effort(stat_idx, effort)
             poke.set_effort(0, effort_H)
@@ -301,8 +298,7 @@ def _estimate_BD(self: Player,
     return False
 
 
-def _estimate_S(self: Player,
-                poke: Pokemon) -> bool:
+def estimate_speed(poke: Pokemon) -> bool:
     """speed_rangeからステータスと持ち物を推定する"""
     if poke.speed_range[0] <= poke.stats[5] <= poke.speed_range[1]:
         return True

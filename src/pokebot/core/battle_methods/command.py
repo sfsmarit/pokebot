@@ -91,14 +91,9 @@ def _available_commands(self: Battle,
             commands += [self.to_command(idx, switch_idx=i) for i in self.switchable_indexes(idx)]
 
     if not commands:
-        for move in self.pokemons[idx].moves:
-            print(move)
-        for i in self.selection_indexes[idx]:
-            print(self.players[idx].team[i])
-        print(f"ターン{self.turn}")
+        print(f"{self.turn=}, {phase=}, {idx=} {self.poke_mgrs[idx].pokemon.name=}")
         for idx in self.action_order:
-            print(f"\tPlayer {int(idx)}", self.logger.summary(self.turn, idx))
-
+            print(f"\tPlayer {int(idx)}", self.logger.get_turn_summary(self.turn, idx))
         raise Exception(f"No available command for player {idx}")
 
     return commands

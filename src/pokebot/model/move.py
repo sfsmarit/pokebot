@@ -20,7 +20,7 @@ class Move:
             name = ""
 
         self.name: str = name
-        self._org_pp = PokeDB.move_data[name]["pp"] if name and pp == 0 else pp
+        self._org_pp = PokeDB.move_data[name].pp if name and pp == 0 else pp
         self.pp: int = self._org_pp
         self.observed = observed
 
@@ -59,29 +59,30 @@ class Move:
         self.category = MoveCategory(self.category)
 
     def set_base_info(self):
-        self.type = PokeDB.move_data[self.name]['type']
-        self.category = PokeDB.move_data[self.name]['category']
-        self.power = PokeDB.move_data[self.name]['power']
-        self.hit = PokeDB.move_data[self.name]['hit']
+        self.type = PokeDB.move_data[self.name].type
+        self.category = PokeDB.move_data[self.name].category
+        self.power = PokeDB.move_data[self.name].power
+        self.hit = PokeDB.move_data[self.name].hit
         self.priority = 0
 
         if self.name in PokeDB.move_priority:
             self.priority = PokeDB.move_priority[self.name]
 
         if self.category == MoveCategory.STA:
-            self.protect = PokeDB.move_data[self.name]["protect"]
-            self.subst = PokeDB.move_data[self.name]["subst"]
-            self.gold = PokeDB.move_data[self.name]["gold"]
-            self.mirror = PokeDB.move_data[self.name]["mirror"]
+            self.protect = PokeDB.move_data[self.name].protect
+            self.subst = PokeDB.move_data[self.name].subst
+            self.gold = PokeDB.move_data[self.name].gold
+            self.mirror = PokeDB.move_data[self.name].mirror
 
         for tag, val in PokeDB.move_tag.items():
             if self.name in val:
                 self.tags.append(tag)
 
     def init_game(self):
-        """試合開始前の状態に初期化"""
+        """試合開始前の状態に初期化する"""
         self.pp = self._org_pp
         self.observed = False
 
     def add_pp(self, v: int):
+        """PPを加算する"""
         self.pp = max(0, min(self._org_pp, self.pp + v))

@@ -157,7 +157,7 @@ def _single_hit_damages(self: DamageManager,
 
         # 状態異常補正
         if attacker.ailment == Ailment.BRN and move_category == MoveCategory.PHY and \
-                attacker.ability != 'こんじょう' and move.name != 'からげんき':
+                attacker.ability.name != 'こんじょう' and move.name != 'からげんき':
             damages[i] = ut.round_half_down(damages[i]*0.5)
             if i == 0:
                 self.log.notes.append('やけど x0.5')

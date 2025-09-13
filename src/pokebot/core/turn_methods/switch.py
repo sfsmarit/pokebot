@@ -19,20 +19,17 @@ def _switch_pokemon(self: TurnManager,
     if not command.is_switch:
         raise Exception(f"Invalid command : {command}")
 
+    poke = self.battle.pokemons[idx]
+
     # 場のポケモンの特性
-    active_ability = Ability()
+    active_ability = poke.ability if poke else Ability()
 
-    # 場のポケモンを控えに戻す
-    if (poke := self.battle.pokemons[idx]):
-        active_ability = poke.ability
-        poke.bench_reset()
+    # フォルムチェンジ
+    if poke and poke.name == 'イルカマン(ナイーブ)':
+        poke.change_form('イルカマン(マイティ)')
+        self.battle.logger.append(TurnLog(self.battle.turn, idx, '-> マイティフォルム'))
 
-        # フォルムチェンジ
-        if poke.name == 'イルカマン(ナイーブ)':
-            poke.change_form('イルカマン(マイティ)')
-            self.battle.logger.append(TurnLog(self.battle.turn, idx, '-> マイティフォルム'))
-
-        # self.switch_command_history[idx].append(command)
+    self.battle.poke_mgrs[idx].bench_reset()
 
     # 交代
     self.battle.players[idx].team[command.index].active = True
@@ -81,68 +78,76 @@ def _switch_pokemon(self: TurnManager,
 
     # 着地処理
     if landing:
-        self.land(idx)
+        self.land([idx])
 
 
-def _land(self: TurnManager, idx: PlayerIndex | int):
+def _land(self: TurnManager, idxes: list[PlayerIndex | int]):
     """ポケモンが場に出たときの処理"""
-    battle = self.battle
-
-    opp = int(not idx)
-    poke = battle.pokemons[idx]
-    poke_mgr = battle.poke_mgrs[idx]
-
     # 設置物の判定
-    if poke.item != 'あつぞこブーツ':
-        if battle.field_mgr.count[SideField.STEALTH_ROCK][idx]:
-            r_def_type = battle.damage_mgr.defence_type_modifier(opp, Move("ステルスロック"))
-            ratio = -int(r_def_type/8)
-            if poke_mgr.add_hp(ratio=ratio):
-                battle.logger.insert(-1, TurnLog(battle.turn, idx, f"{SideField.STEALTH_ROCK}"))
+    for idx in idxes:
+        poke = self.battle.pokemons[idx]
+        poke_mgr = self.battle.poke_mgrs[idx]
+        opp = int(not idx)
+        opponent = self.battle.pokemons[not idx]
 
-        if not poke_mgr.is_floating():
-            if battle.field_mgr.count[SideField.MAKIBISHI][idx]:
-                d = -int(poke.stats[0] / (10-2*battle.field_mgr.count[SideField.MAKIBISHI][idx]))
-                if poke_mgr.add_hp(d):
-                    battle.logger.insert(-1, TurnLog(battle.turn, idx, f"{SideField.MAKIBISHI}"))
+        if poke.item.name != 'あつぞこブーツ':
+            if self.battle.field_mgr.count[SideField.STEALTH_ROCK][idx]:
+                r_def_type = self.battle.damage_mgr.defence_type_modifier(opp, Move("ステルスロック"))
+                ratio = -int(r_def_type/8)
+                if poke_mgr.add_hp(ratio=ratio):
+                    self.battle.logger.insert(-1, TurnLog(self.battle.turn, idx, f"{SideField.STEALTH_ROCK}"))
 
-            if battle.field_mgr.count[SideField.DOKUBISHI][idx]:
-                if 'どく' in poke_mgr.types:
-                    battle.field_mgr.count[SideField.DOKUBISHI][idx] = 0
-                    battle.logger.append(TurnLog(battle.turn, idx, f"{SideField.DOKUBISHI}解除"))
-                elif poke_mgr.set_ailment(Ailment.PSN, bad_poison=(battle.field_mgr.count[SideField.DOKUBISHI][idx] == 2)):
-                    battle.logger.append(TurnLog(battle.turn, idx, f"{SideField.DOKUBISHI}接触"))
+            if not poke_mgr.is_floating():
+                if self.battle.field_mgr.count[SideField.MAKIBISHI][idx]:
+                    d = -int(poke.stats[0] / (10-2*self.battle.field_mgr.count[SideField.MAKIBISHI][idx]))
+                    if poke_mgr.add_hp(d):
+                        self.battle.logger.insert(-1, TurnLog(self.battle.turn, idx, f"{SideField.MAKIBISHI}"))
 
-            if battle.field_mgr.count[SideField.NEBA_NET][idx]:
-                if poke_mgr.add_rank(5, -1, by_opponent=True):
-                    battle.logger.insert(-1, TurnLog(battle.turn, idx, f"{SideField.NEBA_NET}"))
+                if self.battle.field_mgr.count[SideField.DOKUBISHI][idx]:
+                    if 'どく' in poke_mgr.types:
+                        self.battle.field_mgr.count[SideField.DOKUBISHI][idx] = 0
+                        self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{SideField.DOKUBISHI}解除"))
+                    elif poke_mgr.set_ailment(Ailment.PSN, bad_poison=(self.battle.field_mgr.count[SideField.DOKUBISHI][idx] == 2)):
+                        self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{SideField.DOKUBISHI}接触"))
 
-    # 瀕死なら中断
-    if poke.hp == 0:
-        return
+                if self.battle.field_mgr.count[SideField.NEBA_NET][idx]:
+                    if poke_mgr.add_rank(5, -1, by_opponent=True):
+                        self.battle.logger.insert(-1, TurnLog(self.battle.turn, idx, f"{SideField.NEBA_NET}"))
 
-    # 特性の発動
-    for i in [idx, opp]:
-        p1 = battle.pokemons[i]
-        p2 = battle.pokemons[not i]
+    # 特性の上書き
+    for idx in idxes:
+        poke = self.battle.pokemons[idx]
+        poke_mgr = self.battle.poke_mgrs[idx]
+        opp = int(not idx)
+        opponent = self.battle.pokemons[not idx]
 
-        if not battle.poke_mgrs[i].is_ability_protected():
-            if p2.ability.name == 'かがくへんかガス' and p1.item != 'とくせいガード':
-                # かがくへんかガス
-                p1.ability.active = False
-                battle.logger.append(TurnLog(battle.turn, i, 'かがくへんかガス 特性無効'))
+        # 瀕死ならスキップ
+        if poke.hp == 0:
+            continue
+
+        if not poke_mgr.is_ability_protected():
+            # かがくへんかガス
+            if opponent.ability.name == 'かがくへんかガス' and poke.item.name != 'とくせいガード':
+                poke.ability.active = False
+                self.battle.logger.append(TurnLog(self.battle.turn, idx, 'かがくへんかガス 特性無効'))
                 break
 
-            elif p1.ability.name == 'トレース' and "unreproducible" in p2.ability.tags:
-                # トレース
-                p1.ability.name = p2.ability.name
-                battle.logger.append(TurnLog(battle.turn, i, f"トレース -> {p2.ability}"))
+            # トレース
+            if poke.ability.name == 'トレース' and "unreproducible" not in opponent.ability.tags:
+                poke.ability.name = opponent.ability.name
+                self.battle.logger.append(TurnLog(self.battle.turn, idx, f"トレース -> {opponent.ability}"))
 
-        if "immediate" in p1.ability.tags:
-            battle.poke_mgrs[i].activate_ability()
+    # 特性の発動
+    for idx in idxes:
+        if "immediate_1" in self.battle.pokemons[idx].ability.tags:
+            self.battle.poke_mgrs[idx].activate_ability()
+
+    for idx in idxes:
+        if "immediate_2" in self.battle.pokemons[idx].ability.tags:
+            self.battle.poke_mgrs[idx].activate_ability()
 
     # 即時アイテムの判定
-    for i in [idx, opp]:
-        p1 = battle.pokemons[i]
-        if p1.item.immediate and p1.hp:
-            battle.poke_mgrs[i].activate_item()
+    for idx in [idxes[0], int(not idxes[0])]:
+        poke = self.battle.pokemons[idx]
+        if poke.hp and poke.item.immediate:
+            self.battle.poke_mgrs[idx].activate_item()

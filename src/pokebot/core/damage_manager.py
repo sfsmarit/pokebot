@@ -19,6 +19,10 @@ from .damage_methods.damage_modifier import _damage_modifier
 
 
 class DamageManager:
+    """
+    ダメージ計算、致死率計算を管理するクラス
+    """
+
     def __init__(self, battle: Battle):
         self.battle: Battle = battle
 
@@ -45,6 +49,29 @@ class DamageManager:
                            power_multiplier: float = 1,
                            self_damage: bool = False,
                            lethal_calc: bool = False) -> list[int]:
+        """
+        技1発あたりのダメージを返す
+
+        Parameters
+        ----------
+        atk : PlayerIndex | int
+            攻撃側のプレイヤー番号
+        move : Move | str
+            攻撃技
+        critical : bool, optional
+            Trueなら急所, by default False
+        power_multiplier : float, optional
+            任意の威力倍率, by default 1
+        self_damage : bool, optional
+            Trueなら自傷, by default False
+        lethal_calc : bool, optional
+            致死率計算ではTrueを指定する, by default False
+
+        Returns
+        -------
+        list[int]
+            全てのダメージ乱数に対するダメージ量
+        """
         if isinstance(move, str):
             move = Move(move)
         self.critical = critical
@@ -57,7 +84,7 @@ class DamageManager:
                combo_hits: int | None = None,
                max_loop: int = 10) -> str:
         """
-        致死率計算
+        致死率を計算し、結果を"d1~d2 (p1~p2 %) 確n" 形式の文字列で返す
 
         Parameters
         ----------
@@ -81,7 +108,7 @@ class DamageManager:
         return self.lethal_text()
 
     def lethal_text(self) -> str:
-        """致死率計算の結果から 'd1~d2 (r1~r2 %) 乱n (p%)' の文字列を生成"""
+        """致死率計算の結果から 'd1~d2 (r1~r2 %) 乱n (p%)' 形式の文字列を生成する"""
         damages = [int(k) for k in list(self.damage_dstr.keys())]
         damage_ratios = [float(k) for k in list(self.damage_ratio_dstr.keys())]
         text = f"{min(damages)}~{max(damages)} ({100*min(damage_ratios):.1f}~{100*max(damage_ratios):.1f}%)"
@@ -95,6 +122,7 @@ class DamageManager:
                              atk: PlayerIndex | int,
                              move: Move,
                              log: DamageLog | None = None) -> float:
+        """攻撃タイプ補正"""
         return _attack_type_modifier(self, atk, move, log)
 
     def defence_type_modifier(self,
@@ -102,6 +130,7 @@ class DamageManager:
                               move: Move,
                               self_damage: bool = False,
                               log: DamageLog | None = None) -> float:
+        """防御タイプ補正"""
         return _defence_type_modifier(self, atk, move, self_damage, log)
 
     def power_modifier(self,
@@ -109,6 +138,7 @@ class DamageManager:
                        move: Move,
                        self_damage: bool = False,
                        log: DamageLog | None = None) -> float:
+        """威力補正"""
         return _power_modifier(self, atk, move, self_damage, log)
 
     def attack_modifier(self,
@@ -116,6 +146,7 @@ class DamageManager:
                         move: Move,
                         self_damage: bool = False,
                         log: DamageLog | None = None) -> float:
+        """攻撃補正"""
         return _attack_modifier(self, atk, move, self_damage, log)
 
     def defence_modifier(self,
@@ -123,6 +154,7 @@ class DamageManager:
                          move: Move,
                          self_damage: bool = False,
                          log: DamageLog | None = None) -> float:
+        """防御補正"""
         return _defence_modifier(self, atk, move, self_damage, log)
 
     def damage_modifier(self,
@@ -131,4 +163,5 @@ class DamageManager:
                         self_damage: bool = False,
                         is_lethal: bool = False,
                         log: DamageLog | None = None):
+        """ダメージ補正"""
         return _damage_modifier(self, atk, move, self_damage, is_lethal, log)

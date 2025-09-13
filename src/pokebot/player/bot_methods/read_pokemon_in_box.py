@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..bot_player import BotPlayer
+    from ..bot import Bot
 
 from pokebot.common.constants import TYPES, NATURE_MODIFIER
 from pokebot.common.enums import Gender
@@ -11,7 +11,7 @@ from pokebot.model import Pokemon, Item, Move
 from pokebot.player.image import image_utils as iut
 
 
-def _read_pokemon_from_box(self: BotPlayer):
+def _read_pokemon_from_box(self: Bot):
     """ボックスのidx番目のポケモンを読み込む"""
     type(self).capture()
 
@@ -111,9 +111,9 @@ def _read_pokemon_from_box(self: BotPlayer):
     poke.stats = stats
 
     # ザシアン・ザマゼンタの識別
-    if (poke.name == 'ザシアン(れきせん)' and poke.item.name == 'くちたけん') or \
-            (poke.name == 'ザマゼンタ(れきせん)' and poke.item.name == 'くちたたて'):
-        poke.change_form(poke.name[:-5] + poke.item.name[-2:] + 'のおう)')
+    if (poke.label in ["ザシアン", "ザマゼンタ"] and "くちた" in poke.item.name):
+        poke.change_form(f"{poke.label}({poke.item.name[-2:]}のおう)")
+
     print(poke, end='\n\n')
 
     return poke

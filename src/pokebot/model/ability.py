@@ -7,10 +7,13 @@ from pokebot.common import PokeDB
 
 
 class Ability:
-    """ポケモンの特性を表現するクラス"""
+    """
+    ポケモンの特性を表現するクラス
+    """
 
     def __init__(self, name: str = ""):
         if name and name not in PokeDB.abilities:
+            print(PokeDB.abilities)
             print(f"{name} is not in PokeDB.abilities")
             name = ""
 
@@ -20,6 +23,8 @@ class Ability:
         self.tags = []
         self.observed: bool = False
         self.count: int = 0
+
+        self.set_base_info()
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -32,7 +37,10 @@ class Ability:
         return self.name
 
     def set_base_info(self):
-        for tag, val in PokeDB.ability_tag.items():
+        if not self.name:
+            return
+
+        for tag, val in PokeDB.tagged_abilities.items():
             if self._name in val:
                 self.tags.append(tag)
 
@@ -47,7 +55,7 @@ class Ability:
         self._name = self._org_name
         self.count = 0
 
-        if self.org_name not in PokeDB.ability_tag['one_time']:
+        if self.org_name not in PokeDB.tagged_abilities['one_time']:
             self.active = True
 
     def mask(self):
@@ -74,5 +82,6 @@ class Ability:
         self._name = name
 
     def swap(self, target: Ability):
+        """特性を入れ替える"""
         self.name, target.name = target.name, self.name
         self.observed = target.observed = True  # 観測

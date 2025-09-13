@@ -16,6 +16,9 @@ def _game(self: Player,
 
     battle = Battle(self, opponent, n_selection, open_sheet, seed)
 
+    # 選出
+    battle.select_pokemon()
+
     # 勝敗が決まるまでターンを進める
     while battle.winner(TOD=battle.turn >= max_turn) is None:
         self.advance_turn(battle, mute)

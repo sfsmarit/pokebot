@@ -39,6 +39,10 @@ def _process_attack_move(self: TurnManager,
         damages = damage_mgr.single_hit_damages(atk, move, critical=critical, power_multiplier=r)
         self.damage_dealt[atk] = self.battle.random.choice(damages) if damages else 0
 
+        # ダメージログに記録
+        self.battle.damage_mgr.log.damage_dealt = self.damage_dealt[atk]
+        self.battle.damage_mgr.log.damage_ratio = self.damage_dealt[atk] / defender.stats[0]
+
         # ダメージが発生した状況を記録
         if self.damage_dealt[atk] and not any(self.battle.call_count):
             self.battle.logger.append(self.battle.damage_mgr.log)

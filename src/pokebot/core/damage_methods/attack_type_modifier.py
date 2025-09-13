@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.model import Move
 from pokebot.logger.damage_log import DamageLog
-from pokebot.core.move_utils import effective_move_type, effective_move_category
+from pokebot.core.move_utils import effective_move_type
 
 
 def _attack_type_modifier(self: DamageManager,

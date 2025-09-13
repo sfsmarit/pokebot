@@ -51,7 +51,7 @@ def _process_tagged_move(self: ActivePokemonManager,
             # 壁破壊
             if self.battle.turn_mgr.damage_dealt[self.idx]:
                 broken = self.battle.field_mgr.set_field(SideField.REFLECTOR, dfn, 0)
-                broken |= self.battle.field_mgr.set_field(SideField.LIGHTWALL, dfn, 0)
+                broken |= self.battle.field_mgr.set_field(SideField.LIGHT_WALL, dfn, 0)
                 if broken:
                     self.battle.logger.append(TurnLog(self.battle.turn, self.idx, '壁破壊'))
                     return True

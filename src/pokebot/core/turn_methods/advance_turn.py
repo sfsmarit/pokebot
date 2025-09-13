@@ -24,8 +24,7 @@ def _advance_turn(self: TurnManager,
                 self.switch_pokemon(i, switch_idx=self.battle.selection_indexes[i][0], landing=False)
 
             # 着地処理
-            for i in self.speed_order:
-                self.land(i)
+            self.land(self.speed_order)
 
             # だっしゅつパック判定
             switch_indexes = [i for i in self.speed_order if self.is_ejectpack_triggered(i)]
@@ -52,7 +51,7 @@ def _advance_turn(self: TurnManager,
             if commands[idx] == Command.NONE:
                 # 方策関数に従う
                 self.battle.phase = Phase.ACTION
-                masked = self.battle.masked(idx, called=True)
+                masked = self.battle.masked(idx, _called=True)
                 self.command[idx] = self.battle.players[idx].action_command(masked)
                 self.battle.phase = Phase.NONE
             else:
@@ -73,8 +72,8 @@ def _advance_turn(self: TurnManager,
             text = '先手' if self.battle.poke_mgrs[idx].first_act else '後手'
             self.battle.logger.append(TurnLog(self.battle.turn, idx, text))
 
-            # TODO 高速化 相手のS推定
-            # self.estimate_opponent_speed(idx)
+            # 相手のS推定
+            self.update_opponent_speed_limit(idx)
 
     for idx in range(2):
         if not any(self.breakpoint):
@@ -116,6 +115,9 @@ def _advance_turn(self: TurnManager,
 
         if not any(self.breakpoint):
             self.process_turn_action(idx)
+
+        if self.battle.winner() is not None:  # 勝敗判定
+            return
 
         # だっしゅつボタンによる交代
         ejectbutton_triggered = False
@@ -243,8 +245,7 @@ def _advance_turn(self: TurnManager,
             idxes = self.speed_order
 
         # 着地処理
-        for idx in idxes:
-            self.land(idx)
+        self.land(idxes)
 
     # コマンドを記録
     self.battle.logger.append(CommandLog(self.battle.turn, self.command, self.switch_history))

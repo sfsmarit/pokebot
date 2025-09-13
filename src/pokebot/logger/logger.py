@@ -26,12 +26,19 @@ class Logger:
         ut.selective_deepcopy(self, new)
         return new
 
-    def summary(self, turn: int, idx: PlayerIndex | int) -> str:
+    def get_turn_summary(self, turn: int, idx: PlayerIndex | int) -> str:
         logs = []
         for log in self.turn_logs:
             if log.turn == turn and log.idx in [idx, None]:
                 logs.append(log.text)
         return ", ".join(logs)
+
+    def get_damage_summary(self, turn: int, idx: PlayerIndex | int) -> list[str]:
+        notes = []
+        for log in self.damage_logs:
+            if log.turn == turn and log.idx in [idx, None]:
+                notes.append(log.notes)
+        return notes
 
     def append(self, log: TurnLog | CommandLog | DamageLog):
         if isinstance(log, TurnLog):
@@ -48,25 +55,3 @@ class Logger:
             self.command_logs.insert(i, log)
         elif isinstance(log, DamageLog):
             self.damage_logs.insert(i, log)
-
-    def get_turn_logs(self,
-                      turn: int | None = None,
-                      idx: int | None = None) -> list[TurnLog]:
-        res = []
-        for log in self.turn_logs:
-            if (turn is not None and log.turn != turn) or \
-                    (idx is not None and log.idx != idx):
-                continue
-            res.append(log)
-        return res
-
-    def get_damage_logs(self,
-                        turn: int | None = None,
-                        atk: int | None = None) -> list[DamageLog]:
-        res = []
-        for log in self.damage_logs:
-            if (turn is not None and log.turn != turn) or \
-                    (atk is not None and log.atk != atk):
-                continue
-            res.append(log)
-        return res

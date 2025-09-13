@@ -20,7 +20,7 @@ def _can_choose_move(self: ActivePokemonManager,
 
     if self.count[Condition.ENCORE] and \
             self.expended_moves and \
-            move != self.expended_moves[-1]:
+            move.name != self.expended_moves[-1].name:
         return [False, 'アンコール状態']
 
     if self.count[Condition.HEAL_BLOCK] and \
@@ -29,7 +29,7 @@ def _can_choose_move(self: ActivePokemonManager,
 
     if self.count[Condition.KANASHIBARI] and \
             self.expended_moves and \
-            move == self.expended_moves[-1]:
+            move.name == self.expended_moves[-1].name:
         return [False, 'かなしばり状態']
 
     if self.count[Condition.JIGOKUZUKI] and \
@@ -40,15 +40,18 @@ def _can_choose_move(self: ActivePokemonManager,
             move.category == MoveCategory.STA:
         return [False, 'ちょうはつ状態']
 
-    if any(tag in move.tags for tag in ["unrepeatable", "protect"]) and move == self.executed_move:
+    if any(tag in move.tags for tag in ["unrepeatable", "protect"]) and \
+            self.executed_move and \
+            move.name == self.executed_move.name:
         return [False, '連発不可']
 
     if self.choice_locked and \
             self.expended_moves and \
-            move != self.expended_moves[-1]:
+            move.name != self.expended_moves[-1].name:
         return [False, 'こだわり状態']
 
-    if self.pokemon.item.name == 'とつげきチョッキ' and move.category == MoveCategory.STA:
+    if self.pokemon.item.name == 'とつげきチョッキ' and \
+            move.category == MoveCategory.STA:
         return [False, 'とつげきチョッキ']
 
     return [True, ""]

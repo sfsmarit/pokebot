@@ -37,11 +37,11 @@ def cv2pil(img):
 
 
 def BGR2BIN(img, threshold: int = 128, bitwise_not: bool = False):
-    img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, img1 = cv2.threshold(img1, threshold, 255, cv2.THRESH_BINARY)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    _, img = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
     if bitwise_not:
-        img1 = cv2.bitwise_not(img1)
-    return img1
+        img = cv2.bitwise_not(img)
+    return img
 
 
 def OCR(img,
@@ -50,7 +50,6 @@ def OCR(img,
         log_dir: Path | None = None,
         scale: int = 1,
         ignore_dakuten: bool = False) -> str:
-
     result = ''
 
     # 履歴に同じ画像があれば結果を流用する (速い)

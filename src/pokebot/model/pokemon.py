@@ -30,7 +30,7 @@ class Pokemon:
 
         self.active: bool
         self.observed: bool
-        self._is_terastallized: bool
+        self.is_terastallized: bool
         self._hp: int
         self._hp_ratio: float = 1.
         self.sleep_count: int
@@ -66,7 +66,7 @@ class Pokemon:
         return s
 
     def init_kata(self):
-        # 型の初期化
+        """型を初期化する"""
         if self._name in PokeDB.home:
             info = PokeDB.home[self._name]
             self.nature = info.natures[0]
@@ -77,13 +77,15 @@ class Pokemon:
         else:
             self.ability = PokeDB.zukan[self.name].abilities[0]
             self.terastal = self._types[0]
+
+        if not self.moves:
             self.add_move('テラバースト')
 
     def init_game(self):
-        """試合開始前の状態に初期化"""
+        """試合開始前の状態に初期化する"""
         self.active = False
         self.observed = False
-        self._is_terastallized = False
+        self.is_terastallized = False
         self.sleep_count = 0
         self.hp_ratio = 1.
         self.ailment = Ailment.NONE
@@ -147,32 +149,25 @@ class Pokemon:
             self.init_game()
 
     def mask(self):
-        """非公開情報を隠蔽"""
-        # 性格
+        """非公開情報を隠蔽(削除)する"""
         self.nature = 'まじめ'
-        # 特性
         self._ability.mask()
-        # アイテム
         self._item.mask()
-        # テラスタイプ
         if self.name not in EXCLUSIVE_TERASTAL:
             self.terastal = self._types[0]
-        # 努力値
         self.effort = [0]*6
-        # 技
         for move in self.moves:
             if not move.observed:
                 self.moves.remove(move)
 
     def masked(self) -> Pokemon:
-        """非公開情報を隠蔽するしたコピーを返す"""
+        """非公開情報を隠蔽したコピーを返す"""
         p = deepcopy(self)
         p.mask()
         return p
 
     def update_stats(self, keep_damage: bool = False):
-        """ステータスを更新する
-        {keep_damage}=Trueなら更新前のダメージを保持し、FalseならHPを全回復する"""
+        """ステータスを更新する。{keep_damage}=Trueなら更新前のダメージを保持し、FalseならHPを全回復する"""
         if keep_damage:
             damage = self._stats[0] - self._hp
 
@@ -212,6 +207,7 @@ class Pokemon:
         self._base = PokeDB.zukan[self._name].bases.copy()
 
     def change_form(self, name: str):
+        """フォルムチェンジする"""
         self._name = name
         self.set_zukan_info()
         self.update_stats(keep_damage=True)
@@ -235,12 +231,12 @@ class Pokemon:
     @property
     def weight(self) -> float:
         w = self._weight
-        match self._ability.name:
+        match self.ability.name:
             case 'ライトメタル':
                 w = int(w*0.5*10)/10
             case 'ヘヴィメタル':
                 w *= 2
-        if self._item == 'かるいし':
+        if self.item.name == 'かるいし':
             w = int(w*0.5*10)/10
         return w
 
@@ -271,16 +267,16 @@ class Pokemon:
 
     @property
     def terastal(self) -> str | None:
-        return self._terastal if self._is_terastallized else None
+        return self._terastal if self.is_terastallized else None
 
     @terastal.setter
     def terastal(self, type: str):
         self._terastal = type
 
     def terastallize(self):
-        if self._is_terastallized:
+        if self.is_terastallized:
             return
-        self._is_terastallized = True
+        self.is_terastallized = True
         if 'テラパゴス' in self.name:
             self.change_form('テラパゴス(ステラ)')
         if 'オーガポン' in self.name:
@@ -382,9 +378,13 @@ class Pokemon:
     def knows(self, move: Move | str) -> bool:
         return self.find_move(move) is not None
 
-    def add_move(self, move: str, pp: int = 0):
-        if not self.knows(move) and (obj := Move(move, pp=pp)):
-            self.moves.append(obj)
+    def add_move(self, move: str | Move, pp: int = 0) -> bool:
+        if isinstance(move, str):
+            move = Move(move, pp=pp)
+        if not self.knows(move) and move.name:
+            self.moves.append(move)
+            return True
+        return False
 
     def add_moves(self, moves: list[str]):
         for move in moves:
@@ -394,7 +394,7 @@ class Pokemon:
 
     def replace_move(self, old: str, new: str, pp: int = 0):
         for i, move in enumerate(self.moves):
-            if move == old:
+            if move.name == old:
                 self.moves[i] = Move(new, pp=pp)
                 return
 

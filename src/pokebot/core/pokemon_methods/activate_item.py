@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..pokemon_manager import ActivePokemonManager
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, MoveCategory, Condition, \
     BoostSource, GlobalField
-from pokebot.common.constants import FIELD_SEED
+from pokebot.common.constants import FIELD_SEED, STAT_CODES
 from pokebot.model import Move
 from pokebot.logger import TurnLog
 
@@ -116,8 +115,12 @@ def _activate_item(self: ActivePokemonManager,
                 self.forced_turn = 0
                 battle.logger.append(TurnLog(battle.turn, self.idx, '溜め省略'))
         case 'ブーストエナジー':
-            activated = True
-            self.boost_source = BoostSource.ITEM
+            activated = self.boost_source == BoostSource.NONE
+            if activated:
+                self.boost_source = BoostSource.ITEM
+                self.battle.logger.append(TurnLog(self.battle.turn, self.idx,
+                                                  f"{STAT_CODES[self.boosted_idx]}上昇"))  # type: ignore
+
         case 'メンタルハーブ':
             for cond in [Condition.MEROMERO, Condition.ENCORE,
                          Condition.KANASHIBARI, Condition.CHOHATSU, Condition.HEAL_BLOCK]:
@@ -144,15 +147,18 @@ def _activate_item(self: ActivePokemonManager,
         case 'イバンのみ':
             activated = self.pokemon.hp_ratio <= hp_ratio_threshold
         case 'オレンのみ':
-            activated = not self.count[Condition.HEAL_BLOCK] and \
+            activated = self.pokemon.hp_ratio <= hp_ratio_threshold and \
+                not self.count[Condition.HEAL_BLOCK] and \
                 self.add_hp(10*r_berry)
         case 'オボンのみ' | 'ナゾのみ':
-            if self.pokemon.item.name == 'ナゾのみ' and move:
-                activated = battle.damage_mgr.defence_type_modifier(self.idx, move) > 1
+            if self.pokemon.item.name == 'オボンのみ':
+                activated = self.pokemon.hp_ratio <= 0.5
             else:
-                activated = True
-            activated &= not self.count[Condition.HEAL_BLOCK] and \
-                self.add_hp(ratio=r_berry/4)
+                activated = move is not None and \
+                    battle.damage_mgr.defence_type_modifier(self.idx, move) > 1
+            activated = activated and \
+                not self.count[Condition.HEAL_BLOCK] and \
+                self.add_hp(ratio=0.25*r_berry)
         case 'フィラのみ' | 'ウイのみ' | 'マゴのみ' | 'バンジのみ' | 'イアのみ':
             activated = not self.count[Condition.HEAL_BLOCK] and \
                 self.add_hp(ratio=r_berry/3)

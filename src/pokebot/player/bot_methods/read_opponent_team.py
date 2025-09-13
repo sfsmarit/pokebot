@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..bot_player import BotPlayer
+    from ..bot import Bot
 
 from pathlib import Path
 import cv2
@@ -13,7 +13,7 @@ from pokebot.model import Pokemon
 from pokebot.player.image import TemplateImage, image_utils as iut
 
 
-def _read_opponent_team(self: BotPlayer, capture: bool = True):
+def _read_opponent_team(self: Bot, capture: bool = True):
     """選出画面で相手のパーティを読み取る"""
     if capture:
         type(self).capture()

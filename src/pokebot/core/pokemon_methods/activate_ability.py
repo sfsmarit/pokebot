@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..pokemon_manager import ActivePokemonManager
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, MoveCategory, \
     BoostSource, SideField, Weather, Terrain
 from pokebot.common.constants import STAT_CODES
@@ -91,7 +90,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             activated = self.battle.turn_mgr.damage_dealt[opp] == user.stats[0]
             if activated:
                 self.battle.turn_mgr.damage_dealt[opp] -= 1
-        case 'かんろなみつ':
+        case 'かんろなミツ':
             opponent_mgr.add_rank(7, -1)
             activated = True
         case 'カーリーヘアー' | 'ぬめぬめ':
@@ -99,42 +98,34 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
         case 'きもったま' | 'せいしんりょく' | 'どんかん' | 'マイペース':
             activated = True
         case 'ぎゃくじょう':
-            activated = not self.berserk_triggered and self.add_rank(3, +1)
+            activated = self.berserk_triggered and self.add_rank(3, +1)
         case 'クォークチャージ' | 'こだいかっせい':
             if user.ability.name == "クォークチャージ":
-                is_ability_activated = self.battle.field_mgr.terrain() == Terrain.ELEC
+                can_boost = self.battle.field_mgr.terrain() == Terrain.ELEC
             else:
-                is_ability_activated = self.battle.field_mgr.weather() == Weather.SUNNY
+                can_boost = self.battle.field_mgr.weather() == Weather.SUNNY
 
             if self.boost_source == BoostSource.NONE:
-                # ブースト状態でない場合
-                if is_ability_activated:
+                # ブースト状態になる
+                if can_boost:
                     self.boost_source = BoostSource.ABILITY
-                elif user.item.name == 'ブーストエナジー':
-                    self.activate_item()
                 else:
                     return False
             else:
-                # ブースト状態の場合
-                if not is_ability_activated:
-                    # 外的要因がない場合
-                    if user.item.name == 'ブーストエナジー':
-                        self.activate_item()
-                    else:
-                        self.boost_source = BoostSource.NONE
-                        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, "ブースト解除"))
-                        return False
-                else:
-                    return False
+                # ブースト状態を解除する
+                if not can_boost:
+                    self.boost_source = BoostSource.NONE
+                    self.battle.logger.append(TurnLog(self.battle.turn, self.idx, "ブースト解除"))
+                return False
 
             activated = True
             self.battle.logger.append(TurnLog(self.battle.turn, self.idx,
                                               f"{STAT_CODES[self.boosted_idx]}上昇"))  # type: ignore
         case 'くだけるよろい':
             activated = move and move.category == MoveCategory.PHY and \
-                opponent_mgr.add_rank(values=[0, 0, -1, 0, 0, 2])
+                self.add_rank(values=[0, 0, -1, 0, 0, 2])
         case 'こんがりボディ':
-            self.add_rank(2, +2)
+            activated = self.add_rank(2, +2)
         case 'さまようたましい' | 'とれないにおい' | 'ミイラ':
             activated = move and opponent_mgr.contacts(move) and not self.is_ability_protected()
             if activated:
@@ -142,10 +133,11 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
                     user.ability.swap(opponent.ability)
                 else:
                     opponent.ability.name = user.ability.name
+                self.battle.logger.insert(-1, TurnLog(self.battle.turn, opp, opponent.ability.name))
         case 'さめはだ' | 'てつのトゲ':
             activated = move and \
                 opponent_mgr.contacts(move) and \
-                self.add_hp(ratio=-0.125)
+                opponent_mgr.add_hp(ratio=-0.125)
         case 'サンパワー':
             activated = self.battle.field_mgr.weather(self.idx) == Weather.SUNNY and \
                 self.add_hp(ratio=-0.125)
@@ -168,7 +160,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             if user.ability.count == 5:
                 user.ability.active = False
         case 'せいぎのこころ' | 'ねつこうかん':
-            t = 'あく' if opponent.ability.name == 'せいぎのこころ' else 'ほのお'
+            t = 'あく' if user.ability.name == 'せいぎのこころ' else 'ほのお'
             activated = move and \
                 effective_move_type(self.battle, opp, move) == t and \
                 self.add_rank(1, +1)
@@ -180,7 +172,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             activated = move and \
                 opponent_mgr.contacts(move) and \
                 self.battle.random.random() < 0.3 and \
-                self.set_ailment(ailments[user.ability.name])
+                opponent_mgr.set_ailment(ailments[user.ability.name])
         case 'ゼロフォーミング':
             n = self.battle.field_mgr.set_weather(Weather.NONE, self.idx) + \
                 self.battle.field_mgr.set_terrain(Terrain.NONE, self.idx)
@@ -211,9 +203,9 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
         case 'バリアフリー':
             for i in range(2):
                 activated |= self.battle.field_mgr.set_field(SideField.REFLECTOR, i, 0)
-                activated |= self.battle.field_mgr.set_field(SideField.LIGHTWALL, i, 0)
+                activated |= self.battle.field_mgr.set_field(SideField.LIGHT_WALL, i, 0)
         case 'ばんけん':
-            activated = opponent_mgr.add_rank(1, +1, by_opponent=True)
+            activated = self.add_rank(1, +1, by_opponent=True)
         case 'はんすう':
             activated = True
             user.ability.count += 1

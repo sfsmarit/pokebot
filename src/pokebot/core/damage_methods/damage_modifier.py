@@ -126,10 +126,10 @@ def _damage_modifier(self: DamageManager,
     # 壁
     r0 = r
     if not self.critical and \
-            attacker.ability != 'すりぬけ' and \
+            attacker.ability.name != 'すりぬけ' and \
             "wall_break" in move.tags and \
             ((self.battle.field_mgr.count[SideField.REFLECTOR][dfn] and move_category == MoveCategory.PHY) or
-             (self.battle.field_mgr.count[SideField.LIGHTWALL][dfn] and move_category == MoveCategory.SPE)):
+             (self.battle.field_mgr.count[SideField.LIGHT_WALL][dfn] and move_category == MoveCategory.SPE)):
         r = ut.round_half_up(r*0.5)
 
     if r != r0 and log:

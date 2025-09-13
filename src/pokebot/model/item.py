@@ -7,7 +7,9 @@ from pokebot.common import PokeDB
 
 
 class Item:
-    """ポケモンのアイテムを表現するクラス"""
+    """
+    ポケモンのアイテムを表現するクラス
+    """
 
     def __init__(self, name: str = ''):
         if name and name not in PokeDB.item_data:
@@ -62,13 +64,13 @@ class Item:
 
     def set_base_info(self):
         if self._name in PokeDB.item_data:
-            self._throw_power = PokeDB.item_data[self._name]['throw_power']
-            self._buff_type = PokeDB.item_data[self._name]['buff_type']
-            self._debuff_type = PokeDB.item_data[self._name]['debuff_type']
-            self._power_correction = PokeDB.item_data[self._name]['power_correction']
-            self._consumable = PokeDB.item_data[self._name]['consumable']
-            self._immediate = PokeDB.item_data[self._name]['immediate']
-            self._post_hit = PokeDB.item_data[self._name]['post_hit']
+            self._throw_power = PokeDB.item_data[self._name].throw_power
+            self._buff_type = PokeDB.item_data[self._name].buff_type
+            self._debuff_type = PokeDB.item_data[self._name].debuff_type
+            self._power_correction = PokeDB.item_data[self._name].power_correction
+            self._consumable = PokeDB.item_data[self._name].consumable
+            self._immediate = PokeDB.item_data[self._name].immediate
+            self._post_hit = PokeDB.item_data[self._name].post_hit
 
     @property
     def org_name(self) -> str:
@@ -116,5 +118,6 @@ class Item:
         return self._post_hit if self.active else False
 
     def swap(self, target: Item):
+        """アイテムを入れ替える"""
         self.name, target.name = target.name, self.name
         self.observed = target.observed = True  # 観測

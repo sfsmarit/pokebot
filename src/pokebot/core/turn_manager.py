@@ -18,7 +18,7 @@ from .turn_methods.process_on_miss import _process_on_miss
 from .turn_methods.process_protection import _process_protection
 from .turn_methods.end_turn import _end_turn
 from .turn_methods.advance_turn import _advance_turn
-from .turn_methods.action_order import _update_action_order, update_speed_order, _estimate_opponent_speed
+from .turn_methods.action_order import _update_action_order, update_speed_order, _update_opponent_speed_limit
 from .turn_methods.charge_move import _charge_move
 from .turn_methods.flinch import _check_flinch
 from .turn_methods.switch import _switch_pokemon, _land
@@ -27,8 +27,12 @@ from .turn_methods.process_turn_action import _process_turn_action
 
 
 class TurnManager:
+    """
+    ターン進行を管理するクラス
+    """
+
     def __init__(self, battle: Battle):
-        self.battle = battle
+        self.battle: Battle = battle
 
         self.breakpoint: list[str | None]
         self.scheduled_switch_commands: list[list[Command]]
@@ -61,6 +65,7 @@ class TurnManager:
         return new
 
     def init_game(self):
+        """試合開始前の状態に初期化する"""
         self.breakpoint = [None, None]
         self.scheduled_switch_commands = [[], []]
         self.first_player_idx = 0
@@ -68,7 +73,7 @@ class TurnManager:
         self.init_turn()
 
     def init_turn(self):
-        """ターン開始時に初期化"""
+        """ターン開始時に初期化する"""
         self.battle.init_turn()
 
         self.move = [Move(), Move()]
@@ -88,30 +93,47 @@ class TurnManager:
         self.init_act()
 
     def init_act(self):
+        """各プレイヤーの行動前に行う初期化"""
         self._hit_substitute = False
         self._move_was_negated_by_ability = False
         self._move_was_mirrored = False
 
     @property
     def action_order(self) -> list[PlayerIndex | int]:
+        """行動順を返す : [先手のプレイヤー番号, 後手のプレイヤー番号]"""
         return [self.first_player_idx, int(not self.first_player_idx)]
 
-    def advance_turn(self, commands: list[Command], switch_commands: list[Command]):
+    def advance_turn(self, commands: list[Command], switch_commands: list[Command]) -> None:
+        """
+        1ターン進める
+
+        Parameters
+        ----------
+        commands : list[Command]
+            行動フェーズのコマンド
+        switch_commands : list[Command]
+            交代フェーズのコマンド
+        """
         return _advance_turn(self, commands, switch_commands)
 
     def charge_move(self, atk: PlayerIndex | int, move: Move) -> bool:
+        """溜め技の処理"""
         return _charge_move(self, atk, move)
 
     def process_attack_move(self, atk: PlayerIndex | int, move: Move, combo_count: int = 1):
+        """攻撃技の処理"""
         return _process_attack_move(self, atk, move, combo_count)
 
     def process_status_move(self, atk: PlayerIndex | int, move: Move):
+        """変化技の処理"""
         return _process_status_move(self, atk, move)
 
     def process_special_damage(self, atk: PlayerIndex | int, move: Move):
+        """ダメージ計算式に従わない特殊な技の処理"""
         return _process_special_damage(self, atk, move)
 
     def process_negating_ability(self, dfn: PlayerIndex | int):
+        """無効系特性の処理"""
         defender = self.battle.pokemons[dfn]
         def_mgr = self.battle.poke_mgrs[dfn]
         if defender.ability.name == 'かんそうはだ':
@@ -122,50 +144,45 @@ class TurnManager:
             def_mgr.activate_ability()
 
     def process_protection(self, atk: PlayerIndex | int, move: Move) -> bool:
+        """まもる技の処理"""
         return _process_protection(self, atk, move)
 
     def process_on_miss(self, atk: PlayerIndex | int, move: Move):
+        """技を外したときの処理"""
         return _process_on_miss(self, atk, move)
 
     def end_turn(self):
+        """ターン終了時の処理"""
         return _end_turn(self)
 
     def modify_damage(self, atk: PlayerIndex | int):
+        """ダメージ修正処理"""
         return _modify_damage(self, atk)
 
     def is_ejectpack_triggered(self, idx: PlayerIndex | int):
-        return self.battle.pokemons[idx].item == "だっしゅつパック" and \
+        """だっしゅつパックの発動判定"""
+        return self.battle.pokemons[idx].item.name == "だっしゅつパック" and \
             self.battle.poke_mgrs[idx].rank_dropped and \
             self.battle.switchable_indexes(idx)
 
     def update_action_order(self):
+        """行動順を更新する"""
         return _update_action_order(self)
 
     def update_speed_order(self):
+        """すばやさ順を更新する"""
         return update_speed_order(self)
 
-    def estimate_opponent_speed(self, idx: PlayerIndex | int):
-        return _estimate_opponent_speed(self, idx)
+    def update_opponent_speed_limit(self, idx: PlayerIndex | int):
+        """相手の素早さ推定範囲を更新する"""
+        return _update_opponent_speed_limit(self, idx)
 
     def check_flinch(self, idx: PlayerIndex | int, move: Move) -> bool:
-        """
-        相手をひるませたらTrueを返す
-
-        Parameters
-        ----------
-        idx : PlayerIndex | int
-            攻撃側のプレイヤー番号
-        move : Move
-            攻撃技
-
-        Returns
-        -------
-        bool
-            相手をひるませたらTrue
-        """
+        """相手をひるませたらTrueを返す"""
         return _check_flinch(self, idx, move)
 
     def consume_stellar(self, idx: PlayerIndex | int, move: Move):
+        """ステラテラスタルによる強化タイプを消費する"""
         user = self.battle.pokemons[idx]
         user_mgr = self.battle.poke_mgrs[idx]
         move_type = effective_move_type(self.battle, idx, move)
@@ -183,7 +200,7 @@ class TurnManager:
                        switch_idx: int | None = None,
                        baton: dict = {},
                        landing: bool = True):
-
+        """場のポケモンを交代する"""
         if self.scheduled_switch_commands[idx]:
             # 予定されているコマンドを消費
             command = self.scheduled_switch_commands[idx].pop(0)
@@ -198,7 +215,7 @@ class TurnManager:
         else:
             # 方策関数からコマンドを取得
             self.battle.phase = Phase.SWITCH
-            masked = self.battle.masked(idx, called=True)
+            masked = self.battle.masked(idx, _called=True)
             command = self.battle.players[idx].switch_command(masked)
             self.battle.phase = Phase.NONE
 
@@ -206,11 +223,14 @@ class TurnManager:
 
         return _switch_pokemon(self, idx, command, baton, landing)
 
-    def land(self, idx: PlayerIndex | int):
-        return _land(self, idx)
+    def land(self, idxes: list[PlayerIndex | int]):
+        """着地処理"""
+        return _land(self, idxes)
 
     def can_execute_move(self, idx: PlayerIndex | int, move: Move, tag: str = ""):
+        """技を実行できるならTrue"""
         return _can_execute_move(self, idx, move, tag)
 
     def process_turn_action(self, idx: PlayerIndex | int):
+        """ターン行動の処理"""
         return _process_turn_action(self, idx)

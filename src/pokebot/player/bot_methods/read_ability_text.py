@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..bot_player import BotPlayer
+    from ..bot import Bot
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common import PokeDB
@@ -10,7 +10,7 @@ import pokebot.common.utils as ut
 from pokebot.player.image import image_utils as iut
 
 
-def _read_ability_text(self: BotPlayer, idx: PlayerIndex | int, capture: bool = True):
+def _read_ability_text(self: Bot, idx: PlayerIndex | int, capture: bool = True):
     if capture:
         type(self).capture()
 
@@ -46,8 +46,8 @@ def _read_ability_text(self: BotPlayer, idx: PlayerIndex | int, capture: bool = 
         return False
 
     dict = {
-        'player_idx': idx,
-        'display_name': words[0][:-1],
+        'idx': idx,
+        'label': words[0][:-1],
         'ability': ut.find_most_similar(PokeDB.abilities, words[1])
     }
 

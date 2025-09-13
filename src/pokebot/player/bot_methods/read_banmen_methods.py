@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..bot_player import BotPlayer
+    from ..bot import Bot
 
 import cv2
 
@@ -13,7 +13,7 @@ from pokebot.common import PokeDB
 from pokebot.player.image import TemplateImage, image_utils as iut
 
 
-def _read_opponent_terastal(self: BotPlayer, capture: bool = True) -> str:
+def _read_opponent_terastal(self: Bot, capture: bool = True) -> str:
     """相手の場のポケモンのテラスタイプを読み取る"""
     if capture:
         type(self).capture()
@@ -32,7 +32,7 @@ def _read_opponent_terastal(self: BotPlayer, capture: bool = True) -> str:
     return terastal
 
 
-def _read_active_label(self: BotPlayer, idx: PlayerIndex | int, capture: bool = True):
+def _read_active_label(self: Bot, idx: PlayerIndex | int, capture: bool = True):
     """場のポケモンの表示名を読み取る"""
     if capture:
         type(self).capture()
@@ -49,7 +49,7 @@ def _read_active_label(self: BotPlayer, idx: PlayerIndex | int, capture: bool = 
     return label
 
 
-def _read_hp(self: BotPlayer, capture: bool = True) -> int:
+def _read_hp(self: Bot, capture: bool = True) -> int:
     """場のポケモンの残りHPを読み取る"""
     if capture:
         type(self).capture()
@@ -62,7 +62,7 @@ def _read_hp(self: BotPlayer, capture: bool = True) -> int:
     return hp
 
 
-def _read_hp_ratio(self: BotPlayer, capture: bool = True) -> float:
+def _read_hp_ratio(self: Bot, capture: bool = True) -> float:
     """場のポケモンのHP割合を読み取る"""
     if capture:
         type(self).capture()
@@ -77,7 +77,7 @@ def _read_hp_ratio(self: BotPlayer, capture: bool = True) -> float:
     return hp_ratio
 
 
-def _read_ailment(self: BotPlayer, capture: bool = True) -> Ailment:
+def _read_ailment(self: Bot, capture: bool = True) -> Ailment:
     """場のポケモンの状態異常を読み取る"""
     if capture:
         type(self).capture()
@@ -89,7 +89,7 @@ def _read_ailment(self: BotPlayer, capture: bool = True) -> Ailment:
     return Ailment.NONE
 
 
-def _read_rank(self: BotPlayer, capture: bool = True):
+def _read_rank(self: Bot, capture: bool = True):
     """場のポケモンの能力ランクを読み取る"""
     if capture:
         type(self).capture()
@@ -110,7 +110,7 @@ def _read_rank(self: BotPlayer, capture: bool = True):
     return ranks
 
 
-def _read_condition(self: BotPlayer, capture: bool = True):
+def _read_condition(self: Bot, capture: bool = True):
     """場とポケモンの状態変化を読み取る"""
     if capture:
         type(self).capture()
@@ -177,7 +177,7 @@ def _read_condition(self: BotPlayer, capture: bool = True):
     return condition
 
 
-def _read_item(self: BotPlayer, capture: bool = True) -> str:
+def _read_item(self: Bot, capture: bool = True) -> str:
     """場のポケモンのアイテムを読み取る"""
     if capture:
         type(self).capture()
@@ -185,7 +185,7 @@ def _read_item(self: BotPlayer, capture: bool = True) -> str:
     return iut.OCR(img, candidates=PokeDB.items() + [''], log_dir=type(self).ocr_log_dir / "item")
 
 
-def _read_form(self: BotPlayer, label: str, capture: bool = True) -> str:
+def _read_form(self: Bot, label: str, capture: bool = True) -> str:
     """場のポケモンのフォルムを読み取る"""
     if label not in ['ウーラオス', 'ケンタロス', 'ザシアン', 'ザマゼンタ']:
         return ''
@@ -197,9 +197,7 @@ def _read_form(self: BotPlayer, label: str, capture: bool = True) -> str:
     dx = 210
 
     for i in range(2):
-        img = iut.BGR2BIN(
-            self.img[170:210, 525+dx*i:665+dx*i], threshold=230, bitwise_not=True)
-
+        img = iut.BGR2BIN(self.img[170:210, 525+dx*i:665+dx*i], threshold=230, bitwise_not=True)
         if cv2.minMaxLoc(img)[0] == 255:
             types[i] = ''
         else:
@@ -216,7 +214,7 @@ def _read_form(self: BotPlayer, label: str, capture: bool = True) -> str:
     return ""
 
 
-def _read_fainting_opponent(self: BotPlayer, capture: bool = True):
+def _read_fainting_opponent(self: Bot, capture: bool = True):
     """パーティ確認画面で相手のポケモンが瀕死かどうか確認する"""
     if capture:
         type(self).capture()

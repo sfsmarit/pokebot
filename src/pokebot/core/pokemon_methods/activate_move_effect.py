@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..pokemon_manager import ActivePokemonManager
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, SideField, Terrain
 import pokebot.common.utils as ut
-from pokebot.model import Item, Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 
@@ -97,10 +96,10 @@ def _activate_move_effect(self: ActivePokemonManager,
         case 'ついばむ' | 'むしくい':
             if defender.item.name[-2:] == 'のみ':
                 battle.logger.append(TurnLog(battle.turn, self.idx, '追加効果'))
-                backup = attacker.item
+                org_item = attacker.item
                 attacker.item = defender.item
                 self.activate_item()
-                attacker.item = backup
+                attacker.item = org_item
                 return True
         case 'ドラゴンテール' | 'ともえなげ':
             if defender_mgr.is_blowable():

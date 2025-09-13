@@ -27,6 +27,10 @@ from .pokemon_methods.speed import _effective_speed
 
 
 class ActivePokemonManager:
+    """
+    場に出ているポケモンの状態を管理するクラス
+    """
+
     def __init__(self, battle: Battle, idx: PlayerIndex | int):
         self.battle: Battle = battle
         self.idx: PlayerIndex | int = idx
@@ -60,14 +64,15 @@ class ActivePokemonManager:
         return new
 
     def dump(self) -> dict:
-        d: dict = ut.recursive_copy(vars(self))
-        del d['battle']
-        return d
+        d = ut.recursive_copy(vars(self))
+        del d['battle']  # type: ignore
+        return d  # type: ignore
 
     def load(self, d: dict):
         self.__dict__ |= d
 
     def init_game(self):
+        """試合開始前の状態に初期化する"""
         self.consumed_stellar_types = []
         self.no_act()
         self.bench_reset()
@@ -100,6 +105,7 @@ class ActivePokemonManager:
     def no_act(self):
         """そのターンに行動できなかったときの処理"""
         self.hidden = False
+        self.forced_turn = 0
 
     def reset_rank(self):
         self.rank = [0] * 8
@@ -118,6 +124,7 @@ class ActivePokemonManager:
 
     @property
     def types(self) -> list[str]:
+        """場のポケモンのタイプを返す"""
         if self.pokemon.terastal:
             if self.pokemon.terastal == 'ステラ':
                 return self.pokemon._types.copy()
@@ -146,6 +153,7 @@ class ActivePokemonManager:
 
     @property
     def first_act(self):
+        """先手で行動していたらTrue"""
         return self.idx == self.battle.turn_mgr.first_player_idx
 
     def rank_modifier(self, stat_idx: int) -> float:
@@ -156,19 +164,23 @@ class ActivePokemonManager:
             return 2/(2-self.rank[stat_idx])
 
     def activate_ability(self, move: Move | None = None) -> bool:
+        """特性を発動する"""
         return _activate_ability(self, move)
 
     def activate_item(self, move: Move | None = None) -> bool:
+        """アイテムを発動する"""
         return _activate_item(self, move)
 
     def activate_move_effect(self, move: Move) -> bool:
+        """技の効果を発動する"""
         return _activate_move_effect(self, move)
 
-    def apply_move_recoil(self, move: Move,
-                          label: str) -> bool:
+    def apply_move_recoil(self, move: Move, label: str) -> bool:
+        """技の反動の処理を行う"""
         return _apply_move_recoil(self, move, label)
 
     def process_tagged_move(self, move: Move, tag: str) -> bool:
+        """技の追加処理を行う"""
         return _process_tagged_move(self, move, tag)
 
     def set_ailment(self,
@@ -176,6 +188,25 @@ class ActivePokemonManager:
                     move: Move | None = None,
                     bad_poison: bool = False,
                     ignore_shinpi: bool = False) -> bool:
+        """
+        状態異常を設定する
+
+        Parameters
+        ----------
+        ailment : Ailment
+            状態異常
+        move : Move | None, optional
+            指定された場合、技によって状態異常が付与されたとみなす, by default None
+        bad_poison : bool, optional
+            もうどくならTrue, by default False
+        ignore_shinpi : bool, optional
+            Trueならしんぴのまもりを考慮する, by default False
+
+        Returns
+        -------
+        bool
+            状態異常を設定できたらTrueを返す
+        """
         if move is None:
             move = Move()
         return _set_ailment(self, ailment, move, bad_poison, ignore_shinpi)
@@ -184,17 +215,88 @@ class ActivePokemonManager:
                       condition: Condition,
                       count: int = 1,
                       move: Move | None = None) -> bool:
+        """
+        状態を設定する
+
+        Parameters
+        ----------
+        condition : Condition
+            状態
+        count : int, optional
+            状態のカウント(残りターン), by default 1
+        move : Move | None, optional
+            指定された場合、技による状態付与とみなす, by default None
+
+        Returns
+        -------
+        bool
+            設定できたらTrue
+        """
         return _set_condition(self, condition, count, move)
 
-    def add_condition_count(self, condition: Condition, v: int = 1) -> bool:
+    def add_condition_count(self,
+                            condition: Condition,
+                            v: int = 1) -> bool:
+        """
+        状態のカウントを加算する
+
+        Parameters
+        ----------
+        condition : Condition
+            状態
+        v : int, optional
+            変化量, by default 1
+
+        Returns
+        -------
+        bool
+            カウントを変更できたらTrue
+        """
         return _add_condition_count(self, condition, v)
 
-    def add_hp(self, value: int = 0, ratio: float | None = None, move: Move | None = None) -> bool:
+    def add_hp(self,
+               value: int = 0,
+               ratio: float | None = None,
+               move: Move | None = None) -> bool:
+        """
+        HPを加算する
+
+        Parameters
+        ----------
+        value : int, optional
+            変化量, by default 0
+        ratio : float | None, optional
+            変化率, by default None
+        move : Move | None, optional
+            指定された場合、技による変化とみなす, by default None
+
+        Returns
+        -------
+        bool
+            HPを変更できたらTrue
+        """
         if ratio is not None:
             value = int(self.pokemon.stats[0] * ratio)
         return _add_hp(self, value, move) if value else False
 
-    def hp_drain_amount(self, raw_amount: int, from_opponent: bool | None = True):
+    def hp_drain_amount(self,
+                        raw_amount: int,
+                        from_opponent: bool | None = True) -> int:
+        """
+        補正後のHP吸収量を返す
+
+        Parameters
+        ----------
+        raw_amount : int
+            補正前のHP吸収量
+        from_opponent : bool | None, optional
+            Trueなら相手から吸収したとみなす, by default True
+
+        Returns
+        -------
+        int
+            補正後のHP吸収量
+        """
         r = 1
         if self.pokemon.item.name == 'おおきなねっこ':
             r *= 5324/4096
@@ -236,10 +338,23 @@ class ActivePokemonManager:
         return _add_rank(self, values, by_opponent, chain)
 
     def defending_ability(self, move: Move | None = None) -> Ability:
+        """
+        防御側の有効な特性を返す
+
+        Parameters
+        ----------
+        move : Move | None, optional
+            攻撃技, by default None
+
+        Returns
+        -------
+        Ability
+            防御側の特性
+        """
         attacker, defender = self.opponent, self.pokemon
 
         if not move or defender.item.name == 'とくせいガード' or \
-                defender.ability.name in PokeDB.ability_tag["undeniable"]:
+                defender.ability.name in PokeDB.tagged_abilities["undeniable"]:
             return defender.ability
 
         if move.name in ['シャドーレイ', 'フォトンゲイザー', 'メテオドライブ'] or \
@@ -249,30 +364,48 @@ class ActivePokemonManager:
 
         return defender.ability
 
-    def effective_speed(self) -> int:
-        return _effective_speed(self)
+    def effective_speed(self, masked: bool = False) -> int:
+        """
+        補正を考慮した素早さ実効値を返す
+
+        Parameters
+        ----------
+        masked : bool, optional
+            Trueなら観測可能な情報のみを考慮して計算する, by default False
+
+        Returns
+        -------
+        int
+            補正を考慮した素早さ実効値
+        """
+        return _effective_speed(self, masked)
 
     def contacts(self, move: Move) -> bool:
+        """接触攻撃ならTrue"""
         return move and \
             "contact" in move.tags and \
-            self.pokemon.ability != 'えんかく' and \
-            self.pokemon.item != 'ぼうごパッド' and \
+            self.pokemon.ability.name != 'えんかく' and \
+            self.pokemon.item.name != 'ぼうごパッド' and \
             not ("punch" in move.tags and self.pokemon.item.name == 'パンチグローブ')
 
     def can_receive_move_effect(self, move: Move | None) -> bool:
-        return self.opponent.ability != 'ちからずく' and \
+        """技の追加効果を受けることができる状態ならTrue"""
+        return self.opponent.ability.name != 'ちからずく' and \
             self.defending_ability(move) != 'りんぷん' and \
-            self.pokemon.item != 'おんみつマント' and \
+            self.pokemon.item.name != 'おんみつマント' and \
             not self.battle.turn_mgr._hit_substitute
 
     def can_be_flinched(self):
+        """ひるむことができる状態ならTrue"""
         return self.idx != self.battle.turn_mgr.first_player_idx and \
-            self.pokemon.ability != 'せいしんりょく'
+            self.pokemon.ability.name != 'せいしんりょく'
 
     def can_choose_move(self, move: Move) -> list[bool | str]:
+        """技を選択できるならTrue"""
         return _can_choose_move(self, move)
 
     def is_floating(self) -> bool:
+        """浮いている状態ならTrue"""
         if self.pokemon.item.name == 'くろいてっきゅう' or \
             self.count[Condition.ANTI_AIR] or \
                 self.count[Condition.NEOHARU] or \
@@ -285,6 +418,7 @@ class ActivePokemonManager:
             self.count[Condition.MAGNET_RISE]
 
     def is_caught(self) -> bool:
+        """捕まっている状態ならTrue"""
         if 'ゴースト' in self.types or \
             self.pokemon.ability.name == 'にげあし' or \
                 self.pokemon.item.name == 'きれいなぬけがら':
@@ -298,7 +432,7 @@ class ActivePokemonManager:
             case 'ありじごく':
                 return not self.is_floating()
             case 'かげふみ':
-                return self.pokemon.ability != 'かげふみ'
+                return self.pokemon.ability.name != 'かげふみ'
             case 'じりょく':
                 return 'はがね' in self.types
 
@@ -306,14 +440,14 @@ class ActivePokemonManager:
 
     def is_ability_protected(self) -> bool:
         """特性が上書きされない状態ならTrue"""
-        return self.pokemon.ability.name in PokeDB.ability_tag["protected"] or \
+        return self.pokemon.ability.name in PokeDB.tagged_abilities["protected"] or \
             self.pokemon.item.name == 'とくせいガード'
 
     def is_item_removable(self):
         """アイテムを奪われる状態ならTrue"""
         return self.pokemon.name not in EXCLUSIVE_ITEM and \
-            self.pokemon.ability != 'ねんちゃく' and \
-            self.pokemon.item != 'ブーストエナジー' and \
+            self.pokemon.ability.name != 'ねんちゃく' and \
+            self.pokemon.item.name != 'ブーストエナジー' and \
             not (self.pokemon.name == 'アルセウス' and self.pokemon.item.name[-4:] == 'プレート') and \
             not (self.pokemon.name == 'ゲノセクト' and self.pokemon.item.name[-4:] == 'カセット')
 
@@ -333,6 +467,7 @@ class ActivePokemonManager:
             not self.count[Condition.NEOHARU]
 
     def reduce_sleep_count(self, by: int = 1):
+        """眠りカウントを消費する"""
         self.pokemon.sleep_count = max(0, self.pokemon.sleep_count - by)
         self.battle.logger.append(
             TurnLog(self.battle.turn, self.idx, f"ねむり 残り{self.pokemon.sleep_count}ターン"))
@@ -340,6 +475,7 @@ class ActivePokemonManager:
             self.set_ailment(Ailment.NONE)
 
     def rejected_items(self) -> list[str]:
+        """観測情報から否定されるアイテムの一覧を返す"""
         if self.pokemon.item.observed:
             return []
 

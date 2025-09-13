@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 import json
 
-from pokebot.common.enums import Mode, Command
+from pokebot.common.enums import Command
 from pokebot.model import Pokemon
 from pokebot.core.battle import Battle
 
@@ -24,7 +24,6 @@ def _replay(cls: type[Player],
     with open(filepath, encoding='utf-8') as fin:
         log = json.load(fin)
 
-        mode = Mode(log['mode'])
         n_selection = len(log["selection_indexes"][0])
         seed = log['seed']
 
@@ -46,7 +45,7 @@ def _replay(cls: type[Player],
             print('-'*50)
 
         # Battleを生成
-        battle = Battle(players[0], players[1], mode=mode, n_selection=n_selection, seed=seed)
+        battle = Battle(players[0], players[1], n_selection=n_selection, seed=seed)
         battle.init_game()
 
         # 選出
@@ -71,4 +70,4 @@ def _replay(cls: type[Player],
             if not mute:
                 print(f"ターン{battle.turn}")
                 for idx in battle.action_order:
-                    print(f"\tPlayer {int(idx)}", battle.logger.summary(battle.turn, idx))
+                    print(f"\tPlayer {int(idx)}", battle.logger.get_turn_summary(battle.turn, idx))

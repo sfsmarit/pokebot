@@ -17,7 +17,7 @@ class DamageLog:
                  move: Move):
 
         self.turn: int = battle.turn
-        self.atk: PlayerIndex | int = atk
+        self.idx: PlayerIndex | int = atk
         self.pokemons: list[dict] = [p.dump() for p in battle.pokemons]
         self.poke_mgrs: list[dict] = [mgr.dump() for mgr in battle.poke_mgrs]
         self.move: str = move.name

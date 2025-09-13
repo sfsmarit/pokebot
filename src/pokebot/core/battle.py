@@ -30,7 +30,22 @@ class Battle:
                  n_selection: int = 3,
                  open_sheet: bool = False,
                  seed: int | None = None):
+        """
+        _summary_
 
+        Parameters
+        ----------
+        player1 : Player
+            一人目のプレイヤー。idx=0が割り当てられる
+        player2 : Player
+            二人目のプレイヤー。idx=1が割り当てられる
+        n_selection : int, optional
+            選出するポケモンの数, by default 3
+        open_sheet : bool, optional
+            Trueならオープンシート制とみなす, by default False
+        seed : int | None, optional
+            ゲーム内乱数のシード, by default None
+        """
         if seed is None:
             seed = int(time.time())
 
@@ -65,17 +80,6 @@ class Battle:
         # 試合のリセット
         self.init_game()
 
-        # 選出
-        self.select_pokemon()
-
-        ''' TODO ダメージからBattle再現
-        # 引数に指定があれば、ダメージ発生時の状況に上書きする
-        if damage:
-            self.pokemon = deepcopy(damage.pokemons)
-            self.stellar[damage.attack_player_idx] = damage.stellar.copy()
-            self.condition = deepcopy(damage.condition)
-        '''
-
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
@@ -84,10 +88,11 @@ class Battle:
             "players", "random", "logger", "turn_mgr",
             "poke_mgrs", "field_mgr", "damage_mgr"
         ])
-
+        # 参照をコピー先に移し替える
+        for mgr in [new.turn_mgr, new.field_mgr, new.damage_mgr] + new.poke_mgrs:
+            mgr.battle = new
         # 乱数の隠蔽
         new.random.seed(self.seed)
-
         return new
 
     def init_game(self):
@@ -98,9 +103,11 @@ class Battle:
 
         self.logger.clear()
         self.turn_mgr.init_game()
+        self.field_mgr.init_game()
         for mgr in self.poke_mgrs:
             mgr.init_game()
-        self.field_mgr.init_game()
+        for player in self.players:
+            player.init_game()
 
         # オープンシート制なら情報開示
         if self.open_sheet:
@@ -114,6 +121,7 @@ class Battle:
         self.game_start_time = time.time()
 
     def init_turn(self):
+        """ターン開始前の状態に初期化する"""
         self.phase = Phase.NONE
         self.call_count = [0, 0]
         self.turn_start_time = time.time()
@@ -135,6 +143,7 @@ class Battle:
 
     @property
     def pokemons(self) -> list[Pokemon]:
+        """場のポケモン"""
         pokemons = [None, None]
         for idx, player in enumerate(self.players):
             for p in player.team:
@@ -145,6 +154,7 @@ class Battle:
 
     @property
     def action_order(self) -> list[PlayerIndex | int]:
+        """行動順"""
         return self.turn_mgr.action_order
 
     def select_pokemon(self):
@@ -158,27 +168,57 @@ class Battle:
 
         self.phase = Phase.NONE
 
-    def mask(self, perspective: PlayerIndex | int):
-        """プレイヤー視点に相当するように非公開情報を隠蔽・補完する"""
+    def mask(self, perspective: PlayerIndex | int) -> None:
+        """
+        プレイヤーが観測できない情報を隠蔽する
+
+        Parameters
+        ----------
+        perspective : PlayerIndex | int
+            視点となるプレイヤー番号
+        """
         if not self.open_sheet:
             return _mask(self, perspective)
 
-    def masked(self, perspective: PlayerIndex | int, called: bool = False) -> Battle:
-        """非公開情報を隠蔽したコピーを返す"""
+    def masked(self, perspective: PlayerIndex | int, _called: bool = False) -> Battle:
+        """
+        Battleインスタンスを複製し、プレイヤーが観測できない情報を隠蔽して返す
+
+        Parameters
+        ----------
+        perspective : PlayerIndex | int
+            視点となるプレイヤー番号
+        _called : bool, optional
+            方策関数から呼ばれていたらTrue, by default False
+
+        Returns
+        -------
+        Battle
+            複製・隠蔽されたインスタンス
+        """
         battle = deepcopy(self)
 
         # 管理クラスに複製したbattleを再設定する
+        # 高速化のためBattleインスタンスはdeepcopyしておらず、後から手動で新しいインスタンスを指定する必要がある
         for mgr in [battle.turn_mgr, battle.poke_mgrs[0], battle.poke_mgrs[1], battle.field_mgr, battle.damage_mgr]:
             mgr.battle = battle
 
         battle.mask(perspective)
 
-        if called:
+        if _called:
             battle.call_count[perspective] += 1
 
         return battle
 
     def write(self, filepath: str):
+        """
+        試合のログを書き出す
+
+        Parameters
+        ----------
+        filepath : str
+            json形式のファイルパス
+        """
         d = {
             "seed": self.seed,
             "teams": [[poke.dump() for poke in player.team] for player in self.players],
@@ -189,6 +229,7 @@ class Battle:
             f.write(json.dumps(d, ensure_ascii=False))
 
     def selected_pokemons(self, idx: PlayerIndex | int) -> list[Pokemon]:
+        """選出されたポケモンのリストを返す"""
         return [self.players[idx].team[i] for i in self.selection_indexes[idx]]
 
     def advance_turn(self,
@@ -219,42 +260,73 @@ class Battle:
         return _winner(self, TOD)
 
     def switchable_indexes(self, idx: PlayerIndex | int) -> list[int]:
-        """交代可能なポケモンのインデックスのリストを返す"""
+        """交代可能なポケモン番号のリストを返す"""
         return [i for i in self.selection_indexes[idx] if
                 not self.players[idx].team[i].active and self.players[idx].team[i].hp]
 
     def can_terastallize(self, idx: PlayerIndex | int) -> bool:
-        return not any(p.terastal for p in self.selected_pokemons(idx))
+        """テラスタルを使用可能ならTrueを返す"""
+        return not any(poke.terastal for poke in self.selected_pokemons(idx))
 
-    def to_command(self: Battle,
+    def to_command(self,
                    idx: PlayerIndex | int,
                    selection_idx: int | None = None,
                    switch: Pokemon | None = None,
                    switch_idx: int | None = None,
                    move: Move | None = None,
                    terastal: bool = False) -> Command:
+        """
+        引数の情報をコマンドに変換する
+
+        Parameters
+        ----------
+        idx : PlayerIndex | int
+            プレイヤー番号
+        selection_idx : int | None, optional
+            選出するポケモンの番号, by default None
+        switch : Pokemon | None, optional
+            交代先のポケモン, by default None
+        switch_idx : int | None, optional
+            交代先のポケモンの番号, by default None
+        move : Move | None, optional
+            使用する技, by default None
+        terastal : bool, optional
+            Trueならテラスタルを発動する, by default False
+
+        Returns
+        -------
+        Command
+            引数に対応するコマンド
+        """
         if switch in self.players[idx].team:
             switch_idx = self.players[idx].team.index(switch)
 
         return _to_command(self, idx, selection_idx, switch_idx, move, terastal)
 
-    def command_to_str(self: Battle,
+    def command_to_str(self,
                        idx: PlayerIndex | int,
                        command: Command) -> str:
+        """コマンドの説明テキストを返す"""
         return _command_to_str(self, idx, command)
 
     def available_commands(self,
                            idx: PlayerIndex | int,
                            phase: Phase | None = None) -> list[Command]:
+        """選択可能なコマンドの一覧を返す"""
         if phase is None:
             phase = self.phase
+
+        if phase in [None, Phase.NONE]:
+            raise Exception("Invalid phase")
+
         return _available_commands(self, idx, phase)
 
-    def restore_from_damage_log(self, log: DamageLog):
+    def restore_from_damage_log(self, log: DamageLog) -> Battle:
+        """DamageLogからダメージが発生した状況を再現する"""
         battle = deepcopy(self)
         battle.turn = log.turn
         for i in range(2):
-            battle.pokemons[i].load(log.pokemons[i])
+            battle.pokemons[i].load(log.pokemons[i], init=False)
             battle.poke_mgrs[i].load(log.poke_mgrs[i])
         battle.damage_mgr.critical = log.critical
         battle.field_mgr.load(log.field_mgr)

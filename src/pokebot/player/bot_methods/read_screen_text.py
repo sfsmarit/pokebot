@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..bot_player import BotPlayer
+    from ..bot import Bot
 
 import cv2
 import unicodedata
@@ -15,7 +15,7 @@ from pokebot.core.move_utils import move_speed
 from pokebot.player.image import image_utils as iut
 
 
-def _read_screen_text(self: BotPlayer, capture: bool = True):
+def _read_screen_text(self: Bot, capture: bool = True) -> bool:
     if capture:
         type(self).capture()
     words = []
@@ -59,7 +59,7 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
         if re_ocr:
             break
 
-    print(f"{words=}")
+    print(f"\t{words=}")
 
     # 形式が不適切なら中断
     if len(words) < 2:
@@ -70,18 +70,14 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
 
     # 学校最強大会の試合開始判定
     if not self.online and 'しかけて' in worts[-1]:
-        print('*'*50, '\nNew Game\n', '*'*50)
-        self.battle.init_game()
-        self.text_buffer.clear()
-        return False
+        self.battle._winner = 0
+        return True
 
     # 急所
     if any(s in worts[0] for s in ['急', '所']):
         if self.text_buffer and 'move' in self.text_buffer[-1]:
             self.text_buffer[-1]['critical'] = True
-            return True
-        else:
-            return False
+        return False
 
     # 対象のプレイヤーを識別
     idx = 0
@@ -91,9 +87,7 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
         worts.pop(0)
 
     # 形式が不適切なら中断
-    if len(words) < 2:
-        return False
-    elif len(words[0]) < 3 or len(words[1]) < 3:
+    if len(words) < 2 or len(words[0]) < 3 or len(words[1]) < 3:
         return False
 
     dict = {'idx': idx, 'label': words[0][:-1]}
@@ -102,9 +96,7 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
     if '当' in worts[1]:
         if self.text_buffer and 'move' in self.text_buffer[-1]:
             self.text_buffer[-1]['hit'] = False
-            return True
-        else:
-            return False
+        return False
 
     if 'たせな' in worts[-1]:
         # ひるみ
@@ -151,7 +143,7 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
             if 'の' in s:
                 s = s[s.index('の')+1:]
             else:
-                return False
+                return True
         # 対象のポケモンの表示名を照合
         poke = Pokemon.find_most_similar(self.battle.selected_pokemons(idx), label=s)
         if poke:
@@ -170,28 +162,28 @@ def _read_screen_text(self: BotPlayer, capture: bool = True):
         return False
     elif any(s in worts[1] for s in ['まひ', 'やけと']) or any(s in words[-1] for s in ['眠']):
         # 状態異常
-        return False
+        return True
     elif worts[-1][:2] == 'なつ':
         # 状態変化
-        return False
+        return True
     elif 'たおれ' in worts[-1]:
         # 瀕死
         return False
     elif any(s in ''.join(words[-2:]) for s in ['効', '果']):
         # タイプ相性
-        return False
+        return True
     elif 'タメーシ' in ''.join(worts[-2:]) or any(s in words[-1] for s in ['体', '奪']):
         # 定数ダメージ
-        return False
+        return True
     elif any(s in words[0] for s in ['味', '方']):
         # 設置技
-        return False
+        return True
     elif any(s in worts[-1] for s in ['戻', '引', 'くり']):
         # 交代
-        return False
+        return True
     elif any(s in words[-1] for s in ['変', '身']):
         # 変身
-        return False
+        return True
     else:
         # 形式が不適切なら中断
         if worts[0][-1] not in ['の', 'は']:

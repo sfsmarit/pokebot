@@ -91,7 +91,7 @@ def hit_probability(battle: Battle,
         m = ut.round_half_up(m*3686/4096)
 
     # ランク補正
-    delta = attacker_mgr.rank[6]*(defender_ability != 'てんねん')
+    delta = attacker_mgr.rank[6]*(defender_ability.name != 'てんねん')
     if attacker.ability.name not in ['しんがん', 'てんねん', 'するどいめ', 'はっこう'] and \
             "ignore_rank" not in move.tags:
         delta -= defender_mgr.rank[7]

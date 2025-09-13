@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import os
 import json
 from datetime import datetime, timedelta, timezone
+import csv
 
 from .enums import MoveCategory
 from .constants import STAT_CODES
@@ -20,7 +21,40 @@ class Zukan:
 
 
 @dataclass
+class ItemData:
+    """
+    アイテムの基礎データ
+    """
+    throw_power: int
+    buff_type: str
+    debuff_type: str
+    power_correction: float
+    consumable: bool
+    immediate: bool
+    post_hit: bool
+
+
+@dataclass
+class MoveData:
+    """
+    技の基礎データ
+    """
+    type: str
+    category: MoveCategory
+    power: int
+    hit: int
+    pp: int
+    protect: bool = False
+    subst: bool = False
+    gold: bool = False
+    mirror: bool = False
+
+
+@dataclass
 class Home:
+    """
+    ポケモンHOMEの統計データ
+    """
     natures: list[str]
     nature_rates: list[float]
     abilities: list[str]
@@ -35,38 +69,52 @@ class Home:
 
 @dataclass
 class Kata:
-    pokemon: str
+    """
+    ポケモンの型データ
+    """
+    abilities: list[str]
+    ability_rates: list[float]
+    items: list[str]
+    item_rates: list[float]
+    terastals: list[str]
+    terastal_rates: list[float]
+    moves: list[str]
+    move_rates: list[float]
+    teams: list[str]
+    team_rates: list[float]
+    team_kata: list[str]
+    team_kata_rates: list[float]
 
 
 class PokeDB:
     """ポケモンのデータ全般を保持するクラス"""
-    season: int | None = None
-    regulation: str | None = None
+    season: int
+    regulation: str
 
-    zukan: dict = {}                          # 図鑑
-    label_to_names: dict = {}                 # {表示名: [名前]}
-    form_diff: dict = {}                      # フォルムの差分 {表示名: 'type' or 'ability'}
-    jpn_to_foreign_labels: dict = {}          # {各言語の表示名: 日本語の表示名}
-    foreign_to_jpn_label: dict = {}           # {日本語の表示名: [全言語の表示名]}
+    zukan: dict[str, Zukan] = {}
+    label_to_names: dict[str, list[str]] = {}
+    form_diff: dict[str, str] = {}
+    jpn_to_foreign_labels: dict[str, list[str]] = {}
+    foreign_to_jpn_label: dict[str, str] = {}
 
-    abilities: list[str] = []                      # 全特性
-    ability_tag: dict = {}                    # {分類タグ: [特性]}
+    abilities: list[str] = []
+    tagged_abilities: dict[str, list[str]] = {}
 
-    item_data: dict = {}                      # アイテムの基礎データ
+    item_data: dict[str, ItemData] = {}
 
-    move_data: dict = {}                          # 技の基礎データ
-    move_priority: dict = {}                  # 技の優先度
-    move_tag: dict = {}                       # {分類タグ: [技]}
-    combo_range: dict = {}                    # 連続技の最大・最小ヒット数
-    move_effect: dict = {}                    # 技の追加効果
+    move_data: dict[str, MoveData] = {}
+    move_priority: dict[str, int] = {}
+    move_tag: dict[str, list[str]] = {}
+    combo_range: dict[str, list[int]] = {}
+    move_effect: dict[str, dict] = {}
 
-    home: dict = {}
+    home: dict[str, Home] = {}
 
-    kata_data: dict[str, dict] = {}                           # 型データ
-    name_to_kata_name: dict[str, str] = {}              # {名前: 型の定義で使われている名前}
-    name_to_kata_list: dict[str, dict] = {}              # {名前: [型]}
-    item_to_kata_list: dict[str, dict] = {}              # {アイテム: [型]}
-    move_to_kata_list: dict[str, dict] = {}              # {技: [型]}
+    kata: dict[str, Kata] = {}
+    valid_kata_name: dict[str, str] = {}
+    name_to_kata_list: dict[str, dict] = {}
+    item_to_kata_list: dict[str, dict] = {}
+    move_to_kata_list: dict[str, dict] = {}
 
     @classmethod
     def items(cls) -> list[str]:
@@ -95,10 +143,11 @@ class PokeDB:
         cls.load_home()
         cls.load_kata()
         cls.sync_zukan()
+        print(f"Initiallized PokeDB\nseason {cls.season} / regulation {cls.regulation}")
 
     @classmethod
     def load_zukan(cls):
-        """図鑑の読み込み"""
+        """ポケモン図鑑の読み込み"""
         with open(ut.path_str('data', 'zukan.json'), encoding='utf-8') as f:
             for d in json.load(f).values():
                 name = d['alias']
@@ -125,6 +174,9 @@ class PokeDB:
         cls.abilities = list(set(cls.abilities))
         cls.abilities.sort()
 
+        # 特性の追加
+        cls.abilities.append("おもかげやどし")
+
         # 外国語名の読み込み
         with open(ut.path_str('data', 'name.json'), encoding='utf-8') as f:
             for d in json.load(f).values():
@@ -137,10 +189,8 @@ class PokeDB:
     @classmethod
     def load_ability(cls):
         """技データの読み込み"""
-        with open(ut.path_str('data', 'ability_tag.txt'), encoding='utf-8') as f:
-            for line in f:
-                data = line.split()
-                cls.ability_tag[data[0]] = data[1:]
+        with open(ut.path_str('data', 'tagged_abilities.json'), encoding='utf-8') as f:
+            cls.tagged_abilities = json.load(f)
 
     @classmethod
     def load_item(cls):
@@ -149,17 +199,15 @@ class PokeDB:
             next(f)
             for line in f:
                 data = line.split()
-                item = data[0]
-
-                cls.item_data[item] = {
-                    'throw_power': int(data[1]),
-                    'buff_type': data[2],
-                    'debuff_type': data[3],
-                    'power_correction': float(data[4]),
-                    'consumable': int(data[5]),
-                    'immediate': int(data[6]),
-                    'post_hit': int(data[7]),
-                }
+                cls.item_data[data[0]] = ItemData(
+                    throw_power=int(data[1]),
+                    buff_type=data[2],
+                    debuff_type=data[3],
+                    power_correction=float(data[4]),
+                    consumable=bool(int(data[5])),
+                    immediate=bool(int(data[6])),
+                    post_hit=bool(int(data[7])),
+                )
 
     @classmethod
     def load_move(cls):
@@ -194,28 +242,20 @@ class PokeDB:
                 cls.combo_range[data[0]] = [int(data[1]), int(data[2])]
 
         with open(ut.path_str('data', 'attack_move.txt'), encoding='utf-8') as f:
-            str_to_moveclass = {'物理': MoveCategory.PHY, '特殊': MoveCategory.SPE}
-
             line = f.readline()
-            keys = line.split()
-
             for line in f:
                 data = line.split()
-                name = data[0]
-                cls.move_data[name] = {}
-
-                for key, val in zip(keys[1:], data[1:]):
-                    if key == "category":
-                        val = str_to_moveclass[val]
-                    elif key == "pp":
-                        val = int(int(val)*1.6)
-                    elif val.isdigit():
-                        val = int(val)
-                    cls.move_data[name][key] = val
+                cls.move_data[data[0]] = MoveData(
+                    type=data[1],
+                    category=MoveCategory(data[2]),
+                    power=int(data[3]),
+                    hit=int(data[4]),
+                    pp=int(int(data[5])*1.6),
+                )
 
             # 威力変動技の初期化
             for move in cls.move_tag['var_power']:
-                cls.move_data[move]['power'] = 1
+                cls.move_data[move].power = 1
 
         with open(ut.path_str('data', 'status_move.txt'), encoding='utf-8') as f:
             line = f.readline()
@@ -223,21 +263,21 @@ class PokeDB:
 
             for line in f:
                 data = line.split()
-                name = data[0]
-                cls.move_data[name] = {}
-
-                for key, val in zip(keys[1:], data[1:]):
-                    if key == "category":
-                        val = MoveCategory.STA
-                    elif key == "pp":
-                        val = int(int(val)*1.6)
-                    elif val.isdigit():
-                        val = int(val)
-                    cls.move_data[name][key] = val
+                cls.move_data[data[0]] = MoveData(
+                    type=data[1],
+                    category=MoveCategory(data[2]),
+                    power=int(data[3]),
+                    hit=int(data[4]),
+                    pp=int(int(data[5])*1.6),
+                    protect=bool(int(data[6])),
+                    subst=bool(int(data[7])),
+                    gold=bool(int(data[8])),
+                    mirror=bool(int(data[9])),
+                )
 
     @classmethod
     def download_data(cls):
-        """1日1回、統計データをダウンロードする"""
+        """統計データをダウンロードする"""
         # 統計データの最終更新日を取得
         update_log = ut.path_str('data', 'last_update.txt')
         if os.path.isfile(update_log):
@@ -259,24 +299,34 @@ class PokeDB:
             with open(update_log, 'w', encoding='utf-8') as f:
                 f.write(dt_now.strftime('%Y%m%d'))
 
-        filename = ut.path_str("data", "regulation.txt")
-
+        # レギュレーションの一覧が記されたファイルをダウンロード
+        filename = ut.path_str("data", "regulation.csv")
         if not os.path.isfile(filename) or last_update < yyyymmdd:
-            # レギュレーション一覧のダウンロード
-            url = "https://pbasv.cloudfree.jp/download/kata/regulation.txt"
+            url = "https://pbasv.cloudfree.jp/download/kata/regulation.csv"
             ut.download(url, filename)
 
-        cls.regulation = ut.regulation(filename, cls.season)
+        # レギュレーション一覧を取得
+        regulations = ['']
+        with open(filename, encoding='utf-8', newline='\r\n') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                regulations.append(row[1])
 
+        # 現在のレギュレーションを取得
+        if cls.season <= len(regulations) - 1:
+            cls.regulation = regulations[cls.season]
+        else:
+            cls.regulation = regulations[-1]
+
+        # デイリーで、レギュレーションに対応した型データをダウンロード
         filename = ut.path_str("data", f"kata_reg{cls.regulation}.json")
         if not os.path.isfile(filename) or last_update < yyyymmdd:
-            # 型データのダウンロード
             url = f"https://pbasv.cloudfree.jp/download/kata/kata_reg{cls.regulation}.json"
             ut.download(url, filename)
 
     @classmethod
     def load_home(cls):
-        """HOME統計の読み込み"""
+        """ポケモンHOME統計データの読み込み"""
         filename = ut.path_str("data", f"season{cls.season}.json")
         with open(filename, encoding='utf-8') as f:
             for d in json.load(f).values():
@@ -311,11 +361,21 @@ class PokeDB:
         filename = ut.path_str("data", f"kata_reg{cls.regulation}.json")
         with open(filename, encoding='utf-8') as fin:
             d = json.load(fin)
-            cls.kata_data = d['kata']
-            cls.name_to_kata_name = d['valid_alias']
+            kata_data = d['kata']
+            cls.valid_kata_name = d['valid_alias']
             cls.name_to_kata_list = d['alias2kata']
             cls.item_to_kata_list = d['item2kata']
             cls.move_to_kata_list = d['move2kata']
+
+        for kata, data in kata_data.items():
+            cls.kata[kata] = Kata(
+                list(data['ability'].keys()), list(data['ability'].values()),
+                list(data['item'].keys()), list(data['item'].values()),
+                list(data['terastal'].keys()), list(data['terastal'].values()),
+                list(data['move'].keys()), list(data['move'].values()),
+                list(data['team'].keys()), list(data['team'].values()),
+                list(data['team_kata'].keys()), list(data['team_kata'].values()),
+            )
 
     @classmethod
     def sync_zukan(cls):

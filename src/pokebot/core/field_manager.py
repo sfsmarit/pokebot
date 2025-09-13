@@ -11,6 +11,10 @@ from pokebot.logger import TurnLog
 
 
 class FieldManager:
+    """
+    場の状態を管理するクラス
+    """
+
     def __init__(self, battle: Battle):
         self.battle: Battle = battle
 
@@ -35,6 +39,7 @@ class FieldManager:
         self.__dict__ |= d
 
     def init_game(self):
+        """試合開始前の状態に初期化する"""
         for x in GlobalField:
             self.count[x] = 0
         for x in SideField:
@@ -48,27 +53,59 @@ class FieldManager:
                    field: GlobalField | SideField,
                    idx: PlayerIndex | int | None = None,
                    count: int = 0):
+        """
+        場のカウント(残りターン数)を設定する
+
+        Parameters
+        ----------
+        field : GlobalField | SideField
+            対象の場
+        idx : PlayerIndex | int | None, optional
+            変更を行うプレイヤー番号
+        count : int, optional
+            カウント, by default 0
+        """
         if isinstance(field, GlobalField):
             self.count[field] = count
         else:
             self.count[field][idx] = count
-        self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{field} {idx} +{count}"))
+        self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{field} +{count}"))
 
     def set_weather(self,
                     weather: Weather,
                     idx: PlayerIndex | int,
                     count: int | None = None) -> bool:
+        """
+        天候を設定する
+
+        Parameters
+        ----------
+        weather : Weather
+            天候
+        idx : PlayerIndex | int
+            変更を行うプレイヤー番号
+        count : int | None, optional
+            カウント, by default None
+
+        Returns
+        -------
+        bool
+            設定できたらTrue
+        """
         # 重ね掛け不可
         if self._weather == weather:
             return False
 
         self._weather = weather
 
-        if count is None:
-            count = 8 if self.battle.pokemons[idx].item == WEATHER_STONE[weather] else 5
+        if weather == Weather.NONE:
+            count = 0
+        elif count is None:
+            count = 8 if self.battle.pokemons[idx].item.name == WEATHER_STONE[weather] else 5
+
         self._set_count(GlobalField.WEATHER, idx, count)
 
-        # 特性の判定
+        # 特性の発動判定
         for i, poke in enumerate(self.battle.pokemons):
             if poke.ability.name == 'こだいかっせい':
                 self.battle.poke_mgrs[i].activate_ability()
@@ -79,18 +116,37 @@ class FieldManager:
                     terrain: Terrain,
                     idx: PlayerIndex | int,
                     count: int | None = None) -> bool:
+        """
+        フィールドを設定する
 
+        Parameters
+        ----------
+        terrain : Terrain
+            フィールド
+        idx : PlayerIndex | int
+            変更を行うプレイヤー番号
+        count : int | None, optional
+            カウント, by default None
+
+        Returns
+        -------
+        bool
+            設定できたらTrue
+        """
         # 重ね掛け不可
         if self._terrain == terrain:
             return False
 
         self._terrain = terrain
 
+        if terrain == Terrain.NONE:
+            count = 0
         if count is None:
-            count = 8 if self.battle.pokemons[idx].item == "グランドコート" else 5
+            count = 8 if self.battle.pokemons[idx].item.name == "グランドコート" else 5
+
         self._set_count(GlobalField.TERRAIN, idx, count)
 
-        # 特性の判定
+        # 特性の発動判定
         for i, poke in enumerate(self.battle.pokemons):
             if poke.ability.name == 'クォークチャージ':
                 self.battle.poke_mgrs[i].activate_ability()
@@ -101,10 +157,28 @@ class FieldManager:
                   field: GlobalField | SideField,
                   idx: PlayerIndex | int | None = None,
                   count: int = 0) -> bool:
+        """
+        天候・フィールド以外の場を設定する
 
+        Parameters
+        ----------
+        field : GlobalField | SideField
+            場
+        idx : PlayerIndex | int | None, optional
+            変更を行うプレイヤー番号, by default None
+        count : int, optional
+            場のカウント, by default 0
+
+        Returns
+        -------
+        bool
+            設定できたらTrue
+        """
         # 重ね掛け不可
-        if count and self.count[field]:
-            return False
+        if count:
+            if (isinstance(field, GlobalField) and self.count[field]) or \
+                    (isinstance(field, SideField) and self.count[field][idx]):
+                return False
 
         match field:
             case SideField.WISH:
@@ -123,6 +197,23 @@ class FieldManager:
                   field: GlobalField | SideField,
                   idx: PlayerIndex | int | None = None,
                   v: int = 1) -> bool:
+        """
+        場のカウント(残りターン)を加算する
+
+        Parameters
+        ----------
+        field : GlobalField | SideField
+            対象の場
+        idx : PlayerIndex | int | None, optional
+            変更を行うプレイヤー番号, by default None
+        v : int, optional
+            加算するカウント, by default 1
+
+        Returns
+        -------
+        bool
+            変更できたらTrue
+        """
         if isinstance(field, GlobalField):
             count = self.count[field]
         else:
@@ -135,6 +226,7 @@ class FieldManager:
         return True
 
     def weather(self, perspective: PlayerIndex | int | None = None) -> Weather:
+        """プレイヤー視点の天候を返す"""
         active_abilities = [p.ability.name for p in self.battle.pokemons]
         if any(s in active_abilities for s in ['エアロック', 'ノーてんき']):
             return Weather.NONE
@@ -145,6 +237,7 @@ class FieldManager:
         return self._weather
 
     def terrain(self, perspective: PlayerIndex | int | None = None) -> Terrain:
+        """プレイヤー視点のフィールドを返す"""
         if perspective is not None and \
                 self.battle.poke_mgrs[perspective].is_floating():
             return Terrain.NONE

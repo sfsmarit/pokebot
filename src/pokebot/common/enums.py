@@ -117,7 +117,7 @@ class Terrain(BaseEnum):
 
 class SideField(BaseEnum):
     REFLECTOR = ["リフレクター", 8, True]
-    LIGHTWALL = ["ひかりのかべ", 8, True]
+    LIGHT_WALL = ["ひかりのかべ", 8, True]
     AURORA_VEIL = ["オーロラベール", 8, True]
     SHINPI = ["しんぴのまもり", 5, True]
     WHITE_MIST = ["しろいきり", 5, True]
@@ -148,7 +148,7 @@ class MoveCategory(BaseEnum):
 
 
 class BoostSource(BaseEnum):
-    """能力ブーストのトリガー"""
+    """能力ブーストの発動要因"""
     NONE = None
     ABILITY = auto()
     ITEM = auto()
@@ -166,12 +166,12 @@ class Phase(BaseEnum):
 
 class Time(BaseEnum):
     """時間 [s]"""
-    GAME = 20*60                # 試合時間
+    GAME = 20*60                # 試合
     SELECTION = 90              # 選出
     COMMAND = 45                # コマンド入力
     CAPTURE = 0.1               # キャプチャ遅延
     TRANSITION_CAPTURE = 0.3    # 画面遷移を伴うキャプチャ遅延
-    OUT = 60
+    TIMEOUT = 60                # 実機対戦でのタイムアウト
 
 
 class Command(BaseEnum):

@@ -1,23 +1,31 @@
-from pokebot import PokeDB, Pokemon, Player
 import time
 import random
+from pokebot import PokeDB, Pokemon, Player
 
-random.seed(1)
+
+max_turn = 100
 
 
 M = 6  # 匹から
-N = random.randint(1, M)  # 匹選ぶ
+N = M  # random.randint(1, M)  # 匹選ぶ
 
 
 item_pool = PokeDB.items()
+# item_pool = [""]
 # item_pool = ["だっしゅつボタン", "だっしゅつパック", "レッドカード"]
 
 ability_pool = PokeDB.abilities
 
 move_pool = list(PokeDB.move_data.keys())
+# move_pool = ["のしかかり", "トライアタック"]
 
+
+seed = 0
 
 while True:
+    random.seed(seed)
+    print(f"{seed=}")
+
     # 2人のプレイヤーを生成
     player = Player()
     opponent = Player()
@@ -31,7 +39,7 @@ while True:
             pl.team[-1].ability = random.choice(ability_pool)
             pl.team[-1].item = random.choice(item_pool)
             pl.team[-1].moves.clear()
-            pl.team[-1].add_moves(random.sample(move_pool, random.randint(1, 10)))
+            pl.team[-1].add_moves(random.sample(move_pool, random.randint(1, min(10, len(move_pool)))))
 
     # 表示
     for i, pl in enumerate([player, opponent]):
@@ -41,7 +49,7 @@ while True:
 
     # N匹を選出して対戦
     t0 = time.time()
-    battle = player.game(opponent, n_selection=N, seed=0)
+    battle = player.game(opponent, n_selection=N, seed=0, max_turn=max_turn)
     print(f"{time.time() - t0:.2f}s")
     print('-'*50)
 
@@ -54,4 +62,5 @@ while True:
         print(f"\n{'-'*50}\nリプレイ {filepath}\n{'-'*50}")
         player.replay(filepath)
 
-    break
+    # break
+    seed += 1

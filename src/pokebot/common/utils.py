@@ -1,22 +1,22 @@
+import time
 from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_DOWN
 from copy import deepcopy
 import requests
-import glob
-import os
-import glob
 import jaconv
 import unicodedata
 from importlib import resources
-from pathlib import Path
 from datetime import datetime, timedelta, timezone
-from PIL import Image
-import cv2
 import Levenshtein
-import pyocr
-import pyocr.builders
+
+
+def timer(func, *args, **kwargs) -> None:
+    t0 = time.time()
+    func(*args, **kwargs)
+    print(f"{func.__name__} {(time.time()-t0)*1e3}ms")
 
 
 def selective_deepcopy(old, new, keys_to_deepcopy: list[str] = []):
+    """指定されたkeyのみdeep copyし、それ以外はshallow copyする"""
     for key, val in old.__dict__.items():
         if key in keys_to_deepcopy:
             setattr(new, key, deepcopy(val))
@@ -25,6 +25,7 @@ def selective_deepcopy(old, new, keys_to_deepcopy: list[str] = []):
 
 
 def recursive_copy(obj):
+    """オブジェクトを再帰的にコピーする"""
     if isinstance(obj, list):
         return [recursive_copy(item) for item in obj]
     elif isinstance(obj, dict):
@@ -37,11 +38,11 @@ def path(*path_parts: str):
     return resources.files("pokebot").joinpath(*path_parts)
 
 
-def path_str(*path_parts: str):
+def path_str(*path_parts: str) -> str:
     return str(resources.files("pokebot").joinpath(*path_parts))
 
 
-def download(url, dst):
+def download(url: str, dst) -> None:
     print(f"Downloading {url}")
     res = requests.get(url)
     with open(dst, 'w', encoding='utf-8') as fout:
@@ -52,17 +53,6 @@ def current_season() -> int:
     dt_now = datetime.now(timezone(timedelta(hours=+9), 'JST'))
     y, m, d = dt_now.year, dt_now.month, dt_now.day
     return max(12*(y-2022) + m - 11 - (d == 1), 1)
-
-
-def regulation(filename: str, season: int | None = None) -> str:
-    if not season:
-        season = current_season()
-    with open(filename, encoding='utf-8', newline='\r\n') as f:
-        for line in f:
-            data = line.split()
-            if int(data[0]) == season:
-                return data[1]
-    return 'G'
 
 
 def round_half_up(v: float) -> int:
