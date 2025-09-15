@@ -212,6 +212,10 @@ class Pokemon:
         self.set_zukan_info()
         self.update_stats(keep_damage=True)
 
+        # 特性の変更
+        if "テラパゴス" in self.name:
+            self.ability = "ゼロフォーミング"
+
         # 技の変更
         match self._name:
             case 'ザシアン(けんのおう)':
@@ -273,7 +277,7 @@ class Pokemon:
     def terastal(self, type: str):
         self._terastal = type
 
-    def terastallize(self):
+    def terastallize(self) -> None:
         if self.is_terastallized:
             return
         self.is_terastallized = True

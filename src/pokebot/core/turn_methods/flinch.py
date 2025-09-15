@@ -26,7 +26,7 @@ def _check_flinch(self: TurnManager,
         if attacker.ability.name == 'てんのめぐみ':
             prob *= 2
 
-        if self.battle.random.random() < prob:
+        if self.battle.force_trigger or self.battle.random.random() < prob:
             self.battle.logger.append(TurnLog(self.battle.turn, atk, '追加効果 ひるみ'))
             return True
 

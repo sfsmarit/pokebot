@@ -155,7 +155,8 @@ def _damage_modifier(self: DamageManager,
     # 半減実
     r0 = r
     if move.power and defender.item.debuff_type == move_type and \
-            not defender_mgr.is_nervous() and (move_type == 'ノーマル' or r_defence_type > 1):
+            not defender_mgr.is_nervous() and \
+            (move_type == 'ノーマル' or r_defence_type > 1):
         r = ut.round_half_up(r*0.5)
 
     if r != r0 and log:

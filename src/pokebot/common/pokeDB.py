@@ -279,7 +279,7 @@ class PokeDB:
     def download_data(cls):
         """統計データをダウンロードする"""
         # 統計データの最終更新日を取得
-        update_log = ut.path_str('data', 'last_update.txt')
+        update_log = ut.path_str('data', 'update.log')
         if os.path.isfile(update_log):
             with open(update_log, encoding='utf-8') as f:
                 last_update = int(f.read())
@@ -293,13 +293,12 @@ class PokeDB:
         if not os.path.isfile(filename) or last_update < yyyymmdd:
             # HOME統計のダウンロード
             url = f"https://pbasv.cloudfree.jp/download/home/season{cls.season}.json"
-            ut.download(url, filename)
+            if ut.download(url, filename):
+                # 最終更新日を記録
+                with open(update_log, 'w', encoding='utf-8') as f:
+                    f.write(dt_now.strftime('%Y%m%d'))
 
-            # 最終更新日を記録
-            with open(update_log, 'w', encoding='utf-8') as f:
-                f.write(dt_now.strftime('%Y%m%d'))
-
-        # レギュレーションの一覧が記されたファイルをダウンロード
+        # レギュレーション一覧が記されたファイルをダウンロード
         filename = ut.path_str("data", "regulation.csv")
         if not os.path.isfile(filename) or last_update < yyyymmdd:
             url = "https://pbasv.cloudfree.jp/download/kata/regulation.csv"
@@ -318,7 +317,7 @@ class PokeDB:
         else:
             cls.regulation = regulations[-1]
 
-        # デイリーで、レギュレーションに対応した型データをダウンロード
+        # レギュレーションに対応した型データをダウンロード
         filename = ut.path_str("data", f"kata_reg{cls.regulation}.json")
         if not os.path.isfile(filename) or last_update < yyyymmdd:
             url = f"https://pbasv.cloudfree.jp/download/kata/kata_reg{cls.regulation}.json"
@@ -328,6 +327,10 @@ class PokeDB:
     def load_home(cls):
         """ポケモンHOME統計データの読み込み"""
         filename = ut.path_str("data", f"season{cls.season}.json")
+        if not os.path.exists(filename):
+            print(f"{filename} does not exist")
+            return
+
         with open(filename, encoding='utf-8') as f:
             for d in json.load(f).values():
                 name = d['alias']
@@ -380,6 +383,9 @@ class PokeDB:
     @classmethod
     def sync_zukan(cls):
         """図鑑をHOMEと同期する"""
+        if not cls.home:
+            return
+
         d = {}
         for key, val in cls.zukan.items():
             if key in cls.home:

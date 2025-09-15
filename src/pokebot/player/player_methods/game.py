@@ -12,16 +12,22 @@ def _game(self: Player,
           open_sheet: bool,
           seed: int,
           max_turn: int,
-          mute: bool) -> Battle:
+          display_log: bool,
+          force_trigger: bool) -> Battle:
 
-    battle = Battle(self, opponent, n_selection, open_sheet, seed)
+    battle = Battle(player1=self,
+                    player2=opponent,
+                    n_selection=n_selection,
+                    open_sheet=open_sheet,
+                    seed=seed,
+                    force_trigger=force_trigger)
 
     # 選出
     battle.select_pokemon()
 
     # 勝敗が決まるまでターンを進める
     while battle.winner(TOD=battle.turn >= max_turn) is None:
-        self.advance_turn(battle, mute)
+        self.advance_turn(battle, display_log)
 
     # 戦績の更新
     self.n_game += 1

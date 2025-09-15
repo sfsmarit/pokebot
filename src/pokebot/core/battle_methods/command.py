@@ -75,6 +75,7 @@ def _available_commands(self: Battle,
             for move in self.pokemons[idx].moves:
                 if self.poke_mgrs[idx].can_choose_move(move)[0]:
                     commands.append(self.to_command(idx, move=move))
+
                 # テラスタル
                 if self.can_terastallize(idx):
                     commands.append(self.to_command(idx, move=move, terastal=True))
@@ -93,7 +94,7 @@ def _available_commands(self: Battle,
     if not commands:
         print(f"{self.turn=}, {phase=}, {idx=} {self.poke_mgrs[idx].pokemon.name=}")
         for idx in self.action_order:
-            print(f"\tPlayer {int(idx)}", self.logger.get_turn_summary(self.turn, idx))
+            print(f"\tPlayer {int(idx)}", ", ".join(self.logger.get_turn_log(self.turn, idx)))
         raise Exception(f"No available command for player {idx}")
 
     return commands

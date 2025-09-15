@@ -22,7 +22,7 @@ def _set_ailment(self: ActivePokemonManager,
     if self.pokemon.ailment == ailment:
         return False
 
-    ability = self.defending_ability(move)
+    dfn_ability = self.defending_ability(move)
 
     # 状態異常の解除
     if not ailment.value:
@@ -40,10 +40,10 @@ def _set_ailment(self: ActivePokemonManager,
             return False
 
     # すべての状態異常を無効にする条件
-    if ability.name in ['きよめのしお', 'ぜったいねむり'] or \
-        (ability.name == 'リーフガード' and battle.field_mgr.weather(self.idx) == Weather.SUNNY) or \
-            (ability.name == 'フラワーベール' and 'くさ' in self.types):
-        battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+    if dfn_ability.name in ['きよめのしお', 'ぜったいねむり'] or \
+        (dfn_ability.name == 'リーフガード' and battle.field_mgr.weather(self.idx) == Weather.SUNNY) or \
+            (dfn_ability.name == 'フラワーベール' and 'くさ' in self.types):
+        battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
         return False
 
     # ミストフィールドによる無効
@@ -54,8 +54,8 @@ def _set_ailment(self: ActivePokemonManager,
     # 特定の状態異常を無効にする条件
     match ailment:
         case Ailment.PSN:
-            if ability.name in ['めんえき', 'パステルベール']:
-                battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+            if dfn_ability.name in ['めんえき', 'パステルベール']:
+                battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
             if any(t in self.types for t in ['どく', 'はがね']) and \
                     not (self.opponent.ability.name == 'ふしょく' and move.category == MoveCategory.STA):
@@ -63,28 +63,28 @@ def _set_ailment(self: ActivePokemonManager,
         case Ailment.PAR:
             if 'でんき' in self.types:
                 return False
-            if ability.name == 'じゅうなん':
-                battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+            if dfn_ability.name == 'じゅうなん':
+                battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
             if move.name == 'でんじは' and 'じめん' in self.types:
                 return False
         case Ailment.BRN:
             if 'ほのお' in self.types:
                 return False
-            if ability in ['すいほう', 'ねつこうかん', 'みずのベール']:
-                battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+            if dfn_ability in ['すいほう', 'ねつこうかん', 'みずのベール']:
+                battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
         case Ailment.SLP:
-            if ability in ['スイートベール', 'やるき', 'ふみん']:
-                battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+            if dfn_ability in ['スイートベール', 'やるき', 'ふみん']:
+                battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
             if battle.field_mgr.terrain(self.idx) == Terrain.ELEC:
                 return False
         case Ailment.FLZ:
             if 'こおり' in self.types:
                 return False
-            if ability.name == 'マグマのよろい':
-                battle.logger.append(TurnLog(battle.turn, self.idx, ability.name))
+            if dfn_ability.name == 'マグマのよろい':
+                battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
             if battle.field_mgr.weather(self.idx) == Weather.SUNNY:
                 return False
@@ -104,7 +104,7 @@ def _set_ailment(self: ActivePokemonManager,
             if move.name == 'ねむる':
                 self.pokemon.sleep_count = 3
             else:
-                battle.random.randint(2, 4)
+                self.pokemon.sleep_count = battle.random.randint(2, 4)
             self.set_condition(Condition.NEMUKE, 0)
             self.forced_turn = 0
 

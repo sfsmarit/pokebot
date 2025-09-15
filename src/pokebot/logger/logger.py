@@ -26,19 +26,19 @@ class Logger:
         ut.selective_deepcopy(self, new)
         return new
 
-    def get_turn_summary(self, turn: int, idx: PlayerIndex | int) -> str:
+    def get_turn_log(self, turn: int, idx: PlayerIndex | int) -> list[str]:
         logs = []
         for log in self.turn_logs:
             if log.turn == turn and log.idx in [idx, None]:
                 logs.append(log.text)
-        return ", ".join(logs)
+        return logs
 
     def get_damage_summary(self, turn: int, idx: PlayerIndex | int) -> list[str]:
-        notes = []
+        logs = []
         for log in self.damage_logs:
             if log.turn == turn and log.idx in [idx, None]:
-                notes.append(log.notes)
-        return notes
+                logs += log.notes
+        return logs
 
     def append(self, log: TurnLog | CommandLog | DamageLog):
         if isinstance(log, TurnLog):

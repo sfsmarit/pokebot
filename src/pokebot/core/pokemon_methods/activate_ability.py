@@ -12,7 +12,8 @@ from pokebot.logger.logger import TurnLog
 from pokebot.core.move_utils import effective_move_type
 
 
-def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
+def _activate_ability(self: ActivePokemonManager,
+                      move: Move | None) -> bool:
     opp = int(not self.idx)
     user = self.pokemon
     opponent = self.opponent
@@ -49,7 +50,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             activated = weather in [Weather.SUNNY, Weather.RAINY] and \
                 self.add_hp(ratio=sign[weather]/8)
         case 'あくしゅう':
-            activated = self.battle.random.random() < 0.1
+            activated = self.battle.force_trigger or self.battle.random.random() < 0.1
             if activated:
                 self.battle.turn_mgr._flinch = True
         case 'いかく':
@@ -94,7 +95,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             opponent_mgr.add_rank(7, -1)
             activated = True
         case 'カーリーヘアー' | 'ぬめぬめ':
-            activated = move and opponent_mgr.contacts(move) and self.add_rank(5, -1, by_opponent=True)
+            activated = move and opponent_mgr.contacts(move) and opponent_mgr.add_rank(5, -1, by_opponent=True)
         case 'きもったま' | 'せいしんりょく' | 'どんかん' | 'マイペース':
             activated = True
         case 'ぎゃくじょう':
@@ -148,7 +149,9 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             activated = opponent.hp == 0 and self.add_rank(stat_idx, +1)
         case 'しゅうかく':
             activated = user.item.name_lost[-2:] == 'のみ' and \
-                (self.battle.field_mgr.weather(self.idx) == Weather.SUNNY or self.battle.random.random() < 0.5)
+                (self.battle.force_trigger or
+                 self.battle.field_mgr.weather(self.idx) == Weather.SUNNY or
+                 self.battle.random.random() < 0.5)
             if activated:
                 user.item.active = True
         case 'じょうききかん':
@@ -171,13 +174,11 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
                         'ほうし': self.battle.random.choice([Ailment.PSN, Ailment.PAR, Ailment.SLP])}
             activated = move and \
                 opponent_mgr.contacts(move) and \
-                self.battle.random.random() < 0.3 and \
+                (self.battle.force_trigger or self.battle.random.random() < 0.3) and \
                 opponent_mgr.set_ailment(ailments[user.ability.name])
         case 'ゼロフォーミング':
-            n = self.battle.field_mgr.set_weather(Weather.NONE, self.idx) + \
-                self.battle.field_mgr.set_terrain(Terrain.NONE, self.idx)
-            if n:
-                self.battle.logger.insert(-n, TurnLog(self.battle.turn, self.idx, user.ability.name))
+            self.battle.field_mgr.set_weather(Weather.NONE, self.idx)
+            self.battle.field_mgr.set_terrain(Terrain.NONE, self.idx)
             activated = True
         case 'ダウンロード':
             eff_b = int(opponent.stats[2] * opponent_mgr.rank_modifier(2))
@@ -185,8 +186,10 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
             activated = self.add_rank(1+2*int(eff_b > eff_d), +1)
         case 'ちくでん' | 'ちょすい' | 'どしょく':
             self.add_hp(ratio=0.25)
+            activated = True
         case 'でんきエンジン':
             self.add_rank(5, +1)
+            activated = True
         case 'でんきにかえる':
             activated = opponent_mgr.set_condition(Condition.CHARGE, 1)
         case 'どくげしょう':
@@ -198,7 +201,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
                 opponent_mgr.add_hp(ratio=-0.125)
         case 'のろわれボディ':
             activated = opponent_mgr.expended_moves and \
-                self.battle.random.random() < 0.3 and \
+                (self.battle.force_trigger or self.battle.random.random() < 0.3) and \
                 opponent_mgr.set_condition(Condition.KANASHIBARI, 4)
         case 'バリアフリー':
             for i in range(2):
@@ -207,24 +210,18 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
         case 'ばんけん':
             activated = self.add_rank(1, +1, by_opponent=True)
         case 'はんすう':
-            activated = True
             user.ability.count += 1
-            if user.ability.count == 1:
-                # はんすう起動
-                self.battle.logger.append(TurnLog(self.battle.turn, self.idx, "はんすう起動"))
-            elif user.ability.count == 3:
-                # はんすう終了
+            activated = user.ability.count == 3 and user.item.name_lost[-2:] == 'のみ'
+            if activated:
+                user.item.active = True
+                activated &= self.activate_item()
+                # 発動しなかった場合も消費させる
+                if not activated:
+                    user.item.consume()
                 user.ability.count = 0
-                self.battle.logger.append(TurnLog(self.battle.turn, self.idx, "はんすう終了"))
-                if user.item.name_lost[-2:] == 'のみ':
-                    user.item.active = True
-                    # 強制消費
-                    if not self.activate_item():
-                        user.item.consume()
-            else:
-                return False
         case 'ひらいしん' | 'よびみず':
             self.add_rank(3, +1)
+            activated = True
         case 'びびり':
             activated = move and \
                 effective_move_type(self.battle, opp, move) in ['あく', 'ゴースト', 'むし'] and \
@@ -232,7 +229,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
         case 'ふうりょくでんき':
             activated = move and \
                 "wind" in move.tags and \
-                not self.set_condition(Condition.CHARGE, 1)
+                self.set_condition(Condition.CHARGE, 1)
         case 'ふくつのこころ':
             activated = self.add_rank(5, +1)
         case 'ふくつのたて':
@@ -268,6 +265,7 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
                 opponent_mgr.is_item_removable()
             if activated:
                 user.item.name = opponent.item.name
+                user.item.active = opponent.item.active
                 opponent.item.active = False
         case 'みずがため':
             activated = move and \
@@ -284,17 +282,18 @@ def _activate_ability(self: ActivePokemonManager, move: Move | None) -> bool:
                 if down_idxs:
                     self.add_rank(self.battle.random.choice(down_idxs), -1)
         case 'メロメロボディ':
-            activated = self.battle.random.random() < 0.3 and \
+            activated = (self.battle.force_trigger or self.battle.random.random() < 0.3) and \
                 opponent_mgr.set_condition(Condition.MEROMERO, 1)
         case 'もらいび':
             user.ability.count += 1
+            activated = True
         case 'ゆうばく':
             activated = user.hp == 0 and opponent_mgr.add_hp(ratio=-0.25)
         case 'わたげ':
-            activated = self.add_rank(5, -1)
+            activated = opponent_mgr.add_rank(5, -1)
 
     if activated:
-        self.battle.logger.insert(-1, TurnLog(self.battle.turn, self.idx, user.ability.name))
+        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, user.ability.name))
         user.ability.observed = True  # 観測
         if "one_time" in user.ability.tags:
             user.ability.active = False
