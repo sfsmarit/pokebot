@@ -140,6 +140,7 @@ class TurnManager:
             def_mgr.add_hp(ratio=0.25)
         elif defender.ability.name == 'かぜのり':
             def_mgr.add_rank(1, +1)
+            self.battle.logger.insert(-1, TurnLog(self.battle.turn, dfn, defender.ability.name))
         else:
             def_mgr.activate_ability()
 

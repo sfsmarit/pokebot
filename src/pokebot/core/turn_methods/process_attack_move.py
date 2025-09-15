@@ -43,12 +43,12 @@ def _process_attack_move(self: TurnManager,
         self.battle.damage_mgr.log.damage_dealt = self.damage_dealt[atk]
         self.battle.damage_mgr.log.damage_ratio = self.damage_dealt[atk] / defender.stats[0]
 
-        # ダメージが発生した状況を記録
+        # ダメージ発生状況を記録
         if self.damage_dealt[atk] and not any(self.battle.call_count):
             self.battle.logger.append(self.battle.damage_mgr.log)
 
     else:
-        # 特殊なダメージ計算を行う技の処理
+        # 特殊ダメージの処理
         self.process_special_damage(atk, move)
 
         # 勝敗判定 (いのちがけ処理)
@@ -64,17 +64,17 @@ def _process_attack_move(self: TurnManager,
     # 壁破壊
     attacker_mgr.process_tagged_move(move, 'wall_break')
 
-    # ダメージ処理時に発動したアイテムの消費
+    # ダメージ発生時に発動したアイテムの消費
     for i, poke in enumerate(self.battle.pokemons):
         if self.battle.damage_mgr.log.item_consumed[i]:
             poke.item.consume()
 
-    # みがわり判定
+    # みがわり被弾判定
     self._hit_substitute = defender_mgr.sub_hp > 0 and \
         attacker.ability.name != 'すりぬけ' and \
         "sound" not in move.tags
 
-    # ダメージ処理
+    # ダメージ付与
     if self._hit_substitute:
         # みがわり被弾
         self.damage_dealt[atk] = min(defender_mgr.sub_hp, self.damage_dealt[atk])
@@ -107,7 +107,7 @@ def _process_attack_move(self: TurnManager,
         if self.battle.winner() is not None:
             return
 
-    # 追加効果の処理
+    # 追加効果の判定
     if move.name in PokeDB.move_effect:
         effect = PokeDB.move_effect[move.name]
         tgt = ((atk + effect["target"]) % 2)
@@ -153,7 +153,7 @@ def _process_attack_move(self: TurnManager,
         self.damage_dealt[atk] = 0
 
     else:
-        # 技の追加処理
+        # 技の追加処理 (ダメージ付与時)
         if move.name in ['おんねん', 'くちばしキャノン', 'クリアスモッグ', 'コアパニッシャー']:
             attacker_mgr.activate_move_effect(move)
 
@@ -169,7 +169,7 @@ def _process_attack_move(self: TurnManager,
     if move.name == 'やきつくす':
         attacker_mgr.activate_move_effect(move)
 
-    # 被弾後に発動するアイテム
+    # 被弾アイテムの判定
     if defender.item.post_hit:
         defender_mgr.activate_item(move)
 
@@ -180,13 +180,13 @@ def _process_attack_move(self: TurnManager,
         self.move_succeeded[dfn] = True
         return
 
-    # 反動技
+    # 技の反動付与
     attacker_mgr.apply_move_recoil(move, "recoil")
 
-    # バインド技
+    # バインド付与
     attacker_mgr.process_tagged_move(move, "bind")
 
-    # 追加効果
+    # 追加効果の判定
     if move.name in [
         'わるあがき', 'がんせきアックス', 'キラースピン', 'こうそくスピン', 'ひけん･ちえなみ', 'プラズマフィスト',
         'うちおとす', 'サウザンアロー', 'きつけ', 'くらいつく', 'サウザンウェーブ', 'ついばむ', 'むしくい',

@@ -293,7 +293,7 @@ def _activate_ability(self: ActivePokemonManager,
             activated = opponent_mgr.add_rank(5, -1)
 
     if activated:
-        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, user.ability.name))
+        self.battle.logger.insert(-1, TurnLog(self.battle.turn, self.idx, user.ability.name))
         user.ability.observed = True  # 観測
         if "one_time" in user.ability.tags:
             user.ability.active = False

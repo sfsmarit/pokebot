@@ -116,6 +116,11 @@ def _advance_turn(self: TurnManager,
         if not any(self.breakpoint):
             self.process_turn_action(idx)
 
+            # だっしゅつボタン判定
+            if self.battle.pokemons[dfn].item.name == 'だっしゅつボタン' and \
+                    defender_mgr.activate_item():
+                self.breakpoint[not idx] = "ejectbutton"
+
         if self.battle.winner() is not None:  # 勝敗判定
             return
 

@@ -131,22 +131,22 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     # 発動する技の決定
     self.battle.poke_mgrs[idx].executed_move = move if self.move_succeeded[idx] else Move()
 
-    # こだわり固定
+    # こだわり固定化
     if self.battle.pokemons[idx].item.name[:4] == 'こだわり' or \
             self.battle.pokemons[idx].ability.name == 'ごりむちゅう':
         self.battle.poke_mgrs[idx].choice_locked = True
 
-    # 技の発動の成否判定
+    # 技の発動成否判定
     # 自爆技の判定も行う (本来はリベロ判定の後)
     self.move_succeeded[idx] &= self.can_execute_move(idx, move)
 
-    # リベロ判定
+    # へんげんじざい判定
     if self.battle.pokemons[idx].ability.name in ['へんげんじざい', 'リベロ'] and self.move_succeeded[idx]:
         attacker_mgr.activate_ability(move)
 
-    # 溜め技の発動処理
+    # ため技の発動処理
     if any(tag in move.tags for tag in ["charge", "hide"]):
-        # 溜めターン (0 or 1)
+        # ためターン (0 or 1)
         self.battle.poke_mgrs[idx].forced_turn = int(self.battle.poke_mgrs[idx].forced_turn == 0)
         # 行動不能判定
         if self.battle.poke_mgrs[idx].forced_turn and not self.charge_move(idx, move):
@@ -155,7 +155,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     # 隠れ状態の解除
     self.battle.poke_mgrs[idx].hidden = False
 
-    # HPコストの消費、勝敗判定
+    # HPコストの消費
     if PokeDB.get_move_effect_value(move, "cost") and \
             self.move_succeeded[idx] and \
             attacker_mgr.apply_move_recoil(move, 'cost') and \
@@ -198,11 +198,11 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
         if self.battle.winner() is not None:  # 勝敗判定
             return
 
-        # 技が反射されたら攻守を入れ替える
+        # 反射による攻守入れ替え
         if self._move_was_mirrored:
             idx, dfn = dfn, idx
 
-        # 技を無効化する特性の処理
+        # 無効化特性の処理
         if self._move_was_negated_by_ability:
             self.process_negating_ability(dfn)
 
@@ -215,42 +215,37 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
         if self.battle.pokemons[idx].hp * self.battle.pokemons[dfn].hp == 0:
             break
 
-    # 技の発動後の処理
+    # 記録
     self.battle.poke_mgrs[idx].active_turn += 1
     self.battle.logger.append(TurnLog(self.battle.turn, idx, f"技{'成功' if self.move_succeeded[idx] else '失敗'}"))
 
     # ステラ強化タイプの消費
     self.consume_stellar(idx, move)
 
-    # 反動で動けない技の反動を設定
+    # 反動による次ターンの行動不能を設定
     if self.move_succeeded[idx]:
         attacker_mgr.process_tagged_move(move, 'immovable')
 
     if self.damage_dealt[idx]:
-        # 攻撃側の特性発動
+        # 攻撃側の特性判定
         if self.battle.pokemons[idx].ability.name in \
                 ['じしんかじょう', 'しろのいななき', 'じんばいったい', 'くろのいななき', 'マジシャン']:
             attacker_mgr.activate_ability()
 
-        # 防御側の特性発動
+        # 防御側の特性判定
         if self.battle.pokemons[dfn].ability.name in ['へんしょく', 'ぎゃくじょう', 'いかりのこうら']:
             defender_mgr.activate_ability(move)
 
         self.battle.poke_mgrs[dfn].berserk_triggered = False
 
-        # 被弾時のアイテム発動
+        # 被弾アイテムの判定
         if self.battle.pokemons[dfn].hp and \
                 self.battle.pokemons[dfn].item.name in ['レッドカード', 'アッキのみ', 'タラプのみ']:
             defender_mgr.activate_item(move)
 
-        # 攻撃後のアイテム発動
+        # 反動アイテムの判定
         if self.battle.pokemons[idx].item.name in ['いのちのたま', 'かいがらのすず']:
             attacker_mgr.activate_item()
 
     # TODO ききかいひ・にげごし判定
     # TODO わるいてぐせ判定
-
-    # だっしゅつボタン判定
-    if self.battle.pokemons[dfn].item.name == 'だっしゅつボタン' and \
-            defender_mgr.activate_item():
-        self.breakpoint[not idx] = "ejectbutton"

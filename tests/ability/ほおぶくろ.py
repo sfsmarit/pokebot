@@ -2,8 +2,6 @@ from pokebot import Pokemon, Player
 
 
 def ほおぶくろ(display_log: bool = False) -> bool:
-    return False
-
     max_turn = 1
 
     names = [

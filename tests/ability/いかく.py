@@ -2,7 +2,7 @@ from pokebot import Pokemon, Player
 
 
 def いかく(display_log: bool = False) -> bool:
-    max_turn = 1
+    max_turn = 0
 
     names = [
         ["リザードン"],
