@@ -29,7 +29,8 @@ class Battle:
                  player2: Player,
                  n_selection: int = 3,
                  open_sheet: bool = False,
-                 seed: int | None = None):
+                 seed: int | None = None,
+                 force_trigger: bool = False):
         """
         _summary_
 
@@ -45,7 +46,10 @@ class Battle:
             Trueならオープンシート制とみなす, by default False
         seed : int | None, optional
             ゲーム内乱数のシード, by default None
+        force_trigger : bool, optional
+            Trueなら確率的事象を必ず発生させるテスト用フラグ, by default False
         """
+
         if seed is None:
             seed = int(time.time())
 
@@ -53,6 +57,7 @@ class Battle:
         self.n_selection: int = n_selection
         self.open_sheet: bool = open_sheet
         self.seed: int = seed
+        self.force_trigger: bool = force_trigger
 
         self.random: Random = Random(self.seed)
         self.logger: Logger = Logger()
@@ -276,7 +281,7 @@ class Battle:
                    move: Move | None = None,
                    terastal: bool = False) -> Command:
         """
-        引数の情報をコマンドに変換する
+        引数に対応したコマンドを返す
 
         Parameters
         ----------

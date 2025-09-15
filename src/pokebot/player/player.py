@@ -44,7 +44,8 @@ class Player:
              open_sheet: bool = False,
              seed: int | None = None,
              max_turn: int = 100,
-             mute: bool = False) -> Battle:
+             display_log: bool = True,
+             force_trigger: bool = False) -> Battle:
         """
         試合を行う
 
@@ -63,8 +64,10 @@ class Player:
         video_id : int, optional
             ビデオキャプチャのデバイスID
             BattleMode.OFFLINE/ONLINEでのみ使用, by default 0
-        mute : bool, optional
-            Falseならログを表示しない, by default False
+        display_log : bool, optional
+            Trueならログを表示する, by default True
+        force_trigger : bool, optional
+            Trueなら確率的事象を必ず発生させるテスト用フラグ, by default False
 
         Returns
         -------
@@ -76,7 +79,7 @@ class Player:
         if seed is None:
             seed = int(time.time())
 
-        return _game(self, opponent, n_selection, open_sheet, seed, max_turn, mute)
+        return _game(self, opponent, n_selection, open_sheet, seed, max_turn, display_log, force_trigger)
 
     def save_team(self, filename: str):
         with open(filename, 'w', encoding='utf-8') as fout:
@@ -145,7 +148,7 @@ class Player:
             players[i].rating += 32 * ((won+i) % 2 - EAs[i])
 
     @classmethod
-    def advance_turn(cls, battle: Battle, mute: bool):
+    def advance_turn(cls, battle: Battle, display_log: bool):
         """
         盤面を1ターン進める
 
@@ -158,17 +161,17 @@ class Player:
         battle.advance_turn()
 
         # ログ表示
-        if not mute:
+        if display_log:
             print(f"ターン{battle.turn}")
             for idx in battle.action_order:
                 print(
                     f"\tPlayer {int(idx)}",
-                    battle.logger.get_turn_summary(battle.turn, idx),
-                    battle.logger.get_damage_summary(battle.turn, idx),
+                    "[" + ", ".join(battle.logger.get_turn_log(battle.turn, idx)) + "]",
+                    "{" + ", ".join(battle.logger.get_damage_summary(battle.turn, idx)) + "}",
                 )
 
     @classmethod
-    def replay(cls, filepath: str, mute: bool = False) -> Battle:
+    def replay(cls, filepath: str, display_log: bool = True) -> Battle:
         """
         ログファイルの対戦をリプレイする
 
@@ -184,7 +187,7 @@ class Player:
         Battle
             リプレイ後の盤面
         """
-        return _replay(cls, filepath, mute)
+        return _replay(cls, filepath, display_log)
 
     def estimate_opponent_stats(self, battle: Battle):
         """相手が選出したポケモンのステータスとアイテムを推定値に置き換える

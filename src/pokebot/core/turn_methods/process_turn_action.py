@@ -228,8 +228,8 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
 
     if self.damage_dealt[idx]:
         # 攻撃側の特性発動
-        if self.battle.pokemons[idx].ability.name in ['じしんかじょう', 'しろのいななき', 'じんばいったい',
-                                                      'くろのいななき', 'マジシャン']:
+        if self.battle.pokemons[idx].ability.name in \
+                ['じしんかじょう', 'しろのいななき', 'じんばいったい', 'くろのいななき', 'マジシャン']:
             attacker_mgr.activate_ability()
 
         # 防御側の特性発動

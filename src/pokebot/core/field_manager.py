@@ -215,14 +215,14 @@ class FieldManager:
             変更できたらTrue
         """
         if isinstance(field, GlobalField):
-            count = self.count[field]
+            current_count = self.count[field]
         else:
-            count = self.count[field][idx]
+            current_count = self.count[field][idx]
 
-        if (v < 0 and count == 0) or (v > 0 and count == field.max_count):
+        if (v < 0 and current_count == 0) or (v > 0 and current_count == field.max_count):
             return False
 
-        self.set_field(field, idx, max(0, min(field.max_count, v + v)))
+        self._set_count(field, idx, max(0, min(field.max_count, current_count + v)))
         return True
 
     def weather(self, perspective: PlayerIndex | int | None = None) -> Weather:

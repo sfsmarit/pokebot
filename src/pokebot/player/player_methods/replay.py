@@ -17,9 +17,7 @@ def find_command_log(log: dict, turn: int) -> dict:
     return {}
 
 
-def _replay(cls: type[Player],
-            filepath: str,
-            mute: bool = False) -> Battle:
+def _replay(cls: type[Player], filepath: str, display_log: bool = True) -> Battle:
 
     with open(filepath, encoding='utf-8') as fin:
         log = json.load(fin)
@@ -35,13 +33,13 @@ def _replay(cls: type[Player],
             for i, d in enumerate(log[f"teams"][idx]):
                 p = Pokemon()
                 p.load(d)
-                if not mute:
+                if display_log:
                     print(f"Player_{idx} #{i} {p}\n")
                 player.team.append(p)
 
             players.append(player)
 
-        if not mute:
+        if display_log:
             print('-'*50)
 
         # Battleを生成
@@ -67,7 +65,8 @@ def _replay(cls: type[Player],
             battle.advance_turn(commands=commands)
 
             # ログ表示
-            if not mute:
+            if display_log:
                 print(f"ターン{battle.turn}")
                 for idx in battle.action_order:
-                    print(f"\tPlayer {int(idx)}", battle.logger.get_turn_summary(battle.turn, idx))
+                    print(f"\tPlayer {int(idx)}",
+                          ", ".join(battle.logger.get_turn_log(battle.turn, idx)))

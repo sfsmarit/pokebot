@@ -42,11 +42,18 @@ def path_str(*path_parts: str) -> str:
     return str(resources.files("pokebot").joinpath(*path_parts))
 
 
-def download(url: str, dst) -> None:
-    print(f"Downloading {url}")
-    res = requests.get(url)
-    with open(dst, 'w', encoding='utf-8') as fout:
-        fout.write(res.text)
+def download(url: str, dst) -> bool:
+    print(f"Downloading {url} ... ", end="")
+    try:
+        res = requests.get(url)
+        with open(dst, 'w', encoding='utf-8') as fout:
+            fout.write(res.text)
+        print(f"Saved as {dst}")
+        return True
+    except Exception as e:
+        # print(e)
+        print("Failed")
+        return False
 
 
 def current_season() -> int:
