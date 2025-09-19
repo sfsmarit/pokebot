@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..pokemon_manager import ActivePokemonManager
+    from ..active_pokemon_manager import ActivePokemonManager
 
 from pokebot.common.enums import Ailment, Condition, MoveCategory, \
     BoostSource, SideField, Weather, Terrain
@@ -13,7 +13,8 @@ from pokebot.core.move_utils import effective_move_type
 
 
 def _activate_ability(self: ActivePokemonManager,
-                      move: Move | None) -> bool:
+                      move: Move | None,
+                      mode: str | None) -> bool:
     opp = int(not self.idx)
     user = self.pokemon
     opponent = self.opponent
@@ -45,10 +46,14 @@ def _activate_ability(self: ActivePokemonManager,
         case 'ゆきふらし':
             activated = self.battle.field_mgr.set_weather(Weather.SNOW, self.idx)
         case 'かんそうはだ':
-            weather = self.battle.field_mgr.weather(self.idx)
-            sign = {Weather.SUNNY: -1, Weather.RAINY: +1}
-            activated = weather in [Weather.SUNNY, Weather.RAINY] and \
-                self.add_hp(ratio=sign[weather]/8)
+            match mode:
+                case "nagating":
+                    self.add_hp(ratio=0.25)
+                    activated = True
+                case _:
+                    weather = self.battle.field_mgr.weather(self.idx)
+                    sign = {Weather.SUNNY: -1, Weather.RAINY: +1}
+                    activated = weather in [Weather.SUNNY, Weather.RAINY] and self.add_hp(ratio=sign[weather]/8)
         case 'あくしゅう':
             activated = self.battle.force_trigger or self.battle.random.random() < 0.1
             if activated:
@@ -83,7 +88,14 @@ def _activate_ability(self: ActivePokemonManager,
         case 'かそく':
             activated = self.active_turn and self.add_rank(5, +1)
         case 'かぜのり':
-            activated = self.battle.field_mgr.count[SideField.OIKAZE][self.idx] and self.add_rank(1, +1)
+            match mode:
+                case "rank":
+                    activated = self.add_rank(1, +1)
+                case "forced":
+                    activated = True
+                    self.add_rank(1, +1)
+                case _:
+                    activated = self.battle.field_mgr.count[SideField.OIKAZE][self.idx] and self.add_rank(1, +1)
         case 'かるわざ':
             user.ability.count += 1
             activated = True
@@ -227,9 +239,7 @@ def _activate_ability(self: ActivePokemonManager,
                 effective_move_type(self.battle, opp, move) in ['あく', 'ゴースト', 'むし'] and \
                 self.add_rank(5, +1)
         case 'ふうりょくでんき':
-            activated = move and \
-                "wind" in move.tags and \
-                self.set_condition(Condition.CHARGE, 1)
+            activated = move and "wind" in move.tags and self.set_condition(Condition.CHARGE, 1)
         case 'ふくつのこころ':
             activated = self.add_rank(5, +1)
         case 'ふくつのたて':

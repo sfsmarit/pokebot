@@ -182,11 +182,9 @@ def _process_status_move(self: TurnManager,
             if self.move_succeeded[atk]:
                 match attacker.ability.name:
                     case 'かぜのり':
-                        if attacker_mgr.add_rank(1, +1):
-                            battle.logger.insert(-1, TurnLog(battle.turn, atk, attacker.ability.name))
+                        attacker_mgr.activate_ability(mode="rank")
                     case 'ふうりょくでんき':
-                        if attacker_mgr.set_condition(Condition.CHARGE):
-                            battle.logger.insert(-1, TurnLog(battle.turn, atk, attacker.ability.name))
+                        attacker_mgr.activate_ability(move)
         case 'オーロラベール':
             self.move_succeeded[atk] = battle.field_mgr.weather() == Weather.SNOW
             if self.move_succeeded[atk]:
@@ -441,7 +439,7 @@ def _process_status_move(self: TurnManager,
             self.move_succeeded[atk] = attacker.item.name[-2:] == 'のみ'
             if self.move_succeeded[atk]:
                 if not attacker_mgr.activate_item():
-                    attacker.item.consume()  # 強制消費
+                    attacker_mgr.consume_item()  # 強制消費
                 attacker_mgr.add_rank(2, +2)
         case 'ほたるび':
             self.move_succeeded[atk] = any(attacker_mgr.add_rank(3, +3))

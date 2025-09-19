@@ -20,7 +20,7 @@ def さめはだ(display_log: bool = False) -> bool:
     ]
 
     moves = [
-        ["ひっかく"],
+        ["はねる"],
         ["ひっかく"],
     ]
 

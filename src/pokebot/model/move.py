@@ -47,7 +47,7 @@ class Move:
         return new
 
     def __str__(self):
-        return f"{self.name} {self.pp}/{self._org_pp}"
+        return self.name
 
     def dump(self) -> dict:
         d = deepcopy(vars(self))

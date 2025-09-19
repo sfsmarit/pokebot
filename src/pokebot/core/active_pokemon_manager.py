@@ -163,9 +163,9 @@ class ActivePokemonManager:
         else:
             return 2/(2-self.rank[stat_idx])
 
-    def activate_ability(self, move: Move | None = None) -> bool:
+    def activate_ability(self, move: Move | None = None, mode: str | None = None) -> bool:
         """特性を発動する"""
-        return _activate_ability(self, move)
+        return _activate_ability(self, move, mode)
 
     def activate_item(self, move: Move | None = None) -> bool:
         """アイテムを発動する"""
@@ -336,6 +336,21 @@ class ActivePokemonManager:
             values = [0]*8
             values[stat_idx] = value
         return _add_rank(self, values, by_opponent, chain)
+
+    def lose_item(self) -> None:
+        self.pokemon.item.consume()
+        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.item.name_lost}消費"))
+
+        # かるわざ発動
+        if self.pokemon.ability.name == 'かるわざ' and not self.pokemon.item.active:
+            self.activate_ability()
+
+    def consume_item(self) -> None:
+        self.lose_item()
+
+        # きのみ関連の特性の発動
+        if self.pokemon.item.name_lost[-2:] == 'のみ' and "berry" in self.pokemon.ability.tags:
+            self.activate_ability()
 
     def defending_ability(self, move: Move | None = None) -> Ability:
         """

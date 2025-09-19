@@ -113,7 +113,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
         if self.battle.poke_mgrs[idx].forced_turn == 0:
             move.add_pp(-2 if self.battle.pokemons[dfn].ability.name == 'プレッシャー' else -1)
             move.observed = True  # 観測
-            self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{move} PP {move.pp}"))
+            self.battle.logger.append(TurnLog(self.battle.turn, idx, f"{move} {move.pp}/{move._org_pp}"))
 
     # ねごとによる技の変更
     if move.name == 'ねごと':

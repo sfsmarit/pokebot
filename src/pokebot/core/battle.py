@@ -15,7 +15,7 @@ from pokebot.model import Pokemon, Move
 from pokebot.logger import Logger, DamageLog
 
 from .turn_manager import TurnManager
-from .pokemon_manager import ActivePokemonManager
+from .active_pokemon_manager import ActivePokemonManager
 from .field_manager import FieldManager
 from .damage_manager import DamageManager
 from .battle_methods.winner import _winner

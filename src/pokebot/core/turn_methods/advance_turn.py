@@ -3,9 +3,23 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..turn_manager import TurnManager
 
-from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Phase
 from pokebot.logger import TurnLog, CommandLog
+
+
+def check_ejectpack(self: TurnManager, breakpoint: str):
+    idxes = [i for i in self.speed_order if
+             self.battle.pokemons[i].item.name == "だっしゅつパック" and
+             self.battle.poke_mgrs[i].rank_dropped and
+             self.battle.switchable_indexes(i)]
+    if not idxes:
+        return
+    # 先手のみ交代
+    self.breakpoint[idxes[0]] = breakpoint
+    self.battle.pokemons[idxes[0]].item.consume()
+    # 発動フラグを初期化
+    for idx in idxes:
+        self.battle.poke_mgrs[idx].rank_dropped = False
 
 
 def _advance_turn(self: TurnManager,
@@ -27,12 +41,7 @@ def _advance_turn(self: TurnManager,
             self.land(self.speed_order)
 
             # だっしゅつパック判定
-            switch_indexes = [i for i in self.speed_order if self.is_ejectpack_triggered(i)]
-            if switch_indexes:
-                self.breakpoint[switch_indexes[0]] = "ejectpack_turn0"  # 先手のみ交代
-                self.battle.pokemons[switch_indexes[0]].item.consume()
-                for idx in switch_indexes:
-                    self.battle.poke_mgrs[idx].rank_dropped = False  # フラグをリセット
+            check_ejectpack(self, "ejectpack_turn0")
 
         # だっしゅつパックによる交代
         if (s := "ejectpack_turn0") in self.breakpoint:
@@ -82,11 +91,7 @@ def _advance_turn(self: TurnManager,
                 self.switch_pokemon(idx, command=self.command[idx])
 
                 # だっしゅつパック判定
-                if (idxes := [i for i in self.speed_order if self.is_ejectpack_triggered(i)]):
-                    self.breakpoint[idxes[0]] = f"ejectpack_switch_{idx}"
-                    self.battle.pokemons[idxes[0]].item.consume()
-                    for i in idxes:
-                        self.battle.poke_mgrs[i].rank_dropped = False
+                check_ejectpack(self, f"ejectpack_switch_{idx}")
 
         # だっしゅつパックによる交代
         if (s := f"ejectpack_switch_{idx}") in self.breakpoint:
@@ -175,11 +180,7 @@ def _advance_turn(self: TurnManager,
         if not any(self.breakpoint):
             if not ejectbutton_triggered and not Uturned:
                 # だっしゅつパック判定 (わざ発動後)
-                if (idxes := [i for i in self.speed_order if self.is_ejectpack_triggered(i)]):
-                    self.breakpoint[idxes[0]] = f"ejectpack_move_{idx}"
-                    self.battle.pokemons[idxes[0]].item.consume()
-                    for i in idxes:
-                        self.battle.poke_mgrs[i].rank_dropped = False
+                check_ejectpack(self, f"ejectpack_move_{idx}")
 
         # だっしゅつパックによる交代
         if (s := f"ejectpack_move_{idx}") in self.breakpoint:
@@ -213,11 +214,7 @@ def _advance_turn(self: TurnManager,
             return
 
         # だっしゅつパック判定
-        if (idxes := [i for i in self.speed_order if self.is_ejectpack_triggered(i)]):
-            self.breakpoint[idxes[0]] = 'ejectpack_end'
-            self.battle.pokemons[idxes[0]].item.consume()
-            for i in idxes:
-                self.battle.poke_mgrs[i].rank_dropped = False
+        check_ejectpack(self, 'ejectpack_end')
 
     # だっしゅつパックによる交代
     if (s := 'ejectpack_end') in self.breakpoint:

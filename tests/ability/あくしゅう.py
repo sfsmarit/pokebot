@@ -21,7 +21,7 @@ def あくしゅう(display_log: bool = False) -> bool:
 
     moves = [
         ["ひっかく"],
-        ["ひっかく"],
+        ["はねる"],
     ]
 
     # 2人のプレイヤーを生成
@@ -47,7 +47,7 @@ def あくしゅう(display_log: bool = False) -> bool:
     # N匹を選出して対戦
     battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, force_trigger=True)
 
-    return "ひるみ" in "".join(battle.logger.get_turn_log(turn=1, idx=1))
+    return "ひるみ" in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=1))
 
 
 if __name__ == "__main__":
