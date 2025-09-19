@@ -73,7 +73,7 @@ def _activate_ability(self: ActivePokemonManager,
         case 'うるおいボディ':
             activated = self.battle.field_mgr.weather(self.idx) == Weather.RAINY and self.set_ailment(Ailment.NONE)
         case 'だっぴ':
-            activated = self.battle.random.random() < 0.3 and self.set_ailment(Ailment.NONE)
+            activated = (self.battle.force_trigger or self.battle.random.random() < 0.3) and self.set_ailment(Ailment.NONE)
         case 'エレキメイカー' | 'ハドロンエンジン':
             activated = self.battle.field_mgr.set_terrain(Terrain.ELEC, self.idx)
         case 'グラスメイカー' | 'こぼれダネ':

@@ -44,7 +44,7 @@ def _add_rank(self: ActivePokemonManager,
                     self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.ability}により無効"))
                     continue
                 case 'フラワーベール':
-                    if self.battle.field_mgr.weather(self.idx) == Weather.SUNNY:
+                    if "くさ" in self.types:
                         self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.ability}により無効"))
                         continue
                 case 'かいりきバサミ':
