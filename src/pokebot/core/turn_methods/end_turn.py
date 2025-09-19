@@ -223,7 +223,7 @@ def _end_turn(self: TurnManager):
                 if battle.winner() is not None:
                     return
 
-    # 場の効果のカウント消費
+    # 場のカウント消費
     for idx in self.speed_order:
         for cond in [SideField.REFLECTOR, SideField.LIGHT_WALL, SideField.SHINPI,
                      SideField.WHITE_MIST, SideField.OIKAZE]:

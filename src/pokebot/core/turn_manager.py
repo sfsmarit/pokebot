@@ -137,10 +137,9 @@ class TurnManager:
         defender = self.battle.pokemons[dfn]
         def_mgr = self.battle.poke_mgrs[dfn]
         if defender.ability.name == 'かんそうはだ':
-            def_mgr.add_hp(ratio=0.25)
+            def_mgr.activate_ability(mode="negating")
         elif defender.ability.name == 'かぜのり':
-            def_mgr.add_rank(1, +1)
-            self.battle.logger.insert(-1, TurnLog(self.battle.turn, dfn, defender.ability.name))
+            def_mgr.activate_ability(mode="forced")
         else:
             def_mgr.activate_ability()
 

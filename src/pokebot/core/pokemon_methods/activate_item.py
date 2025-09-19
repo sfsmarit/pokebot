@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..pokemon_manager import ActivePokemonManager
+    from ..active_pokemon_manager import ActivePokemonManager
 
 from pokebot.common.enums import Ailment, MoveCategory, Condition, \
     BoostSource, GlobalField
@@ -120,7 +120,6 @@ def _activate_item(self: ActivePokemonManager,
                 self.boost_source = BoostSource.ITEM
                 self.battle.logger.append(TurnLog(self.battle.turn, self.idx,
                                                   f"{STAT_CODES[self.boosted_idx]}上昇"))  # type: ignore
-
         case 'メンタルハーブ':
             for cond in [Condition.MEROMERO, Condition.ENCORE,
                          Condition.KANASHIBARI, Condition.CHOHATSU, Condition.HEAL_BLOCK]:
@@ -218,17 +217,9 @@ def _activate_item(self: ActivePokemonManager,
     if not activated:
         return False
 
-    # きのみ関連の特性の発動
-    if self.pokemon.item.name[-2:] == 'のみ' and \
-            "berry" in self.pokemon.ability.tags:
-        self.activate_ability()
-
     # アイテム消費
     if self.pokemon.item.consumable:
-        self.pokemon.item.consume()
-        battle.logger.append(TurnLog(battle.turn, self.idx, f"{self.pokemon.item.name_lost}消費"))
-        if self.pokemon.ability.name == 'かるわざ':
-            self.activate_ability()
+        self.consume_item()
     else:
         battle.logger.append(TurnLog(battle.turn, self.idx, f"{self.pokemon.item.name}発動"))
         self.pokemon.item.observed = True  # 観測

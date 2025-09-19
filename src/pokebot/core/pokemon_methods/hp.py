@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..pokemon_manager import ActivePokemonManager
+    from ..active_pokemon_manager import ActivePokemonManager
 
 from pokebot.common.enums import Condition
 from pokebot.common.constants import HEAL_BERRIES

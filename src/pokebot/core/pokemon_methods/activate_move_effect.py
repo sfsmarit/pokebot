@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..pokemon_manager import ActivePokemonManager
+    from ..active_pokemon_manager import ActivePokemonManager
 
 from pokebot.common.enums import Ailment, Condition, SideField, Terrain
 import pokebot.common.utils as ut
@@ -125,7 +125,7 @@ def _activate_move_effect(self: ActivePokemonManager,
                 return True
         case 'やきつくす':
             if defender.item.name[-2:] == 'のみ' or defender.item.name[-4:] == 'ジュエル':
-                defender.item.consume()
+                defender_mgr.lose_item()
                 battle.logger.append(TurnLog(battle.turn, self.idx, f"追加効果 {defender.item.name_lost}消失"))
                 return True
 

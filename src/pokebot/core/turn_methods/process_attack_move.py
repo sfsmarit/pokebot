@@ -64,11 +64,6 @@ def _process_attack_move(self: TurnManager,
     # 壁破壊
     attacker_mgr.process_tagged_move(move, 'wall_break')
 
-    # ダメージ発生時に発動したアイテムの消費
-    for i, poke in enumerate(self.battle.pokemons):
-        if self.battle.damage_mgr.log.item_consumed[i]:
-            poke.item.consume()
-
     # みがわり被弾判定
     self._hit_substitute = defender_mgr.sub_hp > 0 and \
         attacker.ability.name != 'すりぬけ' and \
@@ -104,8 +99,14 @@ def _process_attack_move(self: TurnManager,
         # 被弾回数を記録
         defender_mgr.hits_taken += 1
 
-        if self.battle.winner() is not None:
-            return
+    # ダメージ発生時に発動したアイテムの消費
+    for i, poke_mgr in enumerate(self.battle.poke_mgrs):
+        if self.battle.damage_mgr.log.item_consumed[i]:
+            poke_mgr.consume_item()
+
+    # 勝敗判定
+    if self.battle.winner() is not None:
+        return
 
     # 追加効果の判定
     if move.name in PokeDB.move_effect:
@@ -146,7 +147,7 @@ def _process_attack_move(self: TurnManager,
     if (r_drain := PokeDB.get_move_effect_value(move, "drain")) and \
             self.damage_dealt[atk] and \
             attacker_mgr.add_hp(attacker_mgr.hp_drain_amount(int(r_drain * self.damage_dealt[atk]))):
-        self.battle.logger.insert(-1, TurnLog(self.battle.turn, atk, 'HP吸収'))
+        self.battle.logger.insert(-1, TurnLog(self.battle.turn, atk, "吸収"))
 
     if self._hit_substitute:
         # みがわりを攻撃したら与ダメージ0を記録

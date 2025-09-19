@@ -20,7 +20,7 @@ def がんじょう(display_log: bool = False) -> bool:
     ]
 
     moves = [
-        ["なきごえ"],
+        ["はねる"],
         ["しおふき"],
     ]
 
