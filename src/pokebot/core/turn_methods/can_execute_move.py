@@ -37,14 +37,13 @@ def _can_execute_move(self: TurnManager,
 
     match move.name:
         case 'ねごと':
-            if attacker.ailment != Ailment.SLP or \
-                    not attacker.get_negoto_moves():
+            if not (attacker.is_sleeping() and attacker.get_negoto_moves()):
                 return False
         case 'アイアンローラー':
             if not self.battle.field_mgr.terrain():
                 return False
         case 'いびき':
-            if attacker.ailment != Ailment.SLP:
+            if not attacker.is_sleeping():
                 return False
         case 'じんらい' | 'ふいうち':
             if idx != self.battle.turn_mgr.first_player_idx or \

@@ -12,6 +12,7 @@ from pokebot.model import Move
 def hit_probability(battle: Battle,
                     atk: PlayerIndex | int,
                     move: Move) -> float:
+
     dfn = int(not atk)
     attacker_mgr = battle.poke_mgrs[atk]
     defender_mgr = battle.poke_mgrs[dfn]
@@ -44,7 +45,10 @@ def hit_probability(battle: Battle,
 
     # ぜったいれいど
     if "one_ko" in move.tags:
-        return 0.2 if move.name == 'ぜったいれいど' and 'こおり' not in attacker_mgr.types else 0.3
+        if move.name == 'ぜったいれいど' and 'こおり' not in attacker_mgr.types:
+            return 0.2
+        else:
+            return 0.3
 
     # 技の命中率
     prob = move.hit

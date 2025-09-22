@@ -102,6 +102,7 @@ class FieldManager:
             count = 0
         elif count is None:
             count = 8 if self.battle.pokemons[idx].item.name == WEATHER_STONE[weather] else 5
+            self.battle.logger.append(TurnLog(self.battle.turn, idx, weather.value[0]))
 
         self._set_count(GlobalField.WEATHER, idx, count)
 
@@ -143,6 +144,7 @@ class FieldManager:
             count = 0
         if count is None:
             count = 8 if self.battle.pokemons[idx].item.name == "グランドコート" else 5
+            self.battle.logger.append(TurnLog(self.battle.turn, idx, terrain.value[0]))
 
         self._set_count(GlobalField.TERRAIN, idx, count)
 

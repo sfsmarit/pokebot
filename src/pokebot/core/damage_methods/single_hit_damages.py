@@ -58,7 +58,7 @@ def _single_hit_damages(self: DamageManager,
 
     r_rank = self.battle.poke_mgrs[atk_idx2].rank_modifier(stat_idx)
 
-    if defender_mgr.defending_ability(move) == 'てんねん':
+    if defender_mgr.defending_ability(move).name == 'てんねん':
         if r_rank > 1:
             r_rank = 1
             self.log.notes.append('てんねん AC上昇無視')
@@ -87,7 +87,7 @@ def _single_hit_damages(self: DamageManager,
     else:
         r_rank = defender_mgr.rank_modifier(stat_idx)
 
-    if defender_mgr.defending_ability(move) == 'てんねん':
+    if defender_mgr.defending_ability(move).name == 'てんねん':
         if r_rank > 1:
             r_rank = 1
             self.log.notes.append('てんねん BD上昇無視')

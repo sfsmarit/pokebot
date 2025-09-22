@@ -9,6 +9,7 @@ from pokebot.common.types import PlayerIndex
 import pokebot.common.utils as ut
 from pokebot.model import Move
 from pokebot.common import PokeDB
+from pokebot.common.enums import Condition
 from pokebot.logger.damage_log import DamageLog
 
 from pokebot.core.move_utils import effective_move_category, effective_move_type
@@ -30,12 +31,6 @@ def _power_modifier(self: DamageManager,
     move_category = effective_move_category(self.battle, atk, move)
 
     r = 4096
-
-    # 攻撃側
-    if 'オーガポン(' in attacker.name:
-        r = ut.round_half_up(r*4915/4096)
-        if log:
-            log.notes.append('おめん x1.2')
 
     # 威力変動技
     r0 = r
@@ -236,18 +231,6 @@ def _power_modifier(self: DamageManager,
 
     r0 = r
     match attacker.item.name:
-        case 'しらたま' | 'だいしらたま':
-            if 'パルキア' in attacker.name and move_type in ['みず', 'ドラゴン']:
-                r = ut.round_half_up(r*4915/4096)
-        case 'こころのしずく':
-            if attacker.name in ['ラティオス', 'ラティアス'] and move_type in ['エスパー', 'ドラゴン']:
-                r = ut.round_half_up(r*4915/4096)
-        case 'こんごうだま' | 'だいこんごうだま':
-            if 'ディアルガ' in attacker.name and move_type in ['はがね', 'ドラゴン']:
-                r = ut.round_half_up(r*4915/4096)
-        case 'はっきんだま' | 'だいはっきんだま':
-            if 'ギラティナ' in attacker.name and move_type in ['ゴースト', 'ドラゴン']:
-                r = ut.round_half_up(r*4915/4096)
         case 'ちからのハチマキ':
             if move_category == MoveCategory.PHY:
                 r = ut.round_half_up(r*4505/4096)
@@ -262,6 +245,21 @@ def _power_modifier(self: DamageManager,
         case 'ものしりメガネ':
             if move_category == MoveCategory.SPE:
                 r = ut.round_half_up(r*4505/4096)
+        case 'しらたま' | 'だいしらたま':
+            if 'パルキア' in attacker.name and move_type in ['みず', 'ドラゴン']:
+                r = ut.round_half_up(r*4915/4096)
+        case 'こころのしずく':
+            if attacker.name in ['ラティオス', 'ラティアス'] and move_type in ['エスパー', 'ドラゴン']:
+                r = ut.round_half_up(r*4915/4096)
+        case 'こんごうだま' | 'だいこんごうだま':
+            if 'ディアルガ' in attacker.name and move_type in ['はがね', 'ドラゴン']:
+                r = ut.round_half_up(r*4915/4096)
+        case 'はっきんだま' | 'だいはっきんだま':
+            if 'ギラティナ' in attacker.name and move_type in ['ゴースト', 'ドラゴン']:
+                r = ut.round_half_up(r*4915/4096)
+        case "かまどのめん" | "いどのめん" | "いしずえのめん":
+            if 'オーガポン' in attacker.name:
+                r = ut.round_half_up(r*4915/4096)
         case _:
             if move_type == attacker.item.buff_type:
                 r = ut.round_half_up(r*4915/4096)
@@ -306,6 +304,12 @@ def _power_modifier(self: DamageManager,
 
     if r != r0 and log:
         log.notes.append(f"フィールド x{r/r0:.1f}")
+
+    # じゅうでん
+    if attacker_mgr.count[Condition.CHARGE] and move_type == "でんき":
+        r *= 2
+        if log:
+            log.notes.append(f"{Condition.CHARGE.value[0]} x2.0")
 
     # 防御側の特性
     r0 = r

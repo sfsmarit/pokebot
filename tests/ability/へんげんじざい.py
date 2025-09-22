@@ -52,7 +52,7 @@ def へんげんじざい(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, force_trigger=True)
+    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
 
     return abilities[0][0] in battle.logger.get_turn_log(turn=battle.turn, idx=0)
 

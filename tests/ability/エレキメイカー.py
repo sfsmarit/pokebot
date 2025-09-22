@@ -2,6 +2,23 @@ from pokebot import Pokemon, Player
 
 
 def エレキメイカー(display_log: bool = False) -> bool:
+    abilities = [
+        "エレキメイカー",
+        "グラスメイカー",
+        "サイコメイカー",
+        "ミストメイカー",
+    ]
+    result = True
+    for ability in abilities:
+        single_test_result = test(ability, display_log)
+        if display_log:
+            print(f"{ability}\t{single_test_result}")
+        result &= single_test_result
+
+    return result
+
+
+def test(ability: str, display_log: bool = False) -> bool:
     max_turn = 0
 
     names = [
@@ -10,7 +27,7 @@ def エレキメイカー(display_log: bool = False) -> bool:
     ]
 
     abilities = [
-        ["エレキメイカー"],
+        [ability],
         [""],
     ]
 
@@ -38,7 +55,7 @@ def エレキメイカー(display_log: bool = False) -> bool:
             pl.team[-1].add_move(moves[i][j])
 
     # パーティを表示
-    if display_log:
+    if False:
         for i, pl in enumerate([player, opponent]):
             for j, p in enumerate(pl.team):
                 print(f"Player{i}   #{j} {p}\n")

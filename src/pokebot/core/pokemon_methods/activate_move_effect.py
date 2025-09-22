@@ -114,7 +114,7 @@ def _activate_move_effect(self: ActivePokemonManager,
                 battle.logger.append(TurnLog(battle.turn, self.idx, f"追加効果 {attacker.item}奪取"))
                 return True
         case 'はたきおとす':
-            if defender.item.name:
+            if defender.item.name and defender_mgr.is_item_removable():
                 defender.item.active = False
                 battle.logger.append(TurnLog(battle.turn, self.idx, f"追加効果 {defender.item.name_lost}消失"))
                 return True
@@ -152,7 +152,7 @@ def _activate_move_effect(self: ActivePokemonManager,
                 battle.logger.insert(-1, TurnLog(battle.turn, self.idx, '追加効果'))
                 return True
         case 'ニードルガード':
-            if self.add_hp(ratio=-0.125):
+            if defender_mgr.add_hp(ratio=-0.125):
                 battle.logger.insert(-1, TurnLog(battle.turn, self.idx, '追加効果'))
                 return True
         case 'がんせきアックス':

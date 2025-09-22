@@ -18,7 +18,6 @@ def _process_special_damage(self: TurnManager,
     dfn = int(not atk)
     attacker = battle.pokemons[atk]
     defender = battle.pokemons[dfn]
-    attacker_mgr = battle.poke_mgrs[atk]
     defender_mgr = battle.poke_mgrs[dfn]
 
     # ログ生成
@@ -29,10 +28,6 @@ def _process_special_damage(self: TurnManager,
         return False
 
     match move.name:
-        case 'ぜったいれいど' | 'じわれ' | 'つのドリル' | 'ハサミギロチン':
-            if defender_mgr.defending_ability(move) != 'がんじょう' or \
-                    not (move.name == 'ぜったいれいど' and 'こおり' in defender_mgr.types):
-                self.damage_dealt[atk] = defender.hp
         case 'いかりのまえば' | 'カタストロフィ':
             self.damage_dealt[atk] = int(defender.hp/2)
         case 'カウンター' | 'ミラーコート':
@@ -49,6 +44,11 @@ def _process_special_damage(self: TurnManager,
             battle.logger.append(TurnLog(battle.turn, atk, f"いのちがけ {-self.damage_dealt[atk]}"))
         case 'がむしゃら':
             self.damage_dealt[atk] = max(0, defender.hp - attacker.hp)
+        case _:
+            if "one_ko" in move.tags and \
+                    defender_mgr.defending_ability(move).name != 'がんじょう' and \
+                    not (move.name == 'ぜったいれいど' and 'こおり' in defender_mgr.types):
+                self.damage_dealt[atk] = defender.hp
 
 
 def _modify_damage(self: TurnManager, atk: PlayerIndex | int):

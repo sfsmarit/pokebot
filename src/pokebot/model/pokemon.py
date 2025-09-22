@@ -409,7 +409,10 @@ class Pokemon:
         else:
             self.speed_range[1] = min(self.speed_range[1], speed)
 
-    def get_negoto_moves(self):
+    def is_sleeping(self) -> bool:
+        return self.ailment == Ailment.SLP or self.ability.name == "ぜったいねむり"
+
+    def get_negoto_moves(self) -> list[Move]:
         excluded_moves = PokeDB.move_tag['non_negoto'] + PokeDB.move_tag['charge']
         return [move for move in self.moves if move.name not in excluded_moves]
 

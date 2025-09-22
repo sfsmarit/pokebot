@@ -71,11 +71,11 @@ def _set_ailment(self: ActivePokemonManager,
         case Ailment.BRN:
             if 'ほのお' in self.types:
                 return False
-            if dfn_ability in ['すいほう', 'ねつこうかん', 'みずのベール']:
+            if dfn_ability.name in ['すいほう', 'ねつこうかん', 'みずのベール']:
                 battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
         case Ailment.SLP:
-            if dfn_ability in ['スイートベール', 'やるき', 'ふみん']:
+            if dfn_ability.name in ['スイートベール', 'やるき', 'ふみん']:
                 battle.logger.append(TurnLog(battle.turn, self.idx, dfn_ability.name))
                 return False
             if battle.field_mgr.terrain(self.idx) == Terrain.ELEC:
@@ -98,7 +98,7 @@ def _set_ailment(self: ActivePokemonManager,
             self.set_condition(Condition.BAD_POISON, int(bad_poison))
             if self.opponent.ability.name == 'どくくぐつ' and \
                     self.set_condition(Condition.CONFUSION, battle.random.randint(2, 5)):
-                battle.logger.insert(-1, TurnLog(battle.turn, self.idx, self.opponent.ability.name))
+                battle.logger.insert(-1, TurnLog(battle.turn, opp, self.opponent.ability.name))
         case Ailment.SLP:
             # ねむりターン設定
             if move.name == 'ねむる':

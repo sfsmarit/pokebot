@@ -30,7 +30,7 @@ class Battle:
                  n_selection: int = 3,
                  open_sheet: bool = False,
                  seed: int | None = None,
-                 force_trigger: bool = False):
+                 is_test: bool = False):
         """
         _summary_
 
@@ -46,7 +46,7 @@ class Battle:
             Trueならオープンシート制とみなす, by default False
         seed : int | None, optional
             ゲーム内乱数のシード, by default None
-        force_trigger : bool, optional
+        is_test : bool, optional
             Trueなら確率的事象を必ず発生させるテスト用フラグ, by default False
         """
 
@@ -57,7 +57,7 @@ class Battle:
         self.n_selection: int = n_selection
         self.open_sheet: bool = open_sheet
         self.seed: int = seed
-        self.force_trigger: bool = force_trigger
+        self.is_test: bool = is_test
 
         self.random: Random = Random(self.seed)
         self.logger: Logger = Logger()

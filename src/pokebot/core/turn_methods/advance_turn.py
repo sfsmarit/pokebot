@@ -146,7 +146,7 @@ def _advance_turn(self: TurnManager,
                 if move.name in ['クイックターン', 'とんぼがえり', 'ボルトチェンジ'] and ejectbutton_triggered:
                     self.battle.logger.append(TurnLog(self.battle.turn, idx, f"交代失敗"))
                 elif self.move_succeeded[idx]:
-                    if move.name == 'すてゼリフ' and defender_mgr.defending_ability(move) == "マジックミラー":
+                    if move.name == 'すてゼリフ' and defender_mgr.defending_ability(move).name == "マジックミラー":
                         target_idx = dfn
                     else:
                         target_idx = idx

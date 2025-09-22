@@ -1,8 +1,15 @@
 from pokebot import Pokemon, Player
+from pokebot.common.enums import Command
+from pokebot.core.battle import Battle
 
 
-def ひでり(display_log: bool = False) -> bool:
-    max_turn = 0
+class CustomPlayer(Player):
+    def action_command(self, battle: Battle) -> Command:
+        return Command.MOVE_0
+
+
+def ちからずく(display_log: bool = False) -> bool:
+    max_turn = 1
 
     names = [
         ["リザードン"],
@@ -10,7 +17,7 @@ def ひでり(display_log: bool = False) -> bool:
     ]
 
     abilities = [
-        ["ひでり"],
+        ["ちからずく"],
         [""],
     ]
 
@@ -20,13 +27,13 @@ def ひでり(display_log: bool = False) -> bool:
     ]
 
     moves = [
-        ["ひっかく"],
-        ["ひっかく"],
+        ["ほっぺすりすり"],
+        ["はねる"],
     ]
 
     # 2人のプレイヤーを生成
-    player = Player()
-    opponent = Player()
+    player = CustomPlayer()
+    opponent = CustomPlayer()
 
     # ポケモンをM匹ずつパーティに追加
     for i, pl in enumerate([player, opponent]):
@@ -47,8 +54,9 @@ def ひでり(display_log: bool = False) -> bool:
     # N匹を選出して対戦
     battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log)
 
-    return abilities[0][0] in battle.logger.get_turn_log(turn=battle.turn, idx=0)
+    return "追加効果" not in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0)) and \
+        abilities[0][0] in "".join(battle.logger.get_damage_log(turn=battle.turn, idx=0))
 
 
 if __name__ == "__main__":
-    print(ひでり(True))
+    print(ちからずく(True))

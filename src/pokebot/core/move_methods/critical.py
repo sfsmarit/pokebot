@@ -17,7 +17,7 @@ def critical_probability(battle: Battle,
     defender = battle.pokemons[dfn]
 
     # 急所無効
-    if battle.poke_mgrs[dfn].defending_ability(move) in ['シェルアーマー', 'カブトアーマー'] or \
+    if battle.poke_mgrs[dfn].defending_ability(move).name in ['シェルアーマー', 'カブトアーマー'] or \
             "one_ko" in move.tags:
         return 0.
 

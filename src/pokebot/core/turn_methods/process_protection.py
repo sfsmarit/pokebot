@@ -53,7 +53,7 @@ def _process_protection(self: TurnManager,
     if self._protecting_move.name != 'かえんのまもり':
         self.move_succeeded[dfn] |= "protect" in move.tags
 
-    # まもる成功
+    # まもる失敗
     if not self.move_succeeded[dfn]:
         return False
 

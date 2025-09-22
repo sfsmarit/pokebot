@@ -406,7 +406,7 @@ class ActivePokemonManager:
     def can_receive_move_effect(self, move: Move | None) -> bool:
         """技の追加効果を受けることができる状態ならTrue"""
         return self.opponent.ability.name != 'ちからずく' and \
-            self.defending_ability(move) != 'りんぷん' and \
+            self.defending_ability(move).name != 'りんぷん' and \
             self.pokemon.item.name != 'おんみつマント' and \
             not self.battle.turn_mgr._hit_substitute
 
@@ -469,7 +469,7 @@ class ActivePokemonManager:
     def is_overcoat(self, move: Move | None = None) -> bool:
         """ぼうじん状態ならTrue"""
         return self.pokemon.item.name == 'ぼうじんゴーグル' or \
-            self.defending_ability(move) == 'ぼうじん'
+            self.defending_ability(move).name == 'ぼうじん'
 
     def is_nervous(self) -> bool:
         """きんちょうかん状態ならTrue"""

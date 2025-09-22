@@ -40,7 +40,7 @@ def move_speed(battle: Battle,
     if attacker.ability.name == 'きんしのちから' and move.category == MoveCategory.STA:
         speed -= 1e-1
         battle.logger.append(TurnLog(battle.turn, atk, attacker.ability.name))
-    elif attacker.ability.name == 'クイックドロウ' and battle.random.random() < 0.3:
+    elif attacker.ability.name == 'クイックドロウ' and (battle.is_test or battle.random.random() < 0.3):
         speed += 1e-1
         battle.logger.append(TurnLog(battle.turn, atk, attacker.ability.name))
     elif attacker.item.name == 'せんせいのツメ' and battle.poke_mgrs[atk].activate_item:

@@ -13,16 +13,15 @@ class Ability:
 
     def __init__(self, name: str = ""):
         if name and name not in PokeDB.abilities:
-            print(PokeDB.abilities)
             print(f"{name} is not in PokeDB.abilities")
             name = ""
 
         self._org_name: str = name
         self._name: str = name
         self.active: bool = True
-        self.tags = []
         self.observed: bool = False
         self.count: int = 0
+        self.tags: list[str] = []
 
         self.set_base_info()
 
@@ -52,9 +51,9 @@ class Ability:
 
     def bench_reset(self):
         """控えに戻した状態にする"""
-        self._name = self._org_name
+        self._name = self.org_name
+        self.set_base_info()
         self.count = 0
-
         if self.org_name not in PokeDB.tagged_abilities['one_time']:
             self.active = True
 
@@ -80,6 +79,9 @@ class Ability:
     @name.setter
     def name(self, name: str):
         self._name = name
+        self.set_base_info()
+        self.count = 0
+        self.active = True
 
     def swap(self, target: Ability):
         """特性を入れ替える"""

@@ -1,17 +1,24 @@
 from pokebot import Pokemon, Player
+from pokebot.common.enums import Command
+from pokebot.core.battle import Battle
 
 
-def がんじょう(display_log: bool = False) -> bool:
+class CustomPlayer(Player):
+    def action_command(self, battle: Battle) -> Command:
+        return Command.MOVE_0
+
+
+def すなかき(display_log: bool = False) -> bool:
     max_turn = 1
 
     names = [
         ["リザードン"],
-        ["カメックス"],
+        ["フシギバナ"],
     ]
 
     abilities = [
-        ["がんじょう"],
-        [""],
+        ["すなおこし"],
+        ["すなかき"],
     ]
 
     items = [
@@ -21,17 +28,12 @@ def がんじょう(display_log: bool = False) -> bool:
 
     moves = [
         ["はねる"],
-        ["しおふき"],
-    ]
-
-    terastals = [
-        ["ほのお"],
-        ["みず"],
+        ["はねる"],
     ]
 
     # 2人のプレイヤーを生成
-    player = Player()
-    opponent = Player()
+    player = CustomPlayer()
+    opponent = CustomPlayer()
 
     # ポケモンをM匹ずつパーティに追加
     for i, pl in enumerate([player, opponent]):
@@ -40,7 +42,6 @@ def がんじょう(display_log: bool = False) -> bool:
             pl.team[-1].ability = abilities[i][j]
             pl.team[-1].item = items[i][j]
             pl.team[-1].moves.clear()
-            pl.team[-1].terastal = terastals[i][j]
             pl.team[-1].add_move(moves[i][j])
 
     # パーティを表示
@@ -51,10 +52,10 @@ def がんじょう(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log)
+    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
 
-    return abilities[0][0] in battle.logger.get_turn_log(turn=battle.turn, idx=0)
+    return battle.action_order[0] == 1
 
 
 if __name__ == "__main__":
-    print(がんじょう(True))
+    print(すなかき(True))

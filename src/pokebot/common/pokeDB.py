@@ -142,7 +142,7 @@ class PokeDB:
         cls.download_data()
         cls.load_home()
         cls.load_kata()
-        cls.sync_zukan()
+        # cls.sync_zukan_to_HOME()
         print(f"Initiallized PokeDB\nseason {cls.season} / regulation {cls.regulation}")
 
     @classmethod
@@ -152,11 +152,10 @@ class PokeDB:
             for d in json.load(f).values():
                 name = d['alias']
                 types = [d[f'type_{i}'] for i in range(1, 3) if d[f'type_{i}']]
-                abilities = [d[f'ability_{i}'] for i in range(1, 3) if d[f'ability_{i}']]
+                abilities = [d[f'ability_{i}'] for i in range(1, 4) if d[f'ability_{i}']]
                 bases = [d[s] for s in STAT_CODES[:6]]
-                cls.zukan[name] = Zukan(d["id"], d["form_id"], d["name"], d["weight"],
-                                        types, abilities, bases)
 
+                cls.zukan[name] = Zukan(d["id"], d["form_id"], d["name"], d["weight"], types, abilities, bases)
                 cls.abilities += cls.zukan[name].abilities
 
                 label = cls.zukan[name].label
@@ -381,7 +380,7 @@ class PokeDB:
             )
 
     @classmethod
-    def sync_zukan(cls):
+    def sync_zukan_to_HOME(cls):
         """図鑑をHOMEと同期する"""
         if not cls.home:
             return

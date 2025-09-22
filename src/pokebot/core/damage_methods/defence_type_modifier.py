@@ -32,8 +32,6 @@ def _defence_type_modifier(self: DamageManager,
             if attacker.ability.name in ['しんがん', 'きもったま'] and \
                     t == 'ゴースト' and move_type in ['ノーマル', 'かくとう']:
                 pass
-                if log:
-                    log.notes.append(attacker.ability.name)
             elif move.name == 'フリーズドライ' and t == 'みず':
                 r *= 2
             elif not defender_mgr.is_floating() and move_type == 'じめん' and t == 'ひこう':
