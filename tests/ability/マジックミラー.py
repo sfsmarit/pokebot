@@ -51,7 +51,7 @@ def マジックミラー(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log)
 
     return abilities[0][0] in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
 

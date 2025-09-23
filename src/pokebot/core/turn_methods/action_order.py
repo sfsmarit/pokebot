@@ -9,8 +9,6 @@ from pokebot.model import Move
 from pokebot.logger import TurnLog
 from pokebot.core.move_utils import move_speed
 
-import time
-
 
 def _update_action_order(self: TurnManager):
     """場のポケモンの行動順を更新する"""
@@ -45,9 +43,9 @@ def _update_action_order(self: TurnManager):
         elif self.command[idx] == Command.FORCED:
             # 強制行動
             if "immovable" in poke_mgr.executed_move.tags:
-                # 反動
+                # 反動で動けない技
                 self.move[idx] = Move()
-                self.battle.poke_mgrs[idx].forced_turn = 0
+                self.battle.poke_mgrs[idx].forced_turn -= 1
             else:
                 # 前ターンと同じ技
                 self.move[idx] = poke_mgr.executed_move

@@ -21,7 +21,7 @@ class Pokemon:
         self._nature: str = "まじめ"
         self._ability: Ability = Ability()
         self._item: Item = Item()
-        self._terastal: str = "ステラ"
+        self._terastal: str = ""
         self._base: list[int] = [100]*6
         self._indiv: list[int] = [31]*6
         self._effort: list[int] = [0]*6
@@ -413,7 +413,7 @@ class Pokemon:
         return self.ailment == Ailment.SLP or self.ability.name == "ぜったいねむり"
 
     def get_negoto_moves(self) -> list[Move]:
-        excluded_moves = PokeDB.move_tag['non_negoto'] + PokeDB.move_tag['charge']
+        excluded_moves = PokeDB.tagged_moves['non_negoto'] + PokeDB.tagged_moves['charge']
         return [move for move in self.moves if move.name not in excluded_moves]
 
     @classmethod

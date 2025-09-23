@@ -59,7 +59,7 @@ def _process_text_buffer(self: Bot):
         elif 'move' in dict:
             if i > 1 and 'move' in self.text_buffer[i-1] and \
                     self.text_buffer[i-1]['idx'] == idx and \
-                    self.text_buffer[i-1]['move'] in PokeDB.move_tag['call']:
+                    self.text_buffer[i-1]['move'] in PokeDB.tagged_moves['call']:
                 # ねごとなど、1ターンに2度技の演出がある場合
                 poke_mgr.executed_move = poke.find_move(dict['move']) or Move()
 

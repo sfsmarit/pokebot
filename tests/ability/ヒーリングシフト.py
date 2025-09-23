@@ -52,7 +52,7 @@ def ヒーリングシフト(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log, is_test=True)
 
     return battle.action_order[0] == 0
 

@@ -10,6 +10,8 @@ from pokebot.logger import TurnLog
 
 def set_count(self: ActivePokemonManager, condition: Condition, count: int):
     self.count[condition] = count
+    if condition in [Condition.CONFUSION]:
+        count = ""
     self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{condition} {count}"))
 
 

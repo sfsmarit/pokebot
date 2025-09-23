@@ -1,18 +1,24 @@
-from pokebot import Pokemon, Player, Move
-from pokebot.core.move_methods import hit_probability
+from pokebot import Pokemon, Player
+from pokebot.common.enums import Command
+from pokebot.core.battle import Battle
+
+
+class CustomPlayer(Player):
+    def action_command(self, battle: Battle) -> Command:
+        return Command.MOVE_0
 
 
 def するどいめ_2(display_log: bool = False) -> bool:
     max_turn = 1
 
     names = [
-        ["リザードン"],
+        ["フシギバナ"],
         ["カメックス"],
     ]
 
     abilities = [
         ["するどいめ"],
-        [""],
+        ["ノーガード"],
     ]
 
     items = [
@@ -26,8 +32,8 @@ def するどいめ_2(display_log: bool = False) -> bool:
     ]
 
     # 2人のプレイヤーを生成
-    player = Player()
-    opponent = Player()
+    player = CustomPlayer()
+    opponent = CustomPlayer()
 
     # ポケモンをM匹ずつパーティに追加
     for i, pl in enumerate([player, opponent]):
@@ -46,7 +52,7 @@ def するどいめ_2(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log, is_test=True)
 
     return abilities[0][0] in "".join(battle.logger.get_turn_log(battle.turn, 0))
 

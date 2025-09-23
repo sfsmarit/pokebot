@@ -10,6 +10,7 @@ from copy import deepcopy
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Phase, Time
+from pokebot.common.constants import TYPES
 import pokebot.common.utils as ut
 from pokebot.model import Pokemon, Move
 from pokebot.logger import Logger, DamageLog
@@ -78,9 +79,14 @@ class Battle:
         self.action_input_time: float = 10
         self.switch_input_time: float = 3
 
-        # プレイヤーに番号を割り振る
         for i in range(2):
+            # プレイヤーに番号を割り振る
             self.players[i].idx = i
+
+            # 技の補完
+            for poke in self.players[i].team:
+                if not poke.moves:
+                    poke.add_move("はねる")
 
         # 試合のリセット
         self.init_game()
@@ -271,7 +277,8 @@ class Battle:
 
     def can_terastallize(self, idx: PlayerIndex | int) -> bool:
         """テラスタルを使用可能ならTrueを返す"""
-        return not any(poke.terastal for poke in self.selected_pokemons(idx))
+        return self.pokemons[idx]._terastal in TYPES and \
+            not any(poke.terastal for poke in self.selected_pokemons(idx))
 
     def to_command(self,
                    idx: PlayerIndex | int,
@@ -320,9 +327,6 @@ class Battle:
         """選択可能なコマンドの一覧を返す"""
         if phase is None:
             phase = self.phase
-
-        if phase in [None, Phase.NONE]:
-            raise Exception("Invalid phase")
 
         return _available_commands(self, idx, phase)
 

@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, Move
-from pokebot.core.move_methods import hit_probability
+from pokebot.core.move_utils import hit_probability
 from pokebot.common.enums import Command
 from pokebot.core.battle import Battle
 

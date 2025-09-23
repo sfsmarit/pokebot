@@ -65,6 +65,8 @@ def _single_hit_damages(self: DamageManager,
     elif self.critical and r_rank < 1:
         r_rank = 1
         self.log.notes.append('急所 AC下降無視')
+    elif r_rank != 1:
+        self.log.notes.append(f"攻撃ランク x{r_rank:.1f}")
 
     final_attack = int(final_attack*r_rank)
 
@@ -94,6 +96,8 @@ def _single_hit_damages(self: DamageManager,
     elif self.critical and r_rank > 1:
         r_rank = 1
         self.log.notes.append('急所 BD上昇無視')
+    elif r_rank != 1:
+        self.log.notes.append(f"防御ランク x{r_rank:.1f}")
 
     final_defence = int(final_defence*r_rank)
 

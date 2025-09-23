@@ -104,7 +104,7 @@ class PokeDB:
 
     move_data: dict[str, MoveData] = {}
     move_priority: dict[str, int] = {}
-    move_tag: dict[str, list[str]] = {}
+    tagged_moves: dict[str, list[str]] = {}
     combo_range: dict[str, list[int]] = {}
     move_effect: dict[str, dict] = {}
 
@@ -214,7 +214,7 @@ class PokeDB:
         with open(ut.path_str('data', 'move_tag.txt'), encoding='utf-8') as f:
             for line in f:
                 data = line.split()
-                cls.move_tag[data[0]] = data[1:]
+                cls.tagged_moves[data[0]] = data[1:]
 
         with open(ut.path_str('data', 'move_priority.txt'), encoding='utf-8') as f:
             for line in f:
@@ -253,7 +253,7 @@ class PokeDB:
                 )
 
             # 威力変動技の初期化
-            for move in cls.move_tag['var_power']:
+            for move in cls.tagged_moves['var_power']:
                 cls.move_data[move].power = 1
 
         with open(ut.path_str('data', 'status_move.txt'), encoding='utf-8') as f:

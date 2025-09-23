@@ -8,7 +8,7 @@ class CustomPlayer(Player):
         return Command.MOVE_0
 
 
-def ぼうじん_1(display_log: bool = False) -> bool:
+def ぼうじん_2(display_log: bool = False) -> bool:
     max_turn = 1
 
     names = [
@@ -52,10 +52,10 @@ def ぼうじん_1(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log, is_test=True)
 
     return "すなあらし" not in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
 
 
 if __name__ == "__main__":
-    print(ぼうじん_1(True))
+    print(ぼうじん_2(True))

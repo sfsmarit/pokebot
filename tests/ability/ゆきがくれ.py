@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, Move
-from pokebot.core.move_methods import hit_probability
+from pokebot.core.move_utils import hit_probability
 
 
 def ゆきがくれ(display_log: bool = False) -> bool:
@@ -46,7 +46,7 @@ def ゆきがくれ(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log, is_test=True)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log, is_test=True)
 
     r = 0.8
     return r-0.01 < hit_probability(battle, 1, Move("ひっかく")) < r+0.01

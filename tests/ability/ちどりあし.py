@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, Move
-from pokebot.core.move_methods import hit_probability
+from pokebot.core.move_utils import hit_probability
 
 
 def ちどりあし(display_log: bool = False) -> bool:

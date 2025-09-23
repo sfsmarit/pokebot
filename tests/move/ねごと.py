@@ -1,16 +1,23 @@
 from pokebot import Pokemon, Player
+from pokebot.common.enums import Command
+from pokebot.core.battle import Battle
 
 
-def カーリーヘアー(display_log: bool = False) -> bool:
+class CustomPlayer(Player):
+    def action_command(self, battle: Battle) -> Command:
+        return Command.MOVE_0
+
+
+def ねごと(display_log: bool = False) -> bool:
     max_turn = 1
 
     names = [
-        ["リザードン"],
         ["カメックス"],
+        ["リザードン"],
     ]
 
     abilities = [
-        ["カーリーヘアー"],
+        [""],
         [""],
     ]
 
@@ -20,12 +27,12 @@ def カーリーヘアー(display_log: bool = False) -> bool:
     ]
 
     moves = [
-        ["ひっかく"],
-        ["ひっかく"],
+        [["ねごと", "ひっかく"]],
+        [["キノコのほうし"]],
     ]
 
     # 2人のプレイヤーを生成
-    player = Player()
+    player = CustomPlayer()
     opponent = Player()
 
     # ポケモンをM匹ずつパーティに追加
@@ -34,8 +41,9 @@ def カーリーヘアー(display_log: bool = False) -> bool:
             pl.team.append(Pokemon(name))
             pl.team[-1].ability = abilities[i][j]
             pl.team[-1].item = items[i][j]
+            pl.team[-1].terastal = ""
             pl.team[-1].moves.clear()
-            pl.team[-1].add_move(moves[i][j])
+            pl.team[-1].add_moves(moves[i][j])
 
     # パーティを表示
     if display_log:
@@ -45,10 +53,10 @@ def カーリーヘアー(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log)
 
-    return abilities[0][0] in battle.logger.get_turn_log(turn=battle.turn, idx=0)
+    return "技成功" in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
 
 
 if __name__ == "__main__":
-    print(カーリーヘアー(True))
+    print(ねごと(True))
