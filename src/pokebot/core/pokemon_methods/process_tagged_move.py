@@ -38,13 +38,15 @@ def _process_tagged_move(self: ActivePokemonManager,
             if self.forced_turn == 0:
                 # あばれる状態の付与
                 self.forced_turn = self.battle.random.randint(1, 2)
-                self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{move} 残り{self.forced_turn}ターン"))
+                self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{move}状態"))
             else:
                 # ターン経過
                 self.forced_turn -= 1
-                # こんらん付与
-                if self.set_condition(Condition.CONFUSION, self.battle.random.randint(2, 5)):
-                    self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{move}解除 こんらん"))
+                if self.forced_turn:
+                    self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{move}状態"))
+                else:
+                    self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{move}状態解除"))
+                    self.set_condition(Condition.CONFUSION, self.battle.random.randint(2, 5))
             return True
 
         case 'wall_break':

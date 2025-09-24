@@ -86,5 +86,5 @@ class TemplateImage:
                 cls.condition[x] = img
 
         cls.expirable_conditions = [x for enum in [Condition, Weather, Terrain, GlobalField, SideField]
-                                    for x in enum if x.is_expirable]
+                                    for x in enum if x.expirable]
         cls.accumulative_conditions = [Condition.STOCK, SideField.MAKIBISHI, SideField.DOKUBISHI]

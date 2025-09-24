@@ -102,6 +102,7 @@ class FieldManager:
             count = 0
         elif count is None:
             count = 8 if self.battle.pokemons[idx].item.name == WEATHER_STONE[weather] else 5
+            self.battle.logger.append(TurnLog(self.battle.turn, idx, weather.value[0]))
 
         self._set_count(GlobalField.WEATHER, idx, count)
 
@@ -143,6 +144,7 @@ class FieldManager:
             count = 0
         if count is None:
             count = 8 if self.battle.pokemons[idx].item.name == "グランドコート" else 5
+            self.battle.logger.append(TurnLog(self.battle.turn, idx, terrain.value[0]))
 
         self._set_count(GlobalField.TERRAIN, idx, count)
 
@@ -174,11 +176,17 @@ class FieldManager:
         bool
             設定できたらTrue
         """
+
+        # 変動しない
+        if (isinstance(field, GlobalField) and self.count[field] == count) or \
+                (isinstance(field, SideField) and self.count[field][idx] == count):
+            return False
+
         # 重ね掛け不可
-        if count:
-            if (isinstance(field, GlobalField) and self.count[field]) or \
-                    (isinstance(field, SideField) and self.count[field][idx]):
-                return False
+        if count and \
+            ((isinstance(field, GlobalField) and self.count[field]) or
+             (isinstance(field, SideField) and self.count[field][idx])):
+            return False
 
         match field:
             case SideField.WISH:

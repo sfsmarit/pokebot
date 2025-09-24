@@ -55,7 +55,7 @@ def _add_rank(self: ActivePokemonManager,
                     if i == 2:
                         self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.ability}により無効"))
                         continue
-                case 'しんがん' | 'するどいめ':
+                case 'しんがん' | 'するどいめ' | 'はっこう':
                     if i == 6:
                         self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.ability}により無効"))
                         continue

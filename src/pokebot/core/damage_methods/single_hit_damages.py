@@ -58,13 +58,15 @@ def _single_hit_damages(self: DamageManager,
 
     r_rank = self.battle.poke_mgrs[atk_idx2].rank_modifier(stat_idx)
 
-    if defender_mgr.defending_ability(move) == 'てんねん':
+    if defender_mgr.defending_ability(move).name == 'てんねん':
         if r_rank > 1:
             r_rank = 1
             self.log.notes.append('てんねん AC上昇無視')
     elif self.critical and r_rank < 1:
         r_rank = 1
         self.log.notes.append('急所 AC下降無視')
+    elif r_rank != 1:
+        self.log.notes.append(f"攻撃ランク x{r_rank:.1f}")
 
     final_attack = int(final_attack*r_rank)
 
@@ -87,13 +89,15 @@ def _single_hit_damages(self: DamageManager,
     else:
         r_rank = defender_mgr.rank_modifier(stat_idx)
 
-    if defender_mgr.defending_ability(move) == 'てんねん':
+    if defender_mgr.defending_ability(move).name == 'てんねん':
         if r_rank > 1:
             r_rank = 1
             self.log.notes.append('てんねん BD上昇無視')
     elif self.critical and r_rank > 1:
         r_rank = 1
         self.log.notes.append('急所 BD上昇無視')
+    elif r_rank != 1:
+        self.log.notes.append(f"防御ランク x{r_rank:.1f}")
 
     final_defence = int(final_defence*r_rank)
 

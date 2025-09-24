@@ -42,7 +42,7 @@ def _apply_move_recoil(self: ActivePokemonManager,
             # 発動コスト
             cost = ut.round_half_up(self.pokemon.stats[0] * PokeDB.move_effect[move.name]['cost'])
             if self.add_hp(-cost):
-                battle.logger.insert(-1, TurnLog(battle.turn, self.idx, '反動'))
+                battle.logger.insert(-1, TurnLog(battle.turn, self.idx, 'コスト'))
                 return True
 
     return False

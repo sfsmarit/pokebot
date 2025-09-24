@@ -13,14 +13,14 @@ def _game(self: Player,
           seed: int,
           max_turn: int,
           display_log: bool,
-          force_trigger: bool) -> Battle:
+          is_test: bool) -> Battle:
 
     battle = Battle(player1=self,
                     player2=opponent,
                     n_selection=n_selection,
                     open_sheet=open_sheet,
                     seed=seed,
-                    force_trigger=force_trigger)
+                    is_test=is_test)
 
     # 選出
     battle.select_pokemon()

@@ -24,7 +24,7 @@ def _process_status_move(self: TurnManager,
 
     # マジックミラー判定
     self._move_was_mirrored = move.mirror and \
-        defender_mgr.defending_ability(move) == 'マジックミラー'
+        defender_mgr.defending_ability(move).name == 'マジックミラー'
 
     if self._move_was_mirrored:
         defender.ability.observed = True  # 観測
@@ -46,7 +46,7 @@ def _process_status_move(self: TurnManager,
     if move.gold:
         self.move_succeeded[atk] = bool(battle.damage_mgr.damage_modifier(atk, move))
 
-        if defender_mgr.defending_ability(move) == 'おうごんのからだ':
+        if defender_mgr.defending_ability(move).name == 'おうごんのからだ':
             self.move_succeeded[atk] = False
             defender.ability.observed = True  # 観測
 

@@ -151,8 +151,7 @@ class ActivePokemonManager:
         else:
             self.boosted_idx = None
 
-    @property
-    def first_act(self):
+    def is_first_act(self):
         """先手で行動していたらTrue"""
         return self.idx == self.battle.turn_mgr.first_player_idx
 
@@ -337,16 +336,16 @@ class ActivePokemonManager:
             values[stat_idx] = value
         return _add_rank(self, values, by_opponent, chain)
 
-    def lose_item(self) -> None:
+    def lose_item(self, text: str = "消失") -> None:
         self.pokemon.item.consume()
-        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.item.name_lost}消費"))
+        self.battle.logger.append(TurnLog(self.battle.turn, self.idx, f"{self.pokemon.item.name_lost}{text}"))
 
         # かるわざ発動
         if self.pokemon.ability.name == 'かるわざ' and not self.pokemon.item.active:
             self.activate_ability()
 
     def consume_item(self) -> None:
-        self.lose_item()
+        self.lose_item(text="消費")
 
         # きのみ関連の特性の発動
         if self.pokemon.item.name_lost[-2:] == 'のみ' and "berry" in self.pokemon.ability.tags:
@@ -372,7 +371,7 @@ class ActivePokemonManager:
                 defender.ability.name in PokeDB.tagged_abilities["undeniable"]:
             return defender.ability
 
-        if move.name in ['シャドーレイ', 'フォトンゲイザー', 'メテオドライブ'] or \
+        if "ignore_ability" in move.tags or \
             attacker.ability.name in ['かたやぶり', 'ターボブレイズ', 'テラボルテージ'] or \
                 (attacker.ability.name == 'きんしのちから' and move.category == MoveCategory.STA):
             return Ability()
@@ -406,7 +405,7 @@ class ActivePokemonManager:
     def can_receive_move_effect(self, move: Move | None) -> bool:
         """技の追加効果を受けることができる状態ならTrue"""
         return self.opponent.ability.name != 'ちからずく' and \
-            self.defending_ability(move) != 'りんぷん' and \
+            self.defending_ability(move).name != 'りんぷん' and \
             self.pokemon.item.name != 'おんみつマント' and \
             not self.battle.turn_mgr._hit_substitute
 
@@ -422,7 +421,7 @@ class ActivePokemonManager:
     def is_floating(self) -> bool:
         """浮いている状態ならTrue"""
         if self.pokemon.item.name == 'くろいてっきゅう' or \
-            self.count[Condition.ANTI_AIR] or \
+            self.count[Condition.GROUNDED] or \
                 self.count[Condition.NEOHARU] or \
                 self.battle.field_mgr.count[GlobalField.GRAVITY]:
             return False
@@ -469,7 +468,7 @@ class ActivePokemonManager:
     def is_overcoat(self, move: Move | None = None) -> bool:
         """ぼうじん状態ならTrue"""
         return self.pokemon.item.name == 'ぼうじんゴーグル' or \
-            self.defending_ability(move) == 'ぼうじん'
+            self.defending_ability(move).name == 'ぼうじん'
 
     def is_nervous(self) -> bool:
         """きんちょうかん状態ならTrue"""

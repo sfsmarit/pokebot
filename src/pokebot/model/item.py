@@ -27,7 +27,7 @@ class Item:
         self._power_correction: float = 1
         self._consumable: bool = False
         self._immediate: bool = False
-        self._post_hit: bool = False
+        self._triggers_on_hit: bool = False
 
         self.set_base_info()
 
@@ -70,7 +70,7 @@ class Item:
             self._power_correction = PokeDB.item_data[self._name].power_correction
             self._consumable = PokeDB.item_data[self._name].consumable
             self._immediate = PokeDB.item_data[self._name].immediate
-            self._post_hit = PokeDB.item_data[self._name].post_hit
+            self._triggers_on_hit = PokeDB.item_data[self._name].triggers_on_hit
 
     @property
     def org_name(self) -> str:
@@ -114,8 +114,8 @@ class Item:
         return self._immediate if self.active else False
 
     @property
-    def post_hit(self) -> bool:
-        return self._post_hit if self.active else False
+    def triggers_on_hit(self) -> bool:
+        return self._triggers_on_hit if self.active else False
 
     def swap(self, target: Item):
         """アイテムを入れ替える"""

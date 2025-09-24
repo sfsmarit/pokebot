@@ -10,6 +10,7 @@ from copy import deepcopy
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Phase, Time
+from pokebot.common.constants import TYPES
 import pokebot.common.utils as ut
 from pokebot.model import Pokemon, Move
 from pokebot.logger import Logger, DamageLog
@@ -30,7 +31,7 @@ class Battle:
                  n_selection: int = 3,
                  open_sheet: bool = False,
                  seed: int | None = None,
-                 force_trigger: bool = False):
+                 is_test: bool = False):
         """
         _summary_
 
@@ -46,7 +47,7 @@ class Battle:
             Trueならオープンシート制とみなす, by default False
         seed : int | None, optional
             ゲーム内乱数のシード, by default None
-        force_trigger : bool, optional
+        is_test : bool, optional
             Trueなら確率的事象を必ず発生させるテスト用フラグ, by default False
         """
 
@@ -57,7 +58,7 @@ class Battle:
         self.n_selection: int = n_selection
         self.open_sheet: bool = open_sheet
         self.seed: int = seed
-        self.force_trigger: bool = force_trigger
+        self.is_test: bool = is_test
 
         self.random: Random = Random(self.seed)
         self.logger: Logger = Logger()
@@ -78,9 +79,15 @@ class Battle:
         self.action_input_time: float = 10
         self.switch_input_time: float = 3
 
-        # プレイヤーに番号を割り振る
         for i in range(2):
+            # プレイヤーに番号を割り振る
             self.players[i].idx = i
+
+            # 技の補完
+            for poke in self.players[i].team:
+                s = "".join([move.name for move in poke.moves])
+                if not s:
+                    poke.moves = [Move("はねる")]
 
         # 試合のリセット
         self.init_game()
@@ -271,7 +278,8 @@ class Battle:
 
     def can_terastallize(self, idx: PlayerIndex | int) -> bool:
         """テラスタルを使用可能ならTrueを返す"""
-        return not any(poke.terastal for poke in self.selected_pokemons(idx))
+        return self.pokemons[idx]._terastal in TYPES and \
+            not any(poke.terastal for poke in self.selected_pokemons(idx))
 
     def to_command(self,
                    idx: PlayerIndex | int,
@@ -320,9 +328,6 @@ class Battle:
         """選択可能なコマンドの一覧を返す"""
         if phase is None:
             phase = self.phase
-
-        if phase in [None, Phase.NONE]:
-            raise Exception("Invalid phase")
 
         return _available_commands(self, idx, phase)
 

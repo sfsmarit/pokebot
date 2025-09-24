@@ -29,6 +29,7 @@ class Move:
         self.power: int = 0
         self.hit: int = 0
         self.priority: int = 0
+
         self.tags: list[str] = []
 
         self.protect: bool = False
@@ -74,7 +75,7 @@ class Move:
             self.gold = PokeDB.move_data[self.name].gold
             self.mirror = PokeDB.move_data[self.name].mirror
 
-        for tag, val in PokeDB.move_tag.items():
+        for tag, val in PokeDB.tagged_moves.items():
             if self.name in val:
                 self.tags.append(tag)
 

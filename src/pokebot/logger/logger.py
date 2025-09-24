@@ -33,7 +33,7 @@ class Logger:
                 logs.append(log.text)
         return logs
 
-    def get_damage_summary(self, turn: int, idx: PlayerIndex | int) -> list[str]:
+    def get_damage_log(self, turn: int, idx: PlayerIndex | int) -> list[str]:
         logs = []
         for log in self.damage_logs:
             if log.turn == turn and log.idx in [idx, None]:

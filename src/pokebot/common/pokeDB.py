@@ -31,7 +31,7 @@ class ItemData:
     power_correction: float
     consumable: bool
     immediate: bool
-    post_hit: bool
+    triggers_on_hit: bool
 
 
 @dataclass
@@ -104,7 +104,7 @@ class PokeDB:
 
     move_data: dict[str, MoveData] = {}
     move_priority: dict[str, int] = {}
-    move_tag: dict[str, list[str]] = {}
+    tagged_moves: dict[str, list[str]] = {}
     combo_range: dict[str, list[int]] = {}
     move_effect: dict[str, dict] = {}
 
@@ -142,7 +142,7 @@ class PokeDB:
         cls.download_data()
         cls.load_home()
         cls.load_kata()
-        cls.sync_zukan()
+        # cls.sync_zukan_to_HOME()
         print(f"Initiallized PokeDB\nseason {cls.season} / regulation {cls.regulation}")
 
     @classmethod
@@ -152,11 +152,10 @@ class PokeDB:
             for d in json.load(f).values():
                 name = d['alias']
                 types = [d[f'type_{i}'] for i in range(1, 3) if d[f'type_{i}']]
-                abilities = [d[f'ability_{i}'] for i in range(1, 3) if d[f'ability_{i}']]
+                abilities = [d[f'ability_{i}'] for i in range(1, 4) if d[f'ability_{i}']]
                 bases = [d[s] for s in STAT_CODES[:6]]
-                cls.zukan[name] = Zukan(d["id"], d["form_id"], d["name"], d["weight"],
-                                        types, abilities, bases)
 
+                cls.zukan[name] = Zukan(d["id"], d["form_id"], d["name"], d["weight"], types, abilities, bases)
                 cls.abilities += cls.zukan[name].abilities
 
                 label = cls.zukan[name].label
@@ -206,7 +205,7 @@ class PokeDB:
                     power_correction=float(data[4]),
                     consumable=bool(int(data[5])),
                     immediate=bool(int(data[6])),
-                    post_hit=bool(int(data[7])),
+                    triggers_on_hit=bool(int(data[7])),
                 )
 
     @classmethod
@@ -215,7 +214,7 @@ class PokeDB:
         with open(ut.path_str('data', 'move_tag.txt'), encoding='utf-8') as f:
             for line in f:
                 data = line.split()
-                cls.move_tag[data[0]] = data[1:]
+                cls.tagged_moves[data[0]] = data[1:]
 
         with open(ut.path_str('data', 'move_priority.txt'), encoding='utf-8') as f:
             for line in f:
@@ -254,7 +253,7 @@ class PokeDB:
                 )
 
             # 威力変動技の初期化
-            for move in cls.move_tag['var_power']:
+            for move in cls.tagged_moves['var_power']:
                 cls.move_data[move].power = 1
 
         with open(ut.path_str('data', 'status_move.txt'), encoding='utf-8') as f:
@@ -381,7 +380,7 @@ class PokeDB:
             )
 
     @classmethod
-    def sync_zukan(cls):
+    def sync_zukan_to_HOME(cls):
         """図鑑をHOMEと同期する"""
         if not cls.home:
             return

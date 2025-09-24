@@ -55,7 +55,7 @@ def _command_to_str(self: Battle,
         case "SKIP":
             return "行動スキップ"
         case _:
-            return command.value[0]
+            return command.value[0] or "NONE"
 
 
 def _available_commands(self: Battle,

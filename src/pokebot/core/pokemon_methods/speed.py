@@ -36,7 +36,7 @@ def _effective_speed(self: ActivePokemonManager, masked: bool) -> int:
         case 'スロースタート':
             r = ut.round_half_up(r*0.5)
         case 'はやあし':
-            if poke.ailment:
+            if poke.ailment.value:
                 r = ut.round_half_up(r*1.5)
         case 'ゆきかき':
             if self.battle.field_mgr.weather() == Weather.SNOW:

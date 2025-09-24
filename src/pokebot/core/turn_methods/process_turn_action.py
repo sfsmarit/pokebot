@@ -13,8 +13,9 @@ from pokebot.core.move_utils import num_strikes, hit_probability
 
 
 def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
-    dfn = int(not idx)
+    attacker = self.battle.pokemons[idx]
     attacker_mgr = self.battle.poke_mgrs[idx]
+    dfn = int(not idx)
     defender_mgr = self.battle.poke_mgrs[dfn]
     move = self.move[idx]
 
@@ -34,24 +35,24 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     # みちづれ/おんねん解除
     self.battle.poke_mgrs[idx].count[Condition.MICHIZURE] = 0
 
-    # 反動
+    # 反動で動けない
     if not move.name:
         self.battle.logger.append(TurnLog(self.battle.turn, idx, '行動不能 反動'))
         self.battle.poke_mgrs[idx].no_act()
         return
 
     # ねむりカウント消費
-    if self.battle.pokemons[idx].ailment == Ailment.SLP:
+    if attacker.ailment == Ailment.SLP:
         self.battle.poke_mgrs[idx].reduce_sleep_count(
-            by=(2 if self.battle.pokemons[idx].ability.name == 'はやおき' else 1))
+            by=(2 if attacker.ability.name == 'はやおき' else 1))
 
     # ねむり行動不能
-    if self.battle.pokemons[idx].ailment == Ailment.SLP and "sleep" not in move.tags:
+    if attacker.ailment == Ailment.SLP and "sleep" not in move.tags:
         self.battle.poke_mgrs[idx].no_act()
         return
 
     # こおり判定
-    elif self.battle.pokemons[idx].ailment == Ailment.FLZ:
+    elif attacker.ailment == Ailment.FLZ:
         if "unfreeze" in move.tags or self.battle.random.random() < 0.2:
             attacker_mgr.set_ailment(Ailment.NONE)  # こおり解除
         else:
@@ -60,9 +61,9 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
             return
 
     # なまけ判定
-    if self.battle.pokemons[idx].ability.name == 'なまけ':
-        self.battle.pokemons[idx].ability.count += 1
-        if self.battle.pokemons[idx].ability.count % 2 == 0:
+    if attacker.ability.name == 'なまけ':
+        attacker.ability.count += 1
+        if attacker.ability.count % 2 == 0:
             self.battle.poke_mgrs[idx].no_act()
             self.battle.logger.append(TurnLog(self.battle.turn, idx, '行動不能 なまけ'))
             return
@@ -71,7 +72,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     if self._flinch:
         self.battle.poke_mgrs[idx].no_act()
         self.battle.logger.append(TurnLog(self.battle.turn, idx, '行動不能 ひるみ'))
-        if self.battle.pokemons[idx].ability.name == 'ふくつのこころ':
+        if attacker.ability.name == 'ふくつのこころ':
             attacker_mgr.activate_ability()
         return
 
@@ -94,7 +95,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
             return
 
     # しびれ判定
-    if self.battle.pokemons[idx].ailment == Ailment.PAR and self.battle.random.random() < 0.25:
+    if attacker.ailment == Ailment.PAR and self.battle.random.random() < 0.25:
         self.battle.poke_mgrs[idx].no_act()
         self.battle.logger.append(TurnLog(self.battle.turn, idx, '行動不能 しびれ'))
         return
@@ -118,7 +119,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     # ねごとによる技の変更
     if move.name == 'ねごと':
         if self.can_execute_move(idx, move):
-            move = self.battle.random.choice(self.battle.pokemons[idx].get_negoto_moves())
+            move = self.battle.random.choice(attacker.get_negoto_moves())
             move.observed = True  # 観測
             self.battle.logger.append(TurnLog(self.battle.turn, idx, f"ねごと -> {move}"))
         else:
@@ -132,16 +133,17 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
     self.battle.poke_mgrs[idx].executed_move = move if self.move_succeeded[idx] else Move()
 
     # こだわり固定化
-    if self.battle.pokemons[idx].item.name[:4] == 'こだわり' or \
-            self.battle.pokemons[idx].ability.name == 'ごりむちゅう':
+    if attacker.item.name[:4] == 'こだわり' or \
+            attacker.ability.name == 'ごりむちゅう':
         self.battle.poke_mgrs[idx].choice_locked = True
 
-    # 技の発動成否判定
+    # 技の発動可否判定
     # 自爆技の判定も行う (本来はリベロ判定の後)
     self.move_succeeded[idx] &= self.can_execute_move(idx, move)
 
     # へんげんじざい判定
-    if self.battle.pokemons[idx].ability.name in ['へんげんじざい', 'リベロ'] and self.move_succeeded[idx]:
+    if self.move_succeeded[idx] and \
+            attacker.ability.name in ['へんげんじざい', 'リベロ']:
         attacker_mgr.activate_ability(move)
 
     # ため技の発動処理
@@ -168,8 +170,10 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
         return
 
     # 相手のまもる技により攻撃を防がれたら中断
-    if self.process_protection(idx, move):
+    if self._protecting_move.name and self.process_protection(idx, move):
         return
+
+    # 技の無効化 -> 技の効果処理に統合
 
     # 技の発動回数の決定
     self._n_strikes = num_strikes(self.battle, idx, move)
@@ -212,7 +216,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
                 self.battle.poke_mgrs[i].activate_item()
 
         # 場のポケモンが瀕死なら攻撃を中断
-        if self.battle.pokemons[idx].hp * self.battle.pokemons[dfn].hp == 0:
+        if not all(poke.hp for poke in self.battle.pokemons):
             break
 
     # 記録

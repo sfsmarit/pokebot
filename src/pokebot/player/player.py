@@ -45,7 +45,7 @@ class Player:
              seed: int | None = None,
              max_turn: int = 100,
              display_log: bool = True,
-             force_trigger: bool = False) -> Battle:
+             is_test: bool = False) -> Battle:
         """
         試合を行う
 
@@ -66,7 +66,7 @@ class Player:
             BattleMode.OFFLINE/ONLINEでのみ使用, by default 0
         display_log : bool, optional
             Trueならログを表示する, by default True
-        force_trigger : bool, optional
+        is_test : bool, optional
             Trueなら確率的事象を必ず発生させるテスト用フラグ, by default False
 
         Returns
@@ -79,7 +79,7 @@ class Player:
         if seed is None:
             seed = int(time.time())
 
-        return _game(self, opponent, n_selection, open_sheet, seed, max_turn, display_log, force_trigger)
+        return _game(self, opponent, n_selection, open_sheet, seed, max_turn, display_log, is_test)
 
     def save_team(self, filename: str):
         with open(filename, 'w', encoding='utf-8') as fout:
@@ -167,7 +167,7 @@ class Player:
                 print(
                     f"\tPlayer {int(idx)}",
                     "[" + ", ".join(battle.logger.get_turn_log(battle.turn, idx)) + "]",
-                    "{" + ", ".join(battle.logger.get_damage_summary(battle.turn, idx)) + "}",
+                    "{" + ", ".join(battle.logger.get_damage_log(battle.turn, idx)) + "}",
                 )
 
     @classmethod

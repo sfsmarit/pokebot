@@ -1,7 +1,7 @@
 from pokebot import Pokemon, Player
 
 
-def かんろなみつ(display_log: bool = False) -> bool:
+def かんろなミツ(display_log: bool = False) -> bool:
     max_turn = 0
 
     names = [
@@ -45,10 +45,10 @@ def かんろなみつ(display_log: bool = False) -> bool:
         print('-'*50)
 
     # N匹を選出して対戦
-    battle = player.game(opponent, seed=0, max_turn=max_turn, display_log=display_log)
+    battle = player.game(opponent, max_turn=max_turn, display_log=display_log)
 
     return abilities[0][0] in battle.logger.get_turn_log(turn=battle.turn, idx=0)
 
 
 if __name__ == "__main__":
-    print(かんろなみつ(True))
+    print(かんろなミツ(True))

@@ -80,7 +80,7 @@ def _process_attack_move(self: TurnManager,
         else:
             self.battle.logger.append(TurnLog(self.battle.turn, dfn, "みがわり消滅"))
 
-    elif defender_mgr.defending_ability(move) == 'ばけのかわ':
+    elif defender_mgr.defending_ability(move).name == 'ばけのかわ':
         # ばけのかわ被弾
         self.damage_dealt[atk] = 0
         defender_mgr.add_hp(ratio=-1/8)
@@ -113,10 +113,13 @@ def _process_attack_move(self: TurnManager,
         effect = PokeDB.move_effect[move.name]
         tgt = ((atk + effect["target"]) % 2)
         target_mgr = self.battle.poke_mgrs[tgt]
+
         r_prob = 2 if attacker.ability.name == 'てんのめぐみ' else 1
+        if self.battle.is_test:
+            self.battle.r_prob = r_prob  # type: ignore
 
         if (tgt == atk or defender_mgr.can_receive_move_effect(move)) and \
-                self.battle.random.random() < effect['prob'] * r_prob:
+                (self.battle.is_test or self.battle.random.random() < effect['prob'] * r_prob):
             # ランク変動
             delta = [0] + [effect[s] for s in STAT_CODES[1:]]
             if any(delta):
@@ -170,8 +173,8 @@ def _process_attack_move(self: TurnManager,
     if move.name == 'やきつくす':
         attacker_mgr.activate_move_effect(move)
 
-    # 被弾アイテムの判定
-    if defender.item.post_hit:
+    # 被弾時に発動するアイテムの判定
+    if defender.item.triggers_on_hit:
         defender_mgr.activate_item(move)
 
     # みちづれ判定
@@ -189,11 +192,11 @@ def _process_attack_move(self: TurnManager,
 
     # 追加効果の判定
     if move.name in [
-        'わるあがき', 'がんせきアックス', 'キラースピン', 'こうそくスピン', 'ひけん･ちえなみ', 'プラズマフィスト',
+        'わるあがき', 'がんせきアックス', 'キラースピン', 'こうそくスピン', 'ひけん・ちえなみ', 'プラズマフィスト',
         'うちおとす', 'サウザンアロー', 'きつけ', 'くらいつく', 'サウザンウェーブ', 'ついばむ', 'むしくい',
         'とどめばり', 'ドラゴンテール', 'ともえなげ', 'どろぼう', 'ほしがる', 'はたきおとす', 'めざましビンタ',
         'うたかたのアリア', 'ぶきみなじゅもん',
-    ] or (move.name == 'スケイルショット' and combo_count == self._n_strikes):
+    ] or (move.name == 'スケイルショット' and combo_count == self._n_strikes - 1):
         attacker_mgr.activate_move_effect(move)
 
     # 相手のこおり状態解除

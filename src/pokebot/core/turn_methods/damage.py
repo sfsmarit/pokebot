@@ -13,26 +13,19 @@ def _process_special_damage(self: TurnManager,
                             atk: PlayerIndex | int,
                             move: Move):
     """ダメージ計算式に従わない技のダメージを計算する"""
-    battle = self.battle
-
     dfn = int(not atk)
-    attacker = battle.pokemons[atk]
-    defender = battle.pokemons[dfn]
-    attacker_mgr = battle.poke_mgrs[atk]
-    defender_mgr = battle.poke_mgrs[dfn]
+    attacker = self.battle.pokemons[atk]
+    defender = self.battle.pokemons[dfn]
+    defender_mgr = self.battle.poke_mgrs[dfn]
 
     # ログ生成
-    battle.damage_mgr.log = DamageLog(battle, atk, move)
+    self.battle.damage_mgr.log = DamageLog(self.battle, atk, move)
 
-    if battle.damage_mgr.defence_type_modifier(atk, move) == 0 or \
-            battle.damage_mgr.damage_modifier(atk, move) == 0:
+    if self.battle.damage_mgr.defence_type_modifier(atk, move) == 0 or \
+            self.battle.damage_mgr.damage_modifier(atk, move) == 0:
         return False
 
     match move.name:
-        case 'ぜったいれいど' | 'じわれ' | 'つのドリル' | 'ハサミギロチン':
-            if defender_mgr.defending_ability(move) != 'がんじょう' or \
-                    not (move.name == 'ぜったいれいど' and 'こおり' in defender_mgr.types):
-                self.damage_dealt[atk] = defender.hp
         case 'いかりのまえば' | 'カタストロフィ':
             self.damage_dealt[atk] = int(defender.hp/2)
         case 'カウンター' | 'ミラーコート':
@@ -46,17 +39,20 @@ def _process_special_damage(self: TurnManager,
         case 'いのちがけ':
             self.damage_dealt[atk] = attacker.hp
             attacker.hp = 0
-            battle.logger.append(TurnLog(battle.turn, atk, f"いのちがけ {-self.damage_dealt[atk]}"))
+            self.battle.logger.append(TurnLog(self.battle.turn, atk, "瀕死"))
         case 'がむしゃら':
             self.damage_dealt[atk] = max(0, defender.hp - attacker.hp)
+        case _:
+            if "one_ko" in move.tags and \
+                    defender_mgr.defending_ability(move).name != 'がんじょう' and \
+                    not (move.name == 'ぜったいれいど' and 'こおり' in defender_mgr.types):
+                self.damage_dealt[atk] = defender.hp
 
 
 def _modify_damage(self: TurnManager, atk: PlayerIndex | int):
-    battle = self.battle
-
     dfn = int(not atk)
-    defender = battle.pokemons[dfn]
-    defender_mgr = battle.poke_mgrs[dfn]
+    defender = self.battle.pokemons[dfn]
+    defender_mgr = self.battle.poke_mgrs[dfn]
 
     # ダメージ上限 = 残りHP
     self.damage_dealt[atk] = min(defender.hp, self.damage_dealt[atk])
@@ -66,8 +62,8 @@ def _modify_damage(self: TurnManager, atk: PlayerIndex | int):
         # こらえる
         self.damage_dealt[atk] -= 1
         self.move_succeeded[dfn] = True
-    elif defender.ability.name == 'がんじょう' and \
+    elif defender_mgr.defending_ability(self.move[atk]).name == 'がんじょう' and \
             defender_mgr.activate_ability():
         pass
-    elif defender.item in ['きあいのタスキ', 'きあいのハチマキ']:
+    elif defender.item.name in ['きあいのタスキ', 'きあいのハチマキ']:
         defender_mgr.activate_item()
