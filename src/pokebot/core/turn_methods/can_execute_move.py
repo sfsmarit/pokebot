@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ..turn_manager import TurnManager
 
 from pokebot.common.types import PlayerIndex
-from pokebot.common.enums import Ailment, MoveCategory, Terrain
+from pokebot.common.enums import MoveCategory, Terrain
 from pokebot.model import Move
 from pokebot.logger import TurnLog
 
@@ -27,7 +27,7 @@ def _can_execute_move(self: TurnManager,
         match tag * (tag in move.tags):
             case 'protect':
                 if "protect" in attacker_mgr.executed_move.tags:
-                    self.battle.logger.append(TurnLog(self.battle.turn, idx, '連続まもる不可'))
+                    self.battle.logger.append(TurnLog(self.battle.turn, idx, '連発不可'))
                     return False
             case 'first_turn':
                 if attacker_mgr.active_turn:
@@ -40,10 +40,14 @@ def _can_execute_move(self: TurnManager,
             if not (attacker.is_sleeping() and attacker.get_negoto_moves()):
                 return False
         case 'アイアンローラー':
-            if not self.battle.field_mgr.terrain():
+            if self.battle.field_mgr.terrain().is_none():
                 return False
         case 'いびき':
             if not attacker.is_sleeping():
+                return False
+        case 'じばく' | 'だいばくはつ' | 'ビックリヘッド' | 'ミストバースト':
+            if 'しめりけ' in (abilities := [p.ability.name for p in self.battle.pokemons]):
+                self.battle.pokemons[abilities.index('しめりけ')].ability.observed = True  # 観測
                 return False
         case 'じんらい' | 'ふいうち':
             if idx != self.battle.turn_mgr.first_player_idx or \
@@ -59,12 +63,11 @@ def _can_execute_move(self: TurnManager,
                     self.move_speed[dfn] <= 0:
                 return False
         case 'ポルターガイスト':
+            defender.item.observed = True  # 観測
             if not defender.item.active:
                 return False
-            defender.item.observed = True  # 観測
-        case 'じばく' | 'だいばくはつ' | 'ビックリヘッド' | 'ミストバースト':
-            if 'しめりけ' in (abilities := [p.ability.name for p in self.battle.pokemons]):
-                self.battle.pokemons[abilities.index('しめりけ')].ability.observed = True  # 観測
+        case "もえつきる" | "でんこうそうげき":
+            if move.type not in attacker_mgr.types:
                 return False
 
     # 特性による先制技無効

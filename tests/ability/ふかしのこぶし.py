@@ -34,6 +34,7 @@ def ふかしのこぶし(display_log: bool = False) -> bool:
             pl.team.append(Pokemon(name))
             pl.team[-1].ability = abilities[i][j]
             pl.team[-1].item = items[i][j]
+            pl.team[-1].terastal = ""
             pl.team[-1].moves.clear()
             pl.team[-1].add_move(moves[i][j])
 

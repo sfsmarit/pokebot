@@ -1,15 +1,8 @@
 from pokebot import Pokemon, Player, PokeDB
-from pokebot.common.enums import Command
-from pokebot.core.battle import Battle
 
 
-class CustomPlayer(Player):
-    def action_command(self, battle: Battle) -> Command:
-        return Command.MOVE_0
-
-
-def charge(display_log: bool = False) -> bool:
-    moves = PokeDB.tagged_moves["charge"] + PokeDB.tagged_moves["hide"]
+def physical(display_log: bool = False) -> bool:
+    moves = PokeDB.tagged_moves["physical"]
 
     result = True
     for move in moves:
@@ -22,7 +15,7 @@ def charge(display_log: bool = False) -> bool:
 
 
 def test(move: str, display_log: bool = False) -> bool:
-    max_turn = 2
+    max_turn = 1
 
     names = [
         ["リザードン"],
@@ -31,7 +24,7 @@ def test(move: str, display_log: bool = False) -> bool:
 
     abilities = [
         [""],
-        ["ノーガード"],
+        ["ファーコート"],
     ]
 
     items = [
@@ -45,7 +38,7 @@ def test(move: str, display_log: bool = False) -> bool:
     ]
 
     # 2人のプレイヤーを生成
-    player = CustomPlayer()
+    player = Player()
     opponent = Player()
 
     # ポケモンをM匹ずつパーティに追加
@@ -71,9 +64,8 @@ def test(move: str, display_log: bool = False) -> bool:
     if player.team[-1].moves[0].name != move:
         return True
 
-    return "溜め" in "".join(battle.logger.get_turn_log(turn=battle.turn-1, idx=0)) and \
-        "ダメージ" in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
+    return abilities[1][0] in battle.logger.get_turn_log(battle.turn, 1)
 
 
 if __name__ == "__main__":
-    print(charge(True))
+    print(physical(True))

@@ -150,7 +150,7 @@ def _power_modifier(self: DamageManager,
             log.notes.append(f"{attacker.ability} x1.5")
 
     # 以降の技はテクニシャン非適用
-    if move.name in ['ソーラービーム', 'ソーラーブレード']:
+    if "solar" in move.tags:
         rate = 0.5 if self.battle.field_mgr.weather() == Weather.SAND else 1
         r = ut.round_half_up(r*rate)
         if rate != 1 and log:

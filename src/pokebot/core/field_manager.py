@@ -176,11 +176,17 @@ class FieldManager:
         bool
             設定できたらTrue
         """
+
+        # 変動しない
+        if (isinstance(field, GlobalField) and self.count[field] == count) or \
+                (isinstance(field, SideField) and self.count[field][idx] == count):
+            return False
+
         # 重ね掛け不可
-        if count:
-            if (isinstance(field, GlobalField) and self.count[field]) or \
-                    (isinstance(field, SideField) and self.count[field][idx]):
-                return False
+        if count and \
+            ((isinstance(field, GlobalField) and self.count[field]) or
+             (isinstance(field, SideField) and self.count[field][idx])):
+            return False
 
         match field:
             case SideField.WISH:

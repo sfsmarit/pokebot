@@ -170,7 +170,7 @@ def _process_turn_action(self: TurnManager, idx: PlayerIndex | int):
         return
 
     # 相手のまもる技により攻撃を防がれたら中断
-    if self.process_protection(idx, move):
+    if self._protecting_move.name and self.process_protection(idx, move):
         return
 
     # 技の無効化 -> 技の効果処理に統合

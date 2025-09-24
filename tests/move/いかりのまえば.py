@@ -1,6 +1,5 @@
-from pokebot import Pokemon, Player
+from pokebot import Pokemon, Player, Battle, PokeDB
 from pokebot.common.enums import Command
-from pokebot.core.battle import Battle
 
 
 class CustomPlayer(Player):
@@ -8,13 +7,16 @@ class CustomPlayer(Player):
         return Command.MOVE_0
 
 
-def skip_charge(display_log: bool = False) -> bool:
-    moves = ["ソーラービーム", "ソーラーブレード", "エレクトロビーム"]
-    abilities = ["ひでり", "ひでり", "あめふらし"]
+def いかりのまえば(display_log: bool = False) -> bool:
+    moves = ["いかりのまえば", "カタストロフィ"]
 
     result = True
-    for move, ability in zip(moves, abilities):
-        single_test_result = test(move, ability, display_log)
+    for move in moves:
+        if move not in PokeDB.moves():
+            print(f"{move} is not in PokeDB.moves()")
+            continue
+
+        single_test_result = test(move, display_log)
         if display_log:
             print(f"{move}\t{single_test_result}")
         result &= single_test_result
@@ -22,7 +24,7 @@ def skip_charge(display_log: bool = False) -> bool:
     return result
 
 
-def test(move: str, ability: str, display_log: bool = False) -> bool:
+def test(move: str, display_log: bool = False) -> bool:
     max_turn = 1
 
     names = [
@@ -31,8 +33,8 @@ def test(move: str, ability: str, display_log: bool = False) -> bool:
     ]
 
     abilities = [
-        [ability],
         [""],
+        ["ノーガード"],
     ]
 
     items = [
@@ -69,8 +71,8 @@ def test(move: str, ability: str, display_log: bool = False) -> bool:
     # N匹を選出して対戦
     battle = player.game(opponent, max_turn=max_turn, display_log=display_log)
 
-    return "ダメージ" in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
+    return f"ダメージ {int(opponent.team[0].stats[0]/2)}" in "".join(battle.logger.get_turn_log(turn=battle.turn, idx=0))
 
 
 if __name__ == "__main__":
-    print(skip_charge(True))
+    print(いかりのまえば(True))

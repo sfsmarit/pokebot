@@ -29,6 +29,7 @@ class Move:
         self.power: int = 0
         self.hit: int = 0
         self.priority: int = 0
+
         self.tags: list[str] = []
 
         self.protect: bool = False

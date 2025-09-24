@@ -85,8 +85,9 @@ class Battle:
 
             # 技の補完
             for poke in self.players[i].team:
-                if not poke.moves:
-                    poke.add_move("はねる")
+                s = "".join([move.name for move in poke.moves])
+                if not s:
+                    poke.moves = [Move("はねる")]
 
         # 試合のリセット
         self.init_game()

@@ -173,8 +173,8 @@ def _process_attack_move(self: TurnManager,
     if move.name == 'やきつくす':
         attacker_mgr.activate_move_effect(move)
 
-    # 被弾アイテムの判定
-    if defender.item.post_hit:
+    # 被弾時に発動するアイテムの判定
+    if defender.item.triggers_on_hit:
         defender_mgr.activate_item(move)
 
     # みちづれ判定
@@ -192,11 +192,11 @@ def _process_attack_move(self: TurnManager,
 
     # 追加効果の判定
     if move.name in [
-        'わるあがき', 'がんせきアックス', 'キラースピン', 'こうそくスピン', 'ひけん･ちえなみ', 'プラズマフィスト',
+        'わるあがき', 'がんせきアックス', 'キラースピン', 'こうそくスピン', 'ひけん・ちえなみ', 'プラズマフィスト',
         'うちおとす', 'サウザンアロー', 'きつけ', 'くらいつく', 'サウザンウェーブ', 'ついばむ', 'むしくい',
         'とどめばり', 'ドラゴンテール', 'ともえなげ', 'どろぼう', 'ほしがる', 'はたきおとす', 'めざましビンタ',
         'うたかたのアリア', 'ぶきみなじゅもん',
-    ] or (move.name == 'スケイルショット' and combo_count == self._n_strikes):
+    ] or (move.name == 'スケイルショット' and combo_count == self._n_strikes - 1):
         attacker_mgr.activate_move_effect(move)
 
     # 相手のこおり状態解除

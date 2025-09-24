@@ -78,7 +78,7 @@ def _advance_turn(self: TurnManager,
         self.update_action_order()
 
         for idx in range(2):
-            text = '先手' if self.battle.poke_mgrs[idx].first_act else '後手'
+            text = '先手' if self.battle.poke_mgrs[idx].is_first_act() else '後手'
             self.battle.logger.append(TurnLog(self.battle.turn, idx, text))
 
             # 相手のS推定
@@ -138,11 +138,11 @@ def _advance_turn(self: TurnManager,
 
         if not any(self.breakpoint):
             # 技の追加処理
-            if move.name in ['アイアンローラー', 'アイススピナー', 'でんこうそうげき', 'もえつきる']:
+            if self.move_succeeded[idx] and move.name in ['アイアンローラー', 'アイススピナー', 'でんこうそうげき', 'もえつきる']:
                 attacker_mgr.activate_move_effect(move)
 
             # 技による交代判定
-            if "U-turn" in move.tags:
+            if "U_turn" in move.tags:
                 if move.name in ['クイックターン', 'とんぼがえり', 'ボルトチェンジ'] and ejectbutton_triggered:
                     self.battle.logger.append(TurnLog(self.battle.turn, idx, f"交代失敗"))
                 elif self.move_succeeded[idx]:
@@ -169,7 +169,7 @@ def _advance_turn(self: TurnManager,
                     if self.battle.poke_mgrs[idx].sub_hp:
                         baton['sub_hp'] = self.battle.poke_mgrs[idx].sub_hp
 
-                    baton_cond = [key for key, val in self.battle.poke_mgrs[idx].count.items() if key.is_baton and val]
+                    baton_cond = [key for key, val in self.battle.poke_mgrs[idx].count.items() if key.inheritable and val]
                     for cond in baton_cond:
                         baton[cond] = self.battle.poke_mgrs[idx].count[cond]
 

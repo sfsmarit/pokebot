@@ -28,15 +28,10 @@ def _process_protection(self: TurnManager,
     bool
         まもるが成功したらTrue
     """
-    battle = self.battle
-
     dfn = int(not atk)
-    attacker = battle.pokemons[atk]
-    attacker_mgr = battle.poke_mgrs[atk]
-    defender_mgr = battle.poke_mgrs[dfn]
-
-    if not self._protecting_move.name:
-        return False
+    attacker = self.battle.pokemons[atk]
+    attacker_mgr = self.battle.poke_mgrs[atk]
+    defender_mgr = self.battle.poke_mgrs[dfn]
 
     # まもる貫通
     if 'anti_protect' in move.tags or \
@@ -44,7 +39,7 @@ def _process_protection(self: TurnManager,
         self.move_succeeded[dfn] = False
         return False
 
-    move_category = effective_move_category(battle, atk, move)
+    move_category = effective_move_category(self.battle, atk, move)
 
     # 攻撃技かどうか
     self.move_succeeded[dfn] = move_category != MoveCategory.STA
@@ -65,7 +60,7 @@ def _process_protection(self: TurnManager,
     attacker_mgr.apply_move_recoil(move, 'mis_recoil')
 
     attacker_mgr.forced_turn = 0
-    battle.logger.append(TurnLog(battle.turn, atk, f"{self._protecting_move}で防がれた"))
-    battle.logger.append(TurnLog(battle.turn, dfn, f"{self._protecting_move}成功"))
+    self.battle.logger.append(TurnLog(self.battle.turn, atk, f"{self._protecting_move}で防がれた"))
+    self.battle.logger.append(TurnLog(self.battle.turn, dfn, f"{self._protecting_move}成功"))
 
     return True

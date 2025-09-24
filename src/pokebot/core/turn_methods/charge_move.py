@@ -22,7 +22,7 @@ def _charge_move(self: TurnManager,
     elif move.name in ['メテオビーム', 'エレクトロビーム', 'ロケットずつき']:
         attacker_mgr.activate_move_effect(move)
 
-    if (move.name in ['ソーラービーム', 'ソーラーブレード'] and battle.field_mgr.weather(idx) == Weather.SUNNY) or \
+    if ("solar" in move.tags and battle.field_mgr.weather(idx) == Weather.SUNNY) or \
             (move.name == 'エレクトロビーム' and battle.field_mgr.weather(idx) == Weather.RAINY):
         # 溜め省略
         attacker_mgr.forced_turn = 0

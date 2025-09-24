@@ -105,4 +105,4 @@ def _update_opponent_speed_limit(self: TurnManager, idx: PlayerIndex | int) -> N
     speed_limit = int(self.battle.poke_mgrs[idx].effective_speed() / speed_modifier)
 
     # S推定値を更新
-    opponent.set_speed_limit(speed_limit, first_act=self.battle.poke_mgrs[opp].first_act)
+    opponent.set_speed_limit(speed_limit, first_act=self.battle.poke_mgrs[opp].is_first_act())

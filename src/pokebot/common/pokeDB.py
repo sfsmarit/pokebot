@@ -31,7 +31,7 @@ class ItemData:
     power_correction: float
     consumable: bool
     immediate: bool
-    post_hit: bool
+    triggers_on_hit: bool
 
 
 @dataclass
@@ -205,7 +205,7 @@ class PokeDB:
                     power_correction=float(data[4]),
                     consumable=bool(int(data[5])),
                     immediate=bool(int(data[6])),
-                    post_hit=bool(int(data[7])),
+                    triggers_on_hit=bool(int(data[7])),
                 )
 
     @classmethod
