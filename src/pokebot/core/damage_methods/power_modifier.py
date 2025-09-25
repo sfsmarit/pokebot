@@ -7,8 +7,8 @@ from pokebot.common.enums import Ailment, MoveCategory, \
     Weather, Terrain, GlobalField
 from pokebot.common.types import PlayerIndex
 import pokebot.common.utils as ut
-from pokebot.model import Move
-from pokebot.common import PokeDB
+from pokebot.pokedb import Move
+# from pokebot.common import PokeDB
 from pokebot.common.enums import Condition
 from pokebot.logger.damage_log import DamageLog
 

@@ -4,8 +4,8 @@ if TYPE_CHECKING:
     from ..active_pokemon_manager import ActivePokemonManager
 
 import pokebot.common.utils as ut
-from pokebot.common import PokeDB
-from pokebot.model import Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Move
 from pokebot.logger import TurnLog
 
 

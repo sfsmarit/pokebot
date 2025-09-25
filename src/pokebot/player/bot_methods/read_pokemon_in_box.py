@@ -5,8 +5,8 @@ if TYPE_CHECKING:
 
 from pokebot.common.constants import TYPES, NATURE_MODIFIER
 from pokebot.common.enums import Gender
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon, Item, Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon, Item, Move
 
 from pokebot.player.image import image_utils as iut
 
@@ -81,7 +81,7 @@ def _read_pokemon_from_box(self: Bot):
     poke.moves.clear()
     for j in range(4):
         img = iut.BGR2BIN(self.img[700+60*j:750+60*j, 1320:1570], threshold=180, bitwise_not=True)
-        move = iut.OCR(img, candidates=list(PokeDB.move_data.keys()) + [''], log_dir=type(self).ocr_log_dir / "box_move")
+        move = iut.OCR(img, candidates=list(PokeDB.move_data_old.keys()) + [''], log_dir=type(self).ocr_log_dir / "box_move")
         poke.moves.append(Move(move))
 
     # レベル

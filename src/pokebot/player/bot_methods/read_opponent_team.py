@@ -6,9 +6,9 @@ if TYPE_CHECKING:
 from pathlib import Path
 import cv2
 
-from pokebot.common import PokeDB
+# from pokebot.common import PokeDB
 import pokebot.common.utils as ut
-from pokebot.model import Pokemon
+from pokebot.pokedb import Pokemon
 
 from pokebot.player.image import TemplateImage, image_utils as iut
 

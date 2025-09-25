@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import SideField, Weather
-from pokebot.model import Pokemon
+from pokebot.pokedb import Pokemon
 from pokebot.logger import TurnLog
 
 

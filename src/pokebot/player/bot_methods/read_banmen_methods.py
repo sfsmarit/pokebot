@@ -8,7 +8,7 @@ import cv2
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, SideField
 from pokebot.common.constants import TYPES, STAT_CODES
-from pokebot.common import PokeDB
+# from pokebot.common import PokeDB
 
 from pokebot.player.image import TemplateImage, image_utils as iut
 

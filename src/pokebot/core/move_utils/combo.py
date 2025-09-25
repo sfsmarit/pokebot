@@ -4,8 +4,8 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
 from pokebot.common.types import PlayerIndex
-from pokebot.common import PokeDB
-from pokebot.model import Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Move
 
 
 def num_strikes(battle: Battle,

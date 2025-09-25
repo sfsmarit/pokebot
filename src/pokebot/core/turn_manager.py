@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Phase
 import pokebot.common.utils as ut
-from pokebot.model import Pokemon, Move
+from pokebot.pokedb import Pokemon, Move
 from pokebot.logger import TurnLog
 
 from pokebot.core.move_utils import effective_move_type

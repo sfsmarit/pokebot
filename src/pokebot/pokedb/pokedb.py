@@ -4,9 +4,11 @@ import json
 from datetime import datetime, timedelta, timezone
 import csv
 
-from .enums import MoveCategory
-from .constants import STAT_CODES
-from . import utils as ut
+from pokebot.common.enums import MoveCategory
+from pokebot.common.constants import STAT_CODES
+from pokebot.common import utils as ut
+
+from .move import Move
 
 
 @dataclass
@@ -41,9 +43,9 @@ class MoveData:
     """
     type: str
     category: MoveCategory
-    power: int
-    hit: int
     pp: int
+    hit: int
+    power: int
     protect: bool = False
     subst: bool = False
     gold: bool = False
@@ -102,6 +104,7 @@ class PokeDB:
 
     item_data: dict[str, ItemData] = {}
 
+    moves: dict[str, Move] = {}
     move_data: dict[str, MoveData] = {}
     move_priority: dict[str, int] = {}
     tagged_moves: dict[str, list[str]] = {}
@@ -119,10 +122,6 @@ class PokeDB:
     @classmethod
     def items(cls) -> list[str]:
         return list(cls.item_data.keys())
-
-    @classmethod
-    def moves(cls) -> list[str]:
-        return list(cls.move_data.keys())
 
     @classmethod
     def get_move_effect_value(cls, move, effect: str) -> float:
@@ -143,7 +142,9 @@ class PokeDB:
         cls.load_home()
         cls.load_kata()
         # cls.sync_zukan_to_HOME()
-        print(f"Initiallized PokeDB\nseason {cls.season} / regulation {cls.regulation}")
+
+        print(f"PokeDB has been initiallized.")
+        print(f"season {cls.season} / regulation {cls.regulation}")
 
     @classmethod
     def load_zukan(cls):
@@ -188,13 +189,13 @@ class PokeDB:
     @classmethod
     def load_ability(cls):
         """技データの読み込み"""
-        with open(ut.path_str('data', 'tagged_abilities.json'), encoding='utf-8') as f:
+        with open(ut.path_str('data', 'old', 'tagged_abilities.json'), encoding='utf-8') as f:
             cls.tagged_abilities = json.load(f)
 
     @classmethod
     def load_item(cls):
         """アイテムデータの読み込み"""
-        with open(ut.path_str('data', 'item.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', 'old', 'item.txt'), encoding='utf-8') as f:
             next(f)
             for line in f:
                 data = line.split()
@@ -211,36 +212,43 @@ class PokeDB:
     @classmethod
     def load_move(cls):
         """技データの読み込み"""
-        with open(ut.path_str('data', 'move_tag.txt'), encoding='utf-8') as f:
+        filename = ut.path_str("data", "move.json")
+        with open(filename, encoding="utf-8") as f:
+            data = json.load(f)
+            for name, dict in data.items():
+                dict["name"] = name
+                cls.moves[name] = Move.from_json(dict)
+
+        with open(ut.path_str('data', "old", 'move_tag.txt'), encoding='utf-8') as f:
             for line in f:
                 data = line.split()
                 cls.tagged_moves[data[0]] = data[1:]
 
-        with open(ut.path_str('data', 'move_priority.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', "old", 'move_priority.txt'), encoding='utf-8') as f:
             for line in f:
                 data = line.split()
-                for move in data[1:]:
-                    cls.move_priority[move] = int(data[0])
+                for name in data[1:]:
+                    cls.move_priority[name] = int(data[0])
 
-        with open(ut.path_str('data', 'move_effect.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', "old", 'move_effect.txt'), encoding='utf-8') as f:
             line = f.readline()
             labels = line.split()
             for line in f:
                 data = line.split()
-                move = data[0]
-                cls.move_effect[move] = {}
+                name = data[0]
+                cls.move_effect[name] = {}
                 for eff, val in zip(labels[1:], data[1:]):
                     val = float(val)
                     if val.is_integer():
                         val = int(val)
-                    cls.move_effect[move][eff] = val
+                    cls.move_effect[name][eff] = val
 
-        with open(ut.path_str('data', 'combo_move.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', "old", 'combo_move.txt'), encoding='utf-8') as f:
             for line in f:
                 data = line.split()
                 cls.combo_range[data[0]] = [int(data[1]), int(data[2])]
 
-        with open(ut.path_str('data', 'attack_move.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', "old", 'attack_move.txt'), encoding='utf-8') as f:
             line = f.readline()
             for line in f:
                 data = line.split()
@@ -253,12 +261,11 @@ class PokeDB:
                 )
 
             # 威力変動技の初期化
-            for move in cls.tagged_moves['var_power']:
-                cls.move_data[move].power = 1
+            for name in cls.tagged_moves['variable_power']:
+                cls.move_data[name].power = 1
 
-        with open(ut.path_str('data', 'status_move.txt'), encoding='utf-8') as f:
+        with open(ut.path_str('data', "old", 'status_move.txt'), encoding='utf-8') as f:
             line = f.readline()
-            keys = line.split()
 
             for line in f:
                 data = line.split()
@@ -285,7 +292,7 @@ class PokeDB:
         else:
             last_update = 0
 
-        filename = ut.path_str("data", f"season{cls.season}.json")
+        filename = ut.path_str("data", "home", f"season{cls.season}.json")
         dt_now = datetime.now(timezone(timedelta(hours=+9), 'JST'))
         yyyymmdd = int(dt_now.strftime('%Y%m%d'))
 

@@ -4,8 +4,8 @@ if TYPE_CHECKING:
     from ..player import Player
 
 from pokebot.common.enums import Phase, Command
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon, Ability, Item, Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon, Ability, Item, Move
 from pokebot.core.battle import Battle
 
 

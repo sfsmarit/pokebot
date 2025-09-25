@@ -7,7 +7,7 @@ from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, \
     GlobalField, SideField, Weather, Terrain
 import pokebot.common.utils as ut
-from pokebot.model import Pokemon, Move
+from pokebot.pokedb import Pokemon, Move
 from pokebot.logger import TurnLog
 
 
@@ -156,7 +156,7 @@ def _process_status_move(self: TurnManager,
             self.move_succeeded[atk] = any(defender_mgr.add_rank(4, -2, by_opponent=True)) and dfn == org_dfn
         case 'うつしえ' | 'なりきり':
             self.move_succeeded[atk] = not attacker_mgr.is_ability_protected() and \
-                "unreproducible" in defender.ability.tags and \
+                "unreproducible" in defender.ability.flags and \
                 attacker.ability.name != defender.ability.name
             if self.move_succeeded[atk]:
                 attacker.ability.name = defender.ability.name
@@ -288,7 +288,7 @@ def _process_status_move(self: TurnManager,
                     battle.logger.append(TurnLog(battle.turn, i, f"-> {battle.pokemons[i].ability}"))
                 # 特性の再発動
                 for i in battle.turn_mgr.speed_order:
-                    if "immediate" in battle.pokemons[i].ability.tags:
+                    if "immediate" in battle.pokemons[i].ability.flags:
                         battle.poke_mgrs[i].activate_ability()
         case 'すてゼリフ':
             # 成否判定は交代時に行う

@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ..bot import Bot
 
 from pokebot.common.types import PlayerIndex
-from pokebot.common import PokeDB
+# from pokebot.common import PokeDB
 import pokebot.common.utils as ut
 
 from pokebot.player.image import image_utils as iut

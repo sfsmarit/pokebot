@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ..damage_manager import DamageManager
 
 from pokebot.common.types import PlayerIndex
-from pokebot.model import Move
+from pokebot.pokedb import Move
 from pokebot.logger.damage_log import DamageLog
 from pokebot.core.move_utils import effective_move_type
 

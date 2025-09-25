@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from pokebot.common.types import PlayerIndex
 import pokebot.common.utils as ut
-from pokebot.model import Move
+from pokebot.pokedb import Move
 
 
 class DamageLog:

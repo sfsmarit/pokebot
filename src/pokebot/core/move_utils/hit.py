@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import MoveCategory, Weather, Condition, GlobalField
 import pokebot.common.utils as ut
-from pokebot.model import Move
+from pokebot.pokedb import Move
 
 
 def hit_probability(battle: Battle,

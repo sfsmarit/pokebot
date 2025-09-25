@@ -3,7 +3,6 @@ from __future__ import annotations
 from copy import deepcopy
 
 import pokebot.common.utils as ut
-from pokebot.common import PokeDB
 
 
 class Ability:
@@ -12,18 +11,16 @@ class Ability:
     """
 
     def __init__(self, name: str = ""):
-        if name and name not in PokeDB.abilities:
-            print(f"{name} is not in PokeDB.abilities")
-            name = ""
-
         self._org_name: str = name
         self._name: str = name
-        self.active: bool = True
-        self.observed: bool = False
-        self.count: int = 0
-        self.tags: list[str] = []
 
-        self.set_base_info()
+        self.flags: list[str] = []
+        self.effects: list = []
+        self.handlers: list = []
+
+        self.observed: bool = False
+        self.active: bool = True
+        self.count: int = 0
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -41,7 +38,7 @@ class Ability:
 
         for tag, val in PokeDB.tagged_abilities.items():
             if self._name in val:
-                self.tags.append(tag)
+                self.flags.append(tag)
 
     def init_game(self):
         """試合開始前の状態に初期化"""

@@ -5,8 +5,8 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, SideField, Command
-from pokebot.model.ability import Ability
-from pokebot.model import Move
+from pokebot.pokedb.ability import Ability
+from pokebot.pokedb import Move
 from pokebot.logger import TurnLog
 
 
@@ -50,7 +50,7 @@ def _switch_pokemon(self: TurnManager,
         # かがくへんかガス解除
         if active_ability.name == 'かがくへんかガス':
             opponent.ability.active = True
-            if "immediate" in opponent.ability.tags:
+            if "immediate" in opponent.ability.flags:
                 self.battle.poke_mgrs[opp].activate_ability()
             self.battle.logger.append(TurnLog(self.battle.turn, opp, 'かがくへんかガス解除'))
 
@@ -133,17 +133,17 @@ def _land(self: TurnManager, idxes: list[PlayerIndex | int]):
                 break
 
             # トレース
-            if poke.ability.name == 'トレース' and "unreproducible" not in opponent.ability.tags:
+            if poke.ability.name == 'トレース' and "unreproducible" not in opponent.ability.flags:
                 poke.ability.name = opponent.ability.name
                 self.battle.logger.append(TurnLog(self.battle.turn, idx, f"トレース -> {opponent.ability}"))
 
     # 特性の発動
     for idx in idxes:
-        if "immediate_1" in self.battle.pokemons[idx].ability.tags:
+        if "immediate_1" in self.battle.pokemons[idx].ability.flags:
             self.battle.poke_mgrs[idx].activate_ability()
 
     for idx in idxes:
-        if "immediate_2" in self.battle.pokemons[idx].ability.tags:
+        if "immediate_2" in self.battle.pokemons[idx].ability.flags:
             self.battle.poke_mgrs[idx].activate_ability()
 
     # 即時アイテムの判定

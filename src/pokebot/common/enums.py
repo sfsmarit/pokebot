@@ -19,6 +19,10 @@ class BaseEnum(Enum):
         return [x.name for x in cls]
 
 
+class Trigger(Enum):
+    ON_HIT = "on_hit"
+
+
 class Gender(BaseEnum):
     NONE = None
     MALE = "オス"

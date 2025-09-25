@@ -9,8 +9,8 @@ from pokebot.common.enums import Ailment, Condition, BoostSource, \
     MoveCategory, GlobalField
 from pokebot.common.constants import EXCLUSIVE_ITEM, PLATE_TYPE
 import pokebot.common.utils as ut
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon, Ability, Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon, Ability, Move
 from pokebot.logger import TurnLog
 
 from .pokemon_methods.activate_ability import _activate_ability
@@ -348,7 +348,7 @@ class ActivePokemonManager:
         self.lose_item(text="消費")
 
         # きのみ関連の特性の発動
-        if self.pokemon.item.name_lost[-2:] == 'のみ' and "berry" in self.pokemon.ability.tags:
+        if self.pokemon.item.name_lost[-2:] == 'のみ' and "berry" in self.pokemon.ability.flags:
             self.activate_ability()
 
     def defending_ability(self, move: Move | None = None) -> Ability:

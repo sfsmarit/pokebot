@@ -6,8 +6,8 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition
 from pokebot.common.constants import STAT_CODES
-from pokebot.common import PokeDB
-from pokebot.model import Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Move
 from pokebot.logger import TurnLog
 
 from pokebot.core.move_utils import critical_probability
@@ -162,11 +162,11 @@ def _process_attack_move(self: TurnManager,
             attacker_mgr.activate_move_effect(move)
 
         # 攻撃側の特性
-        if "attack" in attacker.ability.tags:
+        if "attack" in attacker.ability.flags:
             attacker_mgr.activate_ability(move)
 
         # 防御側の特性
-        if any(tag in defender.ability.tags for tag in ['damage', 'contact']):
+        if any(tag in defender.ability.flags for tag in ['damage', 'contact']):
             defender_mgr.activate_ability(move)
 
     # やきつくす判定

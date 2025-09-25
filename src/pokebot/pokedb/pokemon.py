@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
-from pokebot.common import PokeDB
+# #from pokebot.common import PokeDB
 from pokebot.common.enums import Gender, Ailment
 from pokebot.common.constants import STAT_CODES, NATURE_MODIFIER, EXCLUSIVE_ITEM, EXCLUSIVE_TERASTAL
 import pokebot.common.utils as ut

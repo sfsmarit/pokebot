@@ -8,8 +8,8 @@ import cv2
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Time, Command, Phase, Ailment, Condition, SideField, GlobalField
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon
 from pokebot.core import Battle
 
 from .player import Player

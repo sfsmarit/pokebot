@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 import json
 
 from pokebot.common.enums import Command
-from pokebot.model import Pokemon
+from pokebot.pokedb import Pokemon
 from pokebot.core.battle import Battle
 
 

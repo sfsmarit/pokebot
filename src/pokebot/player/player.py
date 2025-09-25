@@ -6,7 +6,7 @@ from typing import Self
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command
 import pokebot.common.utils as ut
-from pokebot.model import Pokemon
+from pokebot.pokedb import Pokemon
 from pokebot.core import Battle
 
 from .player_methods.game import _game

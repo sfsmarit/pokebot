@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 import pokebot.common.utils as ut
-from pokebot.common import PokeDB
+# #from pokebot.common import PokeDB
 
 
 class Item:

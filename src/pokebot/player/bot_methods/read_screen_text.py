@@ -7,9 +7,9 @@ import cv2
 import unicodedata
 
 from pokebot.common.constants import TYPES, STAT_CODES_HIRAGANA, STAT_CODES_KANJI
-from pokebot.common import PokeDB
+# from pokebot.common import PokeDB
 import pokebot.common.utils as ut
-from pokebot.model import Pokemon, Item, Move
+from pokebot.pokedb import Pokemon, Item, Move
 from pokebot.core.move_utils import move_speed
 
 from pokebot.player.image import image_utils as iut
@@ -197,7 +197,7 @@ def _read_screen_text(self: Bot, capture: bool = True) -> bool:
         s = ut.find_most_similar(candidates, words[1][:-1])
 
         # 技を読み取った場合
-        if s in PokeDB.move_data:
+        if s in PokeDB.move_data_old:
             dict['move'] = s
             dict['hit'] = True
             dict['critical'] = False

@@ -5,8 +5,8 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Ailment, Condition, MoveCategory
-from pokebot.common import PokeDB
-from pokebot.model import Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Move
 from pokebot.logger import TurnLog
 
 from pokebot.core.move_utils import num_strikes, hit_probability

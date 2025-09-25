@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Ailment, MoveCategory, Condition, \
     BoostSource, GlobalField
 from pokebot.common.constants import FIELD_SEED, STAT_CODES
-from pokebot.model import Move
+from pokebot.pokedb import Move
 from pokebot.logger import TurnLog
 
 

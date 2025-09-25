@@ -6,8 +6,8 @@ if TYPE_CHECKING:
 import warnings
 
 from pokebot.common.enums import Time
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon, Item
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon, Item
 
 
 def _read_banmen(self: Bot) -> bool:

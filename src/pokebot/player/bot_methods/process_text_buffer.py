@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..bot import Bot
 
-from pokebot.common import PokeDB
-from pokebot.model import Pokemon, Item, Move
+# from pokebot.common import PokeDB
+from pokebot.pokedb import Pokemon, Item, Move
 
 
 def _process_text_buffer(self: Bot):

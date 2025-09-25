@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Ailment, Condition, MoveCategory, \
     BoostSource, SideField, Weather, Terrain
 from pokebot.common.constants import STAT_CODES
-from pokebot.model import Move
+from pokebot.pokedb import Move
 from pokebot.logger.logger import TurnLog
 
 from pokebot.core.move_utils import effective_move_type
@@ -59,7 +59,7 @@ def _activate_ability(self: ActivePokemonManager,
             if activated:
                 self.battle.turn_mgr._flinch = True
         case 'いかく':
-            if "anti_ikaku" in opponent.ability.tags:
+            if "anti_ikaku" in opponent.ability.flags:
                 opponent_mgr.activate_ability()
             else:
                 opponent_mgr.add_rank(1, -1, by_opponent=True)
@@ -312,7 +312,7 @@ def _activate_ability(self: ActivePokemonManager,
     if activated:
         self.battle.logger.insert(-1, TurnLog(self.battle.turn, self.idx, user.ability.name))
         user.ability.observed = True  # 観測
-        if "one_time" in user.ability.tags:
+        if "one_time" in user.ability.flags:
             user.ability.active = False
         return True
 
