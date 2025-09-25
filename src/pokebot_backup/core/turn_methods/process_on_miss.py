@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ..turn_manager import TurnManager
 
 from pokebot.common.types import PlayerIndex
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 

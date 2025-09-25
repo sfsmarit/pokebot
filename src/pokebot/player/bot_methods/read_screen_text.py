@@ -9,7 +9,7 @@ import unicodedata
 from pokebot.common.constants import TYPES, STAT_CODES_HIRAGANA, STAT_CODES_KANJI
 # from pokebot.common import PokeDB
 import pokebot.common.utils as ut
-from pokebot.pokedb import Pokemon, Item, Move
+from pokebot.model import Pokemon, Item, Move
 from pokebot.core.move_utils import move_speed
 
 from pokebot.player.image import image_utils as iut

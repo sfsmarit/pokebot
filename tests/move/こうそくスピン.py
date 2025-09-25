@@ -12,7 +12,7 @@ def こうそくスピン(display_log: bool = False) -> bool:
 
     result = True
     for move in moves:
-        if move not in PokeDB.moves():
+        if move not in PokeDB.move():
             print(f"{move} is not in PokeDB.moves()")
             continue
 

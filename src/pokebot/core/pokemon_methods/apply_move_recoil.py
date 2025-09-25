@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 import pokebot.common.utils as ut
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 

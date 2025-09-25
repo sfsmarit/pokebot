@@ -14,7 +14,7 @@ def もえつきる(display_log: bool = False) -> bool:
 
     result = True
     for move, name in zip(moves, names):
-        if move not in PokeDB.moves():
+        if move not in PokeDB.move():
             print(f"{move} is not in PokeDB.moves()")
             continue
         single_test_result = test(move, name, display_log)

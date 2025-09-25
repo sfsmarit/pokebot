@@ -10,7 +10,7 @@ class CustomPlayer(Player):
 
 def きつけ(display_log: bool = False) -> bool:
     move = "きつけ"
-    if move not in PokeDB.moves():
+    if move not in PokeDB.move():
         print(f"{move} is not in PokeDB.moves()")
         return True
 

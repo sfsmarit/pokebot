@@ -8,7 +8,7 @@ import cv2
 
 # from pokebot.common import PokeDB
 import pokebot.common.utils as ut
-from pokebot.pokedb import Pokemon
+from pokebot.model import Pokemon
 
 from pokebot.player.image import TemplateImage, image_utils as iut
 

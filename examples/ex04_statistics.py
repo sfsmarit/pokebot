@@ -24,7 +24,7 @@ print(f"\t\t{PokeDB.home[name].item_rates}")
 print(f"テラスタル\t{PokeDB.home[name].terastals}")
 print(f"\t\t{PokeDB.home[name].terastal_rates}")
 
-print(f"技\t\t{PokeDB.home[name].moves}")
+print(f"技\t\t{PokeDB.home[name].move}")
 print(f"\t\t{PokeDB.home[name].move_rates}")
 
 

@@ -1,4 +1,4 @@
-from pokebot.pokedb import Pokemon
+from pokebot.model import Pokemon
 
 
 def push(dstr: dict, key: str, value: int | float):

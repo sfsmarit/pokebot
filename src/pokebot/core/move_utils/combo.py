@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Move
+from pokebot.model import Move
 
 
 def num_strikes(battle: Battle,

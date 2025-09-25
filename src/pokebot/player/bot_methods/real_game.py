@@ -10,7 +10,7 @@ import warnings
 from copy import deepcopy
 
 from pokebot.common.enums import Ailment, Time, Phase
-from pokebot.pokedb import Pokemon
+from pokebot.model import Pokemon
 
 
 def _real_game(self: Bot):

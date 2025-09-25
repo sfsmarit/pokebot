@@ -7,7 +7,7 @@ from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition
 from pokebot.common.constants import STAT_CODES
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 from pokebot.core.move_utils import critical_probability

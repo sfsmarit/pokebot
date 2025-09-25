@@ -5,8 +5,8 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition, SideField, Command
-from pokebot.pokedb.ability import Ability
-from pokebot.pokedb import Move
+from pokebot.sim.ability import Ability
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 

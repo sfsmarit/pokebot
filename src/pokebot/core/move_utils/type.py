@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import MoveCategory
 from pokebot.common.constants import WEATHER_BALL_TYPE
-from pokebot.pokedb import Move
+from pokebot.model import Move
 
 
 def effective_move_type(battle: Battle,

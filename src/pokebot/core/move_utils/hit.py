@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import MoveCategory, Weather, Condition, GlobalField
 import pokebot.common.utils as ut
-from pokebot.pokedb import Move
+from pokebot.model import Move
 
 
 def hit_probability(battle: Battle,
@@ -51,11 +51,11 @@ def hit_probability(battle: Battle,
             return 0.3
 
     # 技の命中率
-    prob = move.hit
+    prob = move.accuracy
 
     if battle.field_mgr.weather(atk) == Weather.SUNNY and move.name in ['かみなり', 'ぼうふう']:
         prob *= 0.5
-    if defender_ability.name == 'ミラクルスキン' and move.category == MoveCategory.STA and move.hit <= 100:
+    if defender_ability.name == 'ミラクルスキン' and move.category == MoveCategory.STA and move.accuracy <= 100:
         prob = min(prob, 50)
 
     # 命中補正

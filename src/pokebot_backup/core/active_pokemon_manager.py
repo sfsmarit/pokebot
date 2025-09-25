@@ -10,7 +10,7 @@ from pokebot.common.enums import Ailment, Condition, BoostSource, \
 from pokebot.common.constants import EXCLUSIVE_ITEM, PLATE_TYPE
 import pokebot.common.utils as ut
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Pokemon, Ability, Move
+from pokebot.model import Pokemon, Ability, Move
 from pokebot.logger import TurnLog
 
 from .pokemon_methods.activate_ability import _activate_ability

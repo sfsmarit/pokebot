@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.enums import MoveCategory
 from pokebot.common.constants import NATURE_MODIFIER, STAT_CODES_KANJI
 import pokebot.common.utils as ut
-from pokebot.pokedb import Pokemon, Item, Move
+from pokebot.model import Pokemon, Item, Move
 from pokebot.core.battle import Battle
 from pokebot.core.move_utils import effective_move_category
 

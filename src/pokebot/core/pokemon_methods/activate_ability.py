@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Ailment, Condition, MoveCategory, \
     BoostSource, SideField, Weather, Terrain
 from pokebot.common.constants import STAT_CODES
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger.logger import TurnLog
 
 from pokebot.core.move_utils import effective_move_type

@@ -1,4 +1,8 @@
 {
+    "": {
+        "consumable": false,
+        "throw_power": 0
+    },
     "あかいいと": {
         "consumable": false,
         "throw_power": 10,

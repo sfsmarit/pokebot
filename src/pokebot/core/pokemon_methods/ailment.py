@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.common.enums import Ailment, MoveCategory, Condition, \
     SideField, Weather, Terrain
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Ailment, Weather, Terrain, MoveCategory
 from pokebot.common.types import PlayerIndex
 import pokebot.common.utils as ut
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger.damage_log import DamageLog
 from pokebot.core.move_utils import effective_move_type, effective_move_category
 

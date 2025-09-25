@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 from pokebot.common.constants import TYPES, NATURE_MODIFIER
 from pokebot.common.enums import Gender
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Pokemon, Item, Move
+from pokebot.model import Pokemon, Item, Move
 
 from pokebot.player.image import image_utils as iut
 

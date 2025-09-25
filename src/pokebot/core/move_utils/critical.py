@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Ailment, Condition
-from pokebot.pokedb import Move
+from pokebot.model import Move
 
 
 def critical_probability(battle: Battle,

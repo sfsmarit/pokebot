@@ -10,7 +10,7 @@ class CustomPlayer(Player):
 
 def ぶきみなじゅもん(display_log: bool = False) -> bool:
     move = "ぶきみなじゅもん"
-    if move not in PokeDB.moves():
+    if move not in PokeDB.move():
         print(f"{move} is not in PokeDB.moves()")
         return True
 

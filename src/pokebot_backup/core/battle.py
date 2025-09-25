@@ -12,7 +12,7 @@ from pokebot.common.types import PlayerIndex
 from pokebot.common.enums import Command, Phase, Time
 from pokebot.common.constants import TYPES
 import pokebot.common.utils as ut
-from pokebot.pokedb import Pokemon, Move
+from pokebot.model import Pokemon, Move
 from pokebot.logger import Logger, DamageLog
 
 from .turn_manager import TurnManager

@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ..active_pokemon_manager import ActivePokemonManager
 
 from pokebot.common.enums import Condition, SideField, Weather, Terrain
-from pokebot.pokedb import Move
+from pokebot.model import Move
 from pokebot.logger import TurnLog
 
 

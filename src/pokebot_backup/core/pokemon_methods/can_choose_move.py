@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.common.enums import MoveCategory, Condition
 # from pokebot.common import PokeDB
-from pokebot.pokedb import Move
+from pokebot.model import Move
 
 
 def _can_choose_move(self: ActivePokemonManager,
