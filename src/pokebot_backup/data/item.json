@@ -1,0 +1,1601 @@
+{
+    "あかいいと": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "あついいわ": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "あつぞこブーツ": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "いかさまダイス": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "いしずえのめん": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "いどのめん": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "いのちのたま": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.3
+            }
+        ],
+        "handlers": []
+    },
+    "エレキシード": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "おうじゃのしるし": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "おおきなねっこ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "おんみつマント": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "かいがらのすず": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "かえんだま": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "かたいいし": {
+        "consumable": false,
+        "throw_power": 100,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "いわ"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "かまどのめん": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "からぶりほけん": {
+        "consumable": true,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "かるいし": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "きあいのタスキ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "きあいのハチマキ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "きせきのたね": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "くさ"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "きゅうこん": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "きれいなぬけがら": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ぎんのこな": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "むし"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "くっつきバリ": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "グラスシード": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "グランドコート": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "クリアチャーム": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "くろいてっきゅう": {
+        "consumable": false,
+        "throw_power": 130,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "くろいヘドロ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "くろいメガネ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "あく"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "くろおび": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "かくとう"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "こうかくレンズ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "こうこうのしっぽ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "こころのしずく": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "こだわりスカーフ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "こだわりハチマキ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.5
+            }
+        ],
+        "handlers": []
+    },
+    "こだわりメガネ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.5
+            }
+        ],
+        "handlers": []
+    },
+    "ゴツゴツメット": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "サイコシード": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "さらさらいわ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "じしゃく": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "でんき"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "しめつけバンド": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "しめったいわ": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "じゃくてんほけん": {
+        "consumable": true,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "じゅうでんち": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "シルクのスカーフ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "ノーマル"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "しろいハーブ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "しんかのきせき": {
+        "consumable": false,
+        "throw_power": 40,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "しんぴのしずく": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "みず"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "するどいキバ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "するどいくちばし": {
+        "consumable": false,
+        "throw_power": 50,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "ひこう"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "するどいツメ": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "せいれいプレート": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "フェアリー"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "せんせいのツメ": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "だっしゅつパック": {
+        "consumable": true,
+        "throw_power": 50,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "だっしゅつボタン": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "たつじんのおび": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "たべのこし": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ちからのハチマキ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.1
+            }
+        ],
+        "handlers": []
+    },
+    "つめたいいわ": {
+        "consumable": false,
+        "throw_power": 40,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "でかいきんのたま": {
+        "consumable": false,
+        "throw_power": 130,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "でんきだま": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "とくせいガード": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "どくどくだま": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "どくバリ": {
+        "consumable": false,
+        "throw_power": 70,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "どく"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "とけないこおり": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "こおり"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "とつげきチョッキ": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ねばりのかぎづめ": {
+        "consumable": false,
+        "throw_power": 90,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ねらいのまと": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ノーマルジュエル": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "のどスプレー": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "のろいのおふだ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "ゴースト"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "パワフルハーブ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "パンチグローブ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ばんのうがさ": {
+        "consumable": false,
+        "throw_power": 60,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ひかりごけ": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ひかりのこな": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ひかりのねんど": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ビビリだま": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ピントレンズ": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ブーストエナジー": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ふうせん": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "フォーカスレンズ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ぼうごパット": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ぼうじんゴーグル": {
+        "consumable": false,
+        "throw_power": 80,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "まがったスプーン": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "エスパー"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "ミストシード": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "メタルコート": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "はがね"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "メトロノーム": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "メンタルハーブ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "もくたん": {
+        "consumable": false,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "ほのお"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "ものしりメガネ": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.1
+            }
+        ],
+        "handlers": []
+    },
+    "ものまねハーブ": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "やわらかいすな": {
+        "consumable": false,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "じめん"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "ゆきだま": {
+        "consumable": true,
+        "throw_power": 30,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ようせいのハネ": {
+        "consumable": false,
+        "throw_power": 20,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "フェアリー"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "りゅうのキバ": {
+        "consumable": false,
+        "throw_power": 70,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "buff_type": "ドラゴン"
+            },
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "ルームサービス": {
+        "consumable": true,
+        "throw_power": 100,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "レッドカード": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "くちたけん": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "くちたたて": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "こんごうだま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "しらたま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "だいこんごうだま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "だいしらたま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "だいはっきんだま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "はっきんだま": {
+        "consumable": false,
+        "throw_power": 0,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "modifier": 1.2
+            }
+        ],
+        "handlers": []
+    },
+    "オボンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ラムのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "クラボのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "カゴのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "モモンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "チーゴのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ナナシのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "キーのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ヒメリのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "オレンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "フィラのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ウイのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "マゴのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "バンジのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "イアのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "チイラのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "リュガのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ヤタピのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ズアのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "カムラのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "スターのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "サンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_update",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ホズのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "ノーマル"
+            }
+        ],
+        "handlers": []
+    },
+    "リンドのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "くさ"
+            }
+        ],
+        "handlers": []
+    },
+    "オッカのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "ほのお"
+            }
+        ],
+        "handlers": []
+    },
+    "イトケのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "みず"
+            }
+        ],
+        "handlers": []
+    },
+    "ソクノのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "でんき"
+            }
+        ],
+        "handlers": []
+    },
+    "カシブのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "ゴースト"
+            }
+        ],
+        "handlers": []
+    },
+    "ヨロギのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "いわ"
+            }
+        ],
+        "handlers": []
+    },
+    "タンガのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "むし"
+            }
+        ],
+        "handlers": []
+    },
+    "ウタンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "エスパー"
+            }
+        ],
+        "handlers": []
+    },
+    "バコウのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "ひこう"
+            }
+        ],
+        "handlers": []
+    },
+    "シュカのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "じめん"
+            }
+        ],
+        "handlers": []
+    },
+    "ビアーのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "どく"
+            }
+        ],
+        "handlers": []
+    },
+    "ヨプのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "かくとう"
+            }
+        ],
+        "handlers": []
+    },
+    "ヤチェのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "こおり"
+            }
+        ],
+        "handlers": []
+    },
+    "リリバのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "はがね"
+            }
+        ],
+        "handlers": []
+    },
+    "ナモのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "あく"
+            }
+        ],
+        "handlers": []
+    },
+    "ハバンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "ドラゴン"
+            }
+        ],
+        "handlers": []
+    },
+    "ロゼルのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_modify_attack",
+                "debuff_type": "フェアリー"
+            }
+        ],
+        "handlers": []
+    },
+    "アッキのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "タラプのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "イバンのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    },
+    "ジャポのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "レンブのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ナゾのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [
+            {
+                "trigger": "on_hit",
+                "target": "self"
+            }
+        ],
+        "handlers": []
+    },
+    "ミクルのみ": {
+        "consumable": true,
+        "throw_power": 10,
+        "flags": [],
+        "effects": [],
+        "handlers": []
+    }
+}
