@@ -3,10 +3,10 @@ from __future__ import annotations
 from pokebot.common.enums import Gender, Ailment
 from pokebot.common.constants import NATURE_MODIFIER
 import pokebot.common.utils as ut
+from pokebot.data.registry import PokemonData
 
-from .base_data import PokemonData
-from .ability import Ability
-from .item import Item
+from ..model.ability import Ability
+from ..model.item import Item
 from .move import Move
 
 

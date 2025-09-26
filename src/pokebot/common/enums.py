@@ -20,7 +20,8 @@ class BaseEnum(Enum):
 
 
 class Trigger(Enum):
-    ON_HIT = "on_hit"
+    ON_HIT = auto()
+    ON_MOVE_SECONDARY = auto()
 
 
 class Gender(BaseEnum):

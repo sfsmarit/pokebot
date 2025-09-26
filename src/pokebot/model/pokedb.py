@@ -1,11 +1,13 @@
 import json
 
 from pokebot.common import utils as ut
-from .base_data import PokemonData, AbilityData, ItemData, MoveData
-from .pokemon import Pokemon
+from .base_data import PokemonData
+from ..core.pokemon import Pokemon
 from .ability import Ability
 from .item import Item
-from .move import Move
+
+from pokebot.data.registry import AbilityData, ItemData, MoveData
+from pokebot.data.move import MOVE
 
 
 class PokeDB:
@@ -79,3 +81,4 @@ class PokeDB:
         with open(filename, encoding="utf-8") as f:
             for name, data in json.load(f).items():
                 cls.move[name] = MoveData(name, data)
+                cls.move[name].category = cls.move[name].category.value
