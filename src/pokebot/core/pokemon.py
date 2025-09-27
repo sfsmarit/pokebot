@@ -16,6 +16,14 @@ from .move import Move
 from .active_status import ActiveStatus
 
 
+def calc_hp(level, base, indiv, effort):
+    return ((base*2 + indiv + effort//4) * level) // 100 + level + 10
+
+
+def calc_stat(level, base, indiv, effort, nc):
+    return int((((base*2 + indiv + effort//4) * level) // 100 + 5) * nc)
+
+
 class Pokemon:
     def __init__(self, data: PokemonData):
         self.data: PokemonData = data
@@ -54,10 +62,7 @@ class Pokemon:
         self.observed = True
         self.ability.register_handlers(battle)
         self.item.register_handlers(battle)
-        battle.add_turn_log(battle.idx(self), f"{self.name} 着地")
-
-    def try_use_move(self, battle: Battle, move: Move, target: Pokemon):
-        battle.run_move(move, user=self, target=target)
+        battle.add_turn_log(self, f"{self.name} 着地")
 
     @property
     def name(self):
@@ -121,9 +126,9 @@ class Pokemon:
         for i in range(6):
             for eff in efforts_50:
                 if i == 0:
-                    v = int((self.data.base[0]*2+self._indiv[0]+int(eff/4))*self._level/100)+self._level+10
+                    v = calc_hp(self._level, self.data.base[i], self._indiv[i], self._effort[i])
                 else:
-                    v = int((int((self.data.base[i]*2+self._indiv[i]+int(eff/4))*self._level/100)+5)*nc[i])
+                    v = calc_stat(self._level, self.data.base[i], self._indiv[i], self._effort[i], nc)
                 if v == stats[i]:
                     self._effort[i] = eff
                     self._stats[i] = v
@@ -176,11 +181,9 @@ class Pokemon:
         if keep_damage:
             damage = self._stats[0] - self.hp
 
-        self._stats[0] = int((self.base[0]*2+self._indiv[0] + int(self._effort[0]/4)) * self._level/100) + self._level + 10
-
+        self._stats[0] = calc_hp(self._level, self.data.base[0], self._indiv[0], self._effort[0])
         for i in range(1, 6):
-            self._stats[i] = int((int((self.base[i]*2 + self._indiv[i] + int(self._effort[i]/4)) * self._level/100) + 5) *
-                                 NATURE_MODIFIER[self._nature][i])
+            self._stats[i] = calc_stat(self._level, self.data.base[i], self._indiv[i], self._effort[i], NATURE_MODIFIER[self._nature][i])
 
         if keep_damage:
             self.hp = self.hp - damage
@@ -191,9 +194,9 @@ class Pokemon:
 
         for eff in efforts_50:
             if idx == 0:
-                v = int((self.data.base[0]*2+self._indiv[0]+int(eff/4))*self._level/100)+self._level+10
+                v = calc_hp(self._level, self.data.base[0], self._indiv[0], eff)
             else:
-                v = int((int((self.data.base[idx]*2+self._indiv[idx]+int(eff/4))*self._level/100)+5)*nc[idx])
+                v = calc_stat(self._level, self.data.base[idx], self._indiv[idx], eff, nc[idx])
             if v == value:
                 self._effort[idx] = eff
                 self._stats[idx] = v
@@ -205,12 +208,13 @@ class Pokemon:
         self._effort[idx] = value
         self.update_stats()
 
-    def modify_hp(self, battle: Battle, v: int):
+    def modify_hp(self, battle: Battle, v: int) -> bool:
         old = self.hp
-        self.hp = max(0, min(self.max_hp, self.hp + v))
+        self.hp = max(0, min(self.max_hp, old + v))
         diff = self.hp - old
         if diff:
-            battle.add_turn_log(battle.idx(self), f"HP {'+' if diff >= 0 else ''}{diff}")
+            battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff}")
+        return diff != 0
 
     def terastallize(self) -> bool:
         if self.is_terastallized:

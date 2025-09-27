@@ -1,5 +1,21 @@
+from .steps import Step
+
+
 from typing import Callable
-from pokebot.common.enums import Event
+from enum import Enum, auto
+
+
+class Event(Enum):
+    ON_START = auto()
+    ON_SWITCH_IN = auto()
+    ON_BEFORE_MOVE = auto()
+    ON_TRY_MOVE = auto()
+    ON_HIT = auto()
+    ON_DAMAGE = auto()
+    ON_TURN_END = auto()
+    ON_RANK_UP = auto()
+    ON_RANK_DOWN = auto()
+    ON_END = auto()
 
 
 class EventManager:

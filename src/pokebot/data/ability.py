@@ -18,6 +18,7 @@ ABILITY: dict[str, AbilityData] = {
     "あめふらし": {},
     "ありじごく": {},
     "いかく": AbilityData(
+        name="いかく",
         handlers={Event.ON_SWITCH_IN: after_switch_in.いかく}
     ),
     "いかりのこうら": {},
@@ -67,6 +68,7 @@ ABILITY: dict[str, AbilityData] = {
     "かたいツメ": {},
     "かたやぶり": {},
     "かちき": AbilityData(
+        name="かちき",
         flags=["undeniable"],
         handlers={Event.ON_RANK_DOWN: after_stat_change.かちき}
     ),

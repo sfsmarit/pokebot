@@ -6,15 +6,12 @@ if TYPE_CHECKING:
 import pokebot.common.utils as ut
 from pokebot.data.registry import ItemData
 
+from .base import Effect
 
-class Item:
-    def __init__(self, data: ItemData):
-        self.data: ItemData = data      # 静的データへの参照
-        self.active: bool = True
-        self.observed: bool = False
 
-    def __str__(self):
-        return self.name
+class Item(Effect):
+    def __init__(self, data: ItemData) -> None:
+        super().__init__(data)
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -22,11 +19,3 @@ class Item:
         memo[id(self)] = new
         ut.selective_deepcopy(self, new)
         return new
-
-    def register_handlers(self, battle: Battle):
-        for event, func in self.data.handlers.items():
-            battle.events.on(event, func)
-
-    @property
-    def name(self):
-        return self.data.name

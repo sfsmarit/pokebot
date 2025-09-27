@@ -29,6 +29,7 @@ ITEM: dict[str, ItemData] = {
         "throw_power": 60
     },
     "いのちのたま": ItemData(
+        name="いのちのたま",
         throw_power=30,
         consumable=False,
         handlers={Event.ON_HIT: on_hit.いのちのたま}
@@ -234,6 +235,7 @@ ITEM: dict[str, ItemData] = {
         "throw_power": 10
     },
     "たべのこし": ItemData(
+        name="たべのこし",
         throw_power=10,
         handlers={Event.ON_TURN_END: on_turn_end.たべのこし}
     ),

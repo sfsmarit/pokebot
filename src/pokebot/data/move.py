@@ -62,6 +62,7 @@ MOVE: dict[str, MoveData] = {
         ]
     },
     "アームハンマー": MoveData(
+        name="アームハンマー",
         type="かくとう",
         category=MoveCategory("物理"),
         pp=10,
@@ -1749,17 +1750,16 @@ MOVE: dict[str, MoveData] = {
             "hide"
         ]
     },
-    "たいあたり": {
-        "type": "ノーマル",
-        "category": "物理",
-        "pp": 35,
-        "power": 40,
-        "accuracy": 100,
-        "priority": 0,
-        "flags": [
-            "contact"
-        ]
-    },
+    "たいあたり": MoveData(
+        name="たいあたり",
+        type="ノーマル",
+        category=MoveCategory.PHY,
+        pp=35,
+        power=40,
+        accuracy=100,
+        priority=0,
+        flags=["contact"],
+    ),
     "だいばくはつ": {
         "type": "ノーマル",
         "category": "物理",

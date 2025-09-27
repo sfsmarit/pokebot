@@ -19,36 +19,6 @@ class BaseEnum(Enum):
         return [x.name for x in cls]
 
 
-class Event(Enum):
-    ON_START = auto()
-    ON_BEFORE_SWITCH_IN = auto()
-    ON_SWITCH_IN = auto()
-    ON_CHOOSE_ACTION = auto()
-    ON_PREVENT_SWITCH = auto()
-    ON_BEFORE_MOVE = auto()
-    ON_PP_CHANGE = auto()
-    ON_MODIFY_PRIORITY = auto()
-    ON_TRY_MOVE = auto()
-    ON_MODIFY_MOVE_TYPE = auto()
-    ON_MODIFY_MOVE = auto()
-    ON_ACCURACY_CHECK = auto()
-    ON_MOVE_FAIL = auto()
-    ON_CALC_DAMAGE = auto()
-    ON_HIT = auto()
-    ON_CRITICAL_HIT = auto()
-    ON_DAMAGE = auto()
-    ON_FAINT = auto()
-    ON_BEFORE_SWITCH_OUT = auto()
-    ON_SWITCH_OUT = auto()
-    ON_TURN_END = auto()
-    ON_RANK_UP = auto()
-    ON_RANK_DOWN = auto()
-    ON_SET_AILMENT = auto()
-    ON_BEFORE_ITEM_USE = auto()
-    ON_ITEM_USE = auto()
-    ON_END = auto()
-
-
 class Stat(BaseEnum):
     H = (0, "HP", "HP")
     A = (1, "こうげき", "攻撃")
@@ -273,23 +243,18 @@ class Command(BaseEnum):
     def idx(self) -> int:
         return self.value[1]
 
-    @property
     def is_switch(self) -> bool:
         return self.value[0] == "SWITCH"
 
-    @property
     def is_move(self) -> bool:
         return self.value[0] == "MOVE"
 
-    @property
     def is_terastal(self) -> bool:
         return self.value[0] == "TERASTAL"
 
-    @property
     def is_megaevol(self) -> bool:
         return self.value[0] == "MEGAEVOL"
 
-    @property
     def is_action(self) -> bool:
         return self.value[0] in ["MOVE", "TERASTAL", "MEGAEVOL"]
 

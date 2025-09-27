@@ -5,6 +5,6 @@ if TYPE_CHECKING:
     from pokebot.core.pokemon import Pokemon
 
 
-def たべのこし(battle: Battle, user: Pokemon):
-    if user.modify_hp(battle, int(user.max_hp/16)):
-        battle.insert_turn_log(-1, battle.idx(user), user.item.name)
+def たべのこし(battle: Battle, source: Pokemon):
+    if source.item == "たべのこし" and source.modify_hp(battle, source.max_hp // 16):
+        battle.insert_turn_log(-1, source, source.item.name)

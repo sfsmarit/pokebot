@@ -6,12 +6,14 @@ if TYPE_CHECKING:
 import pokebot.common.utils as ut
 from pokebot.data.move import MoveData
 
+from .base import Effect
 
-class Move:
+
+class Move(Effect):
     def __init__(self, data: MoveData, pp: int | None = None):
-        self.data: MoveData = data
+        super().__init__(data)
+
         self.pp: int = pp if pp else data.pp
-        self.observed: bool = False
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -20,16 +22,5 @@ class Move:
         ut.selective_deepcopy(self, new)
         return new
 
-    def __str__(self):
-        return self.name
-
-    def register_handlers(self, battle: Battle):
-        for event, func in self.data.handlers.items():
-            battle.events.on(event, func)
-
-    @property
-    def name(self):
-        return self.data.name
-
-    def add_pp(self, v: int):
+    def modify_pp(self, v: int):
         self.pp = max(0, min(self.data.pp, self.pp + v))

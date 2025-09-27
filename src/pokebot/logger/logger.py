@@ -22,7 +22,7 @@ class Logger:
         ut.selective_deepcopy(self, new)
         return new
 
-    def get_turn_logs(self, turn: int) -> list[list[str]]:
+    def get_turn_logs(self, turn: int | None = None) -> list[list[str]]:
         logs = [[], []]
         for log in self.turn_logs:
             if log.turn != turn:

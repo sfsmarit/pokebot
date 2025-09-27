@@ -32,16 +32,13 @@ class ActiveStatus:
         self.expended_moves: list[Move] = []
         self.count: dict = {}
 
-    def idx(self, battle):
-        return battle.idx(self.owner)
-
-    def change_rank(self, battle: Battle, stat: Stat, v: int) -> bool:
+    def modify_rank(self, battle: Battle, stat: Stat, v: int) -> bool:
         old = self.rank[stat.idx]
         self.rank[stat.idx] = max(-6, min(6, old + v))
         diff = self.rank[stat.idx] - old
 
         if diff:
-            battle.add_turn_log(self.idx(battle), f"{stat.name}{'+' if diff >= 0 else ''}{diff}")
+            battle.add_turn_log(self.owner, f"{stat.name}{'+' if diff >= 0 else ''}{diff}")
 
         if diff > 0:
             battle.events.emit(Event.ON_RANK_UP, battle, self.owner)

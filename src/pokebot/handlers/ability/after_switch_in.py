@@ -7,6 +7,6 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Stat
 
 
-def いかく(battle: Battle, user: Pokemon):
-    if battle.foe(user).active_status.change_rank(battle, Stat.A, -1):
-        battle.insert_turn_log(-1, battle.idx(user), user.ability.name)
+def いかく(battle: Battle, source: Pokemon):
+    if source.ability == "いかく" and battle.foe(source).active_status.modify_rank(battle, Stat.A, -1):
+        battle.insert_turn_log(-1, source, source.ability.name)

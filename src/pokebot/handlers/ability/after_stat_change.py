@@ -7,6 +7,6 @@ if TYPE_CHECKING:
 from pokebot.common.enums import Stat
 
 
-def かちき(battle: Battle, user: Pokemon):
-    if user.active_status.change_rank(battle, Stat.C, +2):
-        battle.insert_turn_log(-1, battle.idx(user), user.ability.name)
+def かちき(battle: Battle, source: Pokemon):
+    if source.ability == "かちき" and source.active_status.modify_rank(battle, Stat.C, +2):
+        battle.insert_turn_log(-1, source, source.ability.name)
