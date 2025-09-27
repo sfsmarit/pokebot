@@ -1,12 +1,9 @@
 from .enums import Weather, Terrain
 
 
-STAT_CODES = ('H', 'A', 'B', 'C', 'D', 'S', 'Hit', 'Eva')
-STAT_CODES_HIRAGANA = ('HP', 'こうげき', 'ぼうぎょ', 'とくこう', 'とくぼう', 'すばやさ', 'めいちゅう', 'かいひ')
-STAT_CODES_KANJI = ('HP', '攻撃', '防御', '特攻', '特防', '素早さ', '命中', '回避')
-
 HEAL_BERRIES = ('オレンのみ', 'オボンのみ', 'フィラのみ', 'ウイのみ', 'マゴのみ', 'バンジのみ', 'イアのみ')
 
+# TODO Enumに統合
 WEATHER_STONE = {
     Weather.NONE: "",
     Weather.SUNNY: "あついいわ",
@@ -15,6 +12,7 @@ WEATHER_STONE = {
     Weather.SAND: "さらさらいわ",
 }
 
+# TODO Enumに統合
 FIELD_SEED = {
     Terrain.NONE: "",
     Terrain.ELEC: "エレキシード",
@@ -23,12 +21,14 @@ FIELD_SEED = {
     Terrain.MIST: "ミストシード"
 }
 
+# TODO Enumに統合
 WEATHER_BALL_TYPE = {Weather.NONE: "ノーマル",
                      Weather.SUNNY: "ほのお",
                      Weather.RAINY: "みず",
                      Weather.SNOW: "こおり",
                      Weather.SAND: "いわ"}
 
+# TODO ハンドラに移管
 PLATE_TYPE = {
     'まっさらプレート': 'ノーマル',
     'ひのたまプレート': 'ほのお',

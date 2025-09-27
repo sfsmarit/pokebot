@@ -36,7 +36,7 @@ def _update_action_order(self: TurnManager):
 
         if self.command[idx].is_action:
             # 技選択
-            self.move[idx] = poke.moves[self.command[idx].index]
+            self.move[idx] = poke.moves[self.command[idx].idx]
         elif self.command[idx] == Command.STRUGGLE:
             # わるあがき
             self.move[idx] = Move('わるあがき')

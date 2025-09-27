@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pokebot.common.enums import Trigger, Ailment
+from pokebot.common.enums import Event, Ailment
 from pokebot.common.constants import STAT_CODES
 
 
 class Effect:
     def __init__(self) -> None:
-        self.trigger: Trigger
+        self.trigger: Event
         self.target: Literal["", "self", "opponent", "all"] = ""
         self.chance: float = 1.
         self.rank: list[int] = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -22,7 +22,7 @@ class Effect:
     def from_json(cls, data: dict) -> Effect:
         obj = cls()
 
-        obj.trigger = Trigger(data["trigger"])
+        obj.trigger = Event(data["trigger"])
 
         for i, s in enumerate(STAT_CODES):
             if s in data:

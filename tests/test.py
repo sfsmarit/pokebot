@@ -1,18 +1,29 @@
-import json
-from pokebot.model import PokeDB
-import pokebot.common.utils as ut
+from pokebot import Battle, Player, PokeDB
 
-# p1 = PokeDB.create_pokemon("リザードン")
-# p1.show()
+player = Player()
+poke = PokeDB.create_pokemon("リザードン")
+poke.ability = PokeDB.create_ability("いかく")
+poke.item = PokeDB.create_item("いのちのたま")
+poke.moves = [PokeDB.create_move("アームハンマー")]
+poke.show()
+player.team.append(poke)
 
-filename = ut.path_str("static", "move.json")
+print("-"*50)
 
-data = {}
-for key, val in PokeDB.move.items():
-    d = val.__dict__
-    data[key] = {k: v for k, v in d.items() if
-                 v != [] and k not in ["name", "handlers"]}
+opponent = Player()
+poke = PokeDB.create_pokemon("カメックス")
+poke.ability = PokeDB.create_ability("かちき")
+poke.item = PokeDB.create_item("たべのこし")
+poke.moves = [PokeDB.create_move("アームハンマー")]
+poke.show()
+opponent.team.append(poke)
 
+print("-"*50)
 
-with open(filename, "w", encoding="utf-8") as f:
-    json.dump(data, f, ensure_ascii=False, indent=4)
+battle = Battle(player, opponent)
+
+for _ in range(2):
+    battle.advance_turn()
+    print(f"{battle.turn=}")
+    for idx in range(2):
+        print("\t", battle.logger.get_turn_logs(battle.turn)[idx])

@@ -1,13 +1,15 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pokebot.core import Battle, Pokemon
 
 import pokebot.common.utils as ut
 from pokebot.data.move import MoveData
 
 
 class Move:
-    def __init__(self, name, data: MoveData, pp: int | None = None):
-        self.name: str = name
-        self.data: MoveData = data              # 静的データへの参照
+    def __init__(self, data: MoveData, pp: int | None = None):
+        self.data: MoveData = data
         self.pp: int = pp if pp else data.pp
         self.observed: bool = False
 
@@ -20,6 +22,14 @@ class Move:
 
     def __str__(self):
         return self.name
+
+    def register_handlers(self, battle: Battle):
+        for event, func in self.data.handlers.items():
+            battle.events.on(event, func)
+
+    @property
+    def name(self):
+        return self.data.name
 
     def add_pp(self, v: int):
         self.pp = max(0, min(self.data.pp, self.pp + v))

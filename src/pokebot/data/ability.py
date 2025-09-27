@@ -1,7 +1,9 @@
-from pokebot.common.enums import Trigger
+from pokebot.common.enums import Event
 from .registry import AbilityData
+from pokebot.handlers.ability import after_stat_change, after_switch_in
 
-ABILITY = {
+ABILITY: dict[str, AbilityData] = {
+    "": AbilityData(name=""),
     "ARシステム": {
         "flags": [
             "unreproducible",
@@ -15,7 +17,9 @@ ABILITY = {
     "あめうけざら": {},
     "あめふらし": {},
     "ありじごく": {},
-    "いかく": {},
+    "いかく": AbilityData(
+        handlers={Event.ON_SWITCH_IN: after_switch_in.いかく}
+    ),
     "いかりのこうら": {},
     "いかりのつぼ": {
         "flags": [
@@ -62,11 +66,10 @@ ABILITY = {
     "かそく": {},
     "かたいツメ": {},
     "かたやぶり": {},
-    "かちき": {
-        "flags": [
-            "undeniable"
-        ]
-    },
+    "かちき": AbilityData(
+        flags=["undeniable"],
+        handlers={Event.ON_RANK_DOWN: after_stat_change.かちき}
+    ),
     "かるわざ": {},
     "かわりもの": {
         "flags": [

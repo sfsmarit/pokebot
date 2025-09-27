@@ -1,8 +1,9 @@
-ITEM = {
-    "": {
-        "consumable": False,
-        "throw_power": 0
-    },
+from pokebot.common.enums import Event
+from .registry import ItemData
+from pokebot.handlers.item import on_hit, on_turn_end
+
+ITEM: dict[str, ItemData] = {
+    "": ItemData(name=""),
     "あかいいと": {
         "consumable": False,
         "throw_power": 10
@@ -27,10 +28,11 @@ ITEM = {
         "consumable": False,
         "throw_power": 60
     },
-    "いのちのたま": {
-        "consumable": False,
-        "throw_power": 30
-    },
+    "いのちのたま": ItemData(
+        throw_power=30,
+        consumable=False,
+        handlers={Event.ON_HIT: on_hit.いのちのたま}
+    ),
     "エレキシード": {
         "consumable": True,
         "throw_power": 10
@@ -231,10 +233,10 @@ ITEM = {
         "consumable": False,
         "throw_power": 10
     },
-    "たべのこし": {
-        "consumable": False,
-        "throw_power": 10
-    },
+    "たべのこし": ItemData(
+        throw_power=10,
+        handlers={Event.ON_TURN_END: on_turn_end.たべのこし}
+    ),
     "ちからのハチマキ": {
         "consumable": False,
         "throw_power": 10
