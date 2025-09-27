@@ -94,7 +94,7 @@ def _available_commands(self: Battle,
     if not commands:
         print(f"{self.turn=}, {phase=}, {idx=} {self.poke_mgrs[idx].pokemon.name=}")
         for idx in self.action_order:
-            print(f"\tPlayer {int(idx)}", ", ".join(self.logger.get_turn_log(self.turn, idx)))
+            print(f"\tPlayer {int(idx)}", ", ".join(self.logger.get_turn_logs(self.turn, idx)))
         raise Exception(f"No available command for player {idx}")
 
     return commands

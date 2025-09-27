@@ -8,7 +8,7 @@ from pokebot.common.enums import Time, Phase, Command
 
 def _input_selection_command(self: Bot, commands: list[Command]) -> list[int]:
     """選出コマンドを入力する"""
-    indexes = [cmd.index for cmd in commands]
+    indexes = [cmd.idx for cmd in commands]
 
     for team_idx in indexes + [6]:
         while True:
@@ -54,7 +54,7 @@ def _input_move_command(self: Bot, command: Command) -> bool:
         self.battle.pokemons[0].moves[i].pp = pp
 
     # PPがなければ中断
-    if self.battle.pokemons[0].moves[command.index] == 0:
+    if self.battle.pokemons[0].moves[command.idx] == 0:
         print(f"PP is zero")
         return False
 
@@ -65,9 +65,9 @@ def _input_move_command(self: Bot, command: Command) -> bool:
     # 技を入力
     while True:
         pos = self.move_cursor_position()
-        if pos == command.index:
+        if pos == command.idx:
             break
-        delta = command.index - pos
+        delta = command.idx - pos
         button = 'DPAD_DOWN' if delta > 0 else 'DPAD_UP'
         type(self).press_button(button, n=abs(delta), post_sleep=Time.CAPTURE.value)
         if self.read_phase() != Phase.ACTION:
@@ -83,7 +83,7 @@ def _input_switch_command(self: Bot, command: Command) -> bool:
 
     for i in range(len(self.team)-2):
         if self._read_switch_state() == 'alive' and \
-                self._read_switch_label(i+1) == self.team[command.index].label:
+                self._read_switch_label(i+1) == self.team[command.idx].label:
             break
 
         type(self).press_button('DPAD_DOWN', post_sleep=Time.CAPTURE.value + 0.1)

@@ -166,7 +166,7 @@ class Player:
             for idx in battle.action_order:
                 print(
                     f"\tPlayer {int(idx)}",
-                    "[" + ", ".join(battle.logger.get_turn_log(battle.turn, idx)) + "]",
+                    "[" + ", ".join(battle.logger.get_turn_logs(battle.turn, idx)) + "]",
                     "{" + ", ".join(battle.logger.get_damage_log(battle.turn, idx)) + "}",
                 )
 
