@@ -12,6 +12,7 @@ from enum import Enum, auto
 
 class Event(Enum):
     ON_START = auto()
+    ON_BEFORE_SWITCH = auto()
     ON_SWITCH_IN = auto()
     ON_BEFORE_MOVE = auto()
     ON_TRY_MOVE = auto()

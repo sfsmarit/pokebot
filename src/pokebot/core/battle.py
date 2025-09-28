@@ -75,12 +75,26 @@ class Battle:
         for i, player in enumerate(self.players):
             self.commands[i] = player.get_action_command(self)
 
-        # 行動前処理
-        self.before_move()
+        # 交代前の処理
+        self.events.emit(Event.ON_BEFORE_SWITCH)
 
+        # 交代
+        pass
+
+        # 技判定前の処理
+        self.events.emit(Event.ON_BEFORE_MOVE)
+
+        # 技の処理
         for i, source in enumerate(self.actives):
-            self.events.emit(Event.ON_TRY_MOVE)
             move = source.moves[self.commands[i].idx]
+
+            # 発動成功判定
+            self.events.emit(Event.ON_TRY_MOVE)
+
+            # 命中判定
+            pass
+
+            # 発動
             self.run_move(move, source)
 
         # ターン終了
@@ -105,13 +119,6 @@ class Battle:
 
     def get_action_order(self) -> list[int]:
         return [0, 1]
-
-    def before_move(self):
-        self.events.emit(Event.ON_BEFORE_MOVE)
-
-        for i, cmd in enumerate(self.commands):
-            if cmd.is_switch():
-                pass
 
     def run_move(self, move: Move, source: Pokemon):
         move.register_handlers(self)
