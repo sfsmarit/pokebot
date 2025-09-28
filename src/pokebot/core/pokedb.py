@@ -3,9 +3,9 @@ import json
 from pokebot.common import utils as ut
 
 from pokebot.data.registry import PokemonData
-from pokebot.data.ability import ABILITY
-from pokebot.data.item import ITEM
-from pokebot.data.move import MOVE
+from pokebot.data.ability import ABILITIES
+from pokebot.data.item import ITEMS
+from pokebot.data.move import MOVES
 
 from .pokemon import Pokemon
 from .ability import Ability
@@ -15,6 +15,9 @@ from .move import Move
 
 class PokeDB:
     zukan: dict[str, PokemonData] = {}
+    abilities = ABILITIES
+    items = ITEMS
+    movess = MOVES
 
     @classmethod
     def init(cls, season: int | None = None):
@@ -41,15 +44,15 @@ class PokeDB:
 
     @classmethod
     def create_ability(cls, name: str) -> Ability:
-        name = name if name in ABILITY else ""
-        return Ability(ABILITY[name])
+        name = name if name in ABILITIES else ""
+        return Ability(ABILITIES[name])
 
     @classmethod
     def create_item(cls, name: str) -> Item:
-        name = name if name in ITEM else ""
-        return Item(ITEM[name])
+        name = name if name in ITEMS else ""
+        return Item(ITEMS[name])
 
     @classmethod
     def create_move(cls, name: str, pp: int | None = None) -> Move:
-        name = name if name in MOVE else "はねる"
-        return Move(MOVE[name], pp)
+        name = name if name in MOVES else "はねる"
+        return Move(MOVES[name], pp)

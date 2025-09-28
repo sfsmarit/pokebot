@@ -4,7 +4,7 @@ from pokebot.player import Player
 from pokebot.common.enums import Phase, Command
 from pokebot.logger import Logger, TurnLog, CommandLog
 
-from .events.events import EventManager, Event
+from .events import EventManager, Event, EventContext
 from .pokemon import Pokemon
 from .move import Move
 
@@ -13,7 +13,7 @@ class Battle:
     def __init__(self, player1: Player, player2: Player) -> None:
         self.players: list[Player] = [player1, player2]
 
-        self.events = EventManager()
+        self.events = EventManager(self)
         self.logger = Logger()
 
         self.turn: int = -1
@@ -79,17 +79,16 @@ class Battle:
         self.before_move()
 
         for i, source in enumerate(self.actives):
-            self.events.emit(Event.ON_TRY_MOVE, self)
+            self.events.emit(Event.ON_TRY_MOVE)
             move = source.moves[self.commands[i].idx]
             self.run_move(move, source)
 
         # ターン終了
-        for source in self.actives:
-            self.events.emit(Event.ON_TURN_END, self, source)
+        self.events.emit(Event.ON_TURN_END)
 
         if True:
             # 試合終了
-            self.events.emit(Event.ON_END, self)
+            self.events.emit(Event.ON_END)
 
     def start(self):
         # プレイヤーから選出コマンドを取得
@@ -102,17 +101,17 @@ class Battle:
             self.actives[i].enter(self)
 
         # 交代時イベントの発火
-        for source in self.actives:
-            self.events.emit(Event.ON_SWITCH_IN, self, source)
+        self.events.emit(Event.ON_SWITCH_IN)
+
+    def get_action_order(self) -> list[int]:
+        return [0, 1]
 
     def before_move(self):
-        self.events.emit(Event.ON_BEFORE_MOVE, self)
+        self.events.emit(Event.ON_BEFORE_MOVE)
 
         for i, cmd in enumerate(self.commands):
             if cmd.is_switch():
-                self.actives[i].
-
-    def switch(self, )
+                pass
 
     def run_move(self, move: Move, source: Pokemon):
         move.register_handlers(self)
@@ -129,5 +128,5 @@ class Battle:
         # ダメージ付与
         self.foe(source).modify_hp(self, -damage)
 
-        self.events.emit(Event.ON_HIT, battle=self, source=source)
-        self.events.emit(Event.ON_DAMAGE, battle=self, source=source)
+        self.events.emit(Event.ON_HIT, EventContext(source))
+        self.events.emit(Event.ON_DAMAGE, EventContext(source))

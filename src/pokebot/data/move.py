@@ -1,9 +1,10 @@
-from pokebot.common.enums import Event, MoveCategory
+from pokebot.common.enums import MoveCategory
+from pokebot.core.events import Event, Handler
 from .registry import MoveData
 from pokebot.handlers.move import on_hit
 
 
-MOVE: dict[str, MoveData] = {
+MOVES: dict[str, MoveData] = {
     "１０まんばりき": {
         "type": "じめん",
         "category": "物理",
@@ -70,7 +71,7 @@ MOVE: dict[str, MoveData] = {
         accuracy=90,
         priority=0,
         flags=["contact", "punch"],
-        handlers={Event.ON_HIT: on_hit.アームハンマー}
+        handlers={Event.ON_HIT: Handler(on_hit.アームハンマー, 0)}
     ),
     "アイアンテール": {
         "type": "はがね",
