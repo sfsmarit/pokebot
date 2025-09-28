@@ -1,8 +1,8 @@
-from pokebot.common.enums import Event
+from pokebot.core.events import Event, Handler
 from .registry import ItemData
 from pokebot.handlers.item import on_hit, on_turn_end
 
-ITEM: dict[str, ItemData] = {
+ITEMS: dict[str, ItemData] = {
     "": ItemData(name=""),
     "あかいいと": {
         "consumable": False,
@@ -32,7 +32,7 @@ ITEM: dict[str, ItemData] = {
         name="いのちのたま",
         throw_power=30,
         consumable=False,
-        handlers={Event.ON_HIT: on_hit.いのちのたま}
+        handlers={Event.ON_HIT: Handler(on_hit.いのちのたま, 0)}
     ),
     "エレキシード": {
         "consumable": True,
@@ -237,7 +237,7 @@ ITEM: dict[str, ItemData] = {
     "たべのこし": ItemData(
         name="たべのこし",
         throw_power=10,
-        handlers={Event.ON_TURN_END: on_turn_end.たべのこし}
+        handlers={Event.ON_TURN_END: Handler(on_turn_end.たべのこし, 0)}
     ),
     "ちからのハチマキ": {
         "consumable": False,

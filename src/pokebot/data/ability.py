@@ -1,8 +1,8 @@
-from pokebot.common.enums import Event
+from pokebot.core.events import Event, Handler
 from .registry import AbilityData
-from pokebot.handlers.ability import after_stat_change, after_switch_in
+from pokebot.handlers.ability import after_stat_change, on_switch_in
 
-ABILITY: dict[str, AbilityData] = {
+ABILITIES: dict[str, AbilityData] = {
     "": AbilityData(name=""),
     "ARシステム": {
         "flags": [
@@ -19,7 +19,7 @@ ABILITY: dict[str, AbilityData] = {
     "ありじごく": {},
     "いかく": AbilityData(
         name="いかく",
-        handlers={Event.ON_SWITCH_IN: after_switch_in.いかく}
+        handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.いかく, 4, True)}
     ),
     "いかりのこうら": {},
     "いかりのつぼ": {
@@ -70,7 +70,7 @@ ABILITY: dict[str, AbilityData] = {
     "かちき": AbilityData(
         name="かちき",
         flags=["undeniable"],
-        handlers={Event.ON_RANK_DOWN: after_stat_change.かちき}
+        handlers={Event.ON_MODIFY_RANK: Handler(after_stat_change.かちき, 0)}
     ),
     "かるわざ": {},
     "かわりもの": {
@@ -101,7 +101,10 @@ ABILITY: dict[str, AbilityData] = {
     "きよめのしお": {},
     "きれあじ": {},
     "きんしのちから": {},
-    "きんちょうかん": {},
+    "きんちょうかん": AbilityData(
+        name="きんちょうかん",
+        handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.きんちょうかん, 3)}
+    ),
     "ぎたい": {
         "flags": [
             "undeniable"

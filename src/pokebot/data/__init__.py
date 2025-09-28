@@ -1,6 +1,6 @@
-from .ability import ABILITY
-from .item import ITEM
-from .move import MOVE
+from .ability import ABILITIES
+from .item import ITEMS
+from .move import MOVES
 
 '''
 # 名前を追加

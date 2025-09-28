@@ -11,7 +11,7 @@ print("-"*50)
 
 opponent = Player()
 opponent.team.append(PokeDB.create_pokemon("カメックス"))
-opponent.team[-1].ability = PokeDB.create_ability("かちき")
+opponent.team[-1].ability = PokeDB.create_ability("きんちょうかん")
 opponent.team[-1].item = PokeDB.create_item("たべのこし")
 opponent.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 opponent.team[-1].show()

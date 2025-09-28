@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.common.enums import Gender, Ailment
+from pokebot.common.enums import Gender, Ailment, Stat
 from pokebot.common.constants import NATURE_MODIFIER
 import pokebot.common.utils as ut
 
+from pokebot.core.events import Event, EventContext
 from pokebot.data.registry import PokemonData
-from pokebot.data import ABILITY, ITEM
 
 from .ability import Ability
 from .item import Item
@@ -30,8 +30,8 @@ class Pokemon:
         self.gender: Gender = Gender.NONE
         self._level: int = 50
         self._nature: str = "まじめ"
-        self.ability: Ability = Ability(ABILITY[""])
-        self.item: Item = Item(ITEM[""])
+        self.ability: Ability = None  # type: ignore
+        self.item: Item = None  # type: ignore
         self.moves: list[Move] = []
         self._indiv: list[int] = [31]*6
         self._effort: list[int] = [0]*6
@@ -215,6 +215,16 @@ class Pokemon:
         if diff:
             battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff}")
         return diff != 0
+
+    def modify_rank(self, battle: Battle, stat: Stat, v: int, by_self: bool = True) -> bool:
+        old = self.active_status.rank[stat.idx]
+        self.active_status.rank[stat.idx] = max(-6, min(6, old + v))
+        delta = self.active_status.rank[stat.idx] - old
+        if delta:
+            battle.add_turn_log(self, f"{stat}{'+' if delta >= 0 else ''}{delta}")
+            battle.events.emit(Event.ON_MODIFY_RANK,
+                               EventContext(self, value={"value": delta, "by_self": by_self}))
+        return delta != 0
 
     def terastallize(self) -> bool:
         if self.is_terastallized:

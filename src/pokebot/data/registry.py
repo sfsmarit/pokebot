@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
-from typing import Callable
 
-from pokebot.common.enums import Event, Stat, MoveCategory
+from pokebot.common.enums import Stat, MoveCategory
+from pokebot.core.events import Event, Handler
 
 
 class PokemonData:
@@ -19,7 +19,7 @@ class PokemonData:
 @dataclass
 class AbilityData:
     flags: list[str] = field(default_factory=list)
-    handlers: dict[Event, Callable] = field(default_factory=dict)
+    handlers: dict[Event, Handler] = field(default_factory=dict)
     name: str = ""
 
 
@@ -27,7 +27,7 @@ class AbilityData:
 class ItemData:
     throw_power: int = 0
     consumable: bool = False
-    handlers: dict[Event, Callable] = field(default_factory=dict)
+    handlers: dict[Event, Handler] = field(default_factory=dict)
     name: str = ""
 
 
@@ -40,5 +40,5 @@ class MoveData:
     accuracy: int = 100
     priority: int = 0
     flags: list[str] = field(default_factory=list)
-    handlers: dict[Event, Callable] = field(default_factory=dict)
+    handlers: dict[Event, Handler] = field(default_factory=dict)
     name: str = ""
