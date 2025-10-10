@@ -69,7 +69,6 @@ MOVES: dict[str, MoveData] = {
         pp=10,
         power=100,
         accuracy=90,
-        priority=0,
         flags=["contact", "punch"],
         handlers={Event.ON_HIT: Handler(on_hit.アームハンマー, 0)}
     ),
@@ -3834,18 +3833,14 @@ MOVES: dict[str, MoveData] = {
             }
         ]
     },
-    "わるあがき": {
-        "type": "ステラ",
-        "category": "物理",
-        "pp": 10000,
-        "power": 40,
-        "accuracy": 0,
-        "priority": 0,
-        "flags": [
-            "contact",
-            "non_encore"
-        ]
-    },
+    "わるあがき": MoveData(
+        type="ステラ",
+        category=MoveCategory.PHY,
+        power=40,
+        priority=0,
+        flags=["contact", "non_encore"],
+        handlers={Event.ON_HIT: Handler(on_hit.わるあがき)}
+    ),
     "１０まんボルト": {
         "type": "でんき",
         "category": "特殊",

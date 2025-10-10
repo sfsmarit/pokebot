@@ -11,3 +11,9 @@ def アームハンマー(battle: Battle, ctx: EventContext):
     if ctx.source.active_status.executed_move == "アームハンマー" and \
             ctx.source.modify_rank(battle, Stat.S, -1):
         battle.insert_turn_log(-1, ctx.source, "追加効果")
+
+
+def わるあがき(battle: Battle, ctx: EventContext):
+    if ctx.source.active_status.executed_move == "わるあがき" and \
+            ctx.source.modify_hp(battle, -ctx.source.max_hp // 4):
+        battle.insert_turn_log(-1, ctx.source, "追加効果")

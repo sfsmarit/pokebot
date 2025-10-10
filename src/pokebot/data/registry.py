@@ -35,9 +35,9 @@ class ItemData:
 class MoveData:
     type: str
     category: MoveCategory
-    pp: int
-    power: int = 0
-    accuracy: int = 100
+    pp: int | None = None
+    power: int | None = None
+    accuracy: int | None = None
     priority: int = 0
     flags: list[str] = field(default_factory=list)
     handlers: dict[Event, Handler] = field(default_factory=dict)

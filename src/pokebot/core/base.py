@@ -15,8 +15,12 @@ class Effect:
         return self.data.name
 
     def register_handlers(self, battle: Battle):
-        for event, func in self.data.handlers.items():
-            battle.events.on(event, func)
+        for event, handler in self.data.handlers.items():
+            battle.events.on(event, handler)
+
+    def unregister_handlers(self, battle: Battle):
+        for event, handler in self.data.handlers.items():
+            battle.events.off(event, handler)
 
     def __str__(self):
         return self.name

@@ -27,6 +27,8 @@ def calc_stat(level, base, indiv, effort, nc):
 class Pokemon:
     def __init__(self, data: PokemonData):
         self.data: PokemonData = data
+        self.observed: bool
+
         self.gender: Gender = Gender.NONE
         self._level: int = 50
         self._nature: str = "まじめ"
@@ -39,7 +41,7 @@ class Pokemon:
         self._terastal: str = ""
         self.is_terastallized: bool = False
 
-        self.observed: bool
+        self.is_selected: bool = False
         self.sleep_count: int
         self.ailment: Ailment
 
@@ -58,11 +60,16 @@ class Pokemon:
     def __str__(self):
         return self.name
 
-    def enter(self, battle: Battle):
+    def switch_in(self, battle: Battle):
         self.observed = True
         self.ability.register_handlers(battle)
         self.item.register_handlers(battle)
-        battle.add_turn_log(self, f"{self.name} 着地")
+        battle.add_turn_log(self, f"{self.name} 入場")
+
+    def switch_out(self, battle: Battle):
+        self.ability.unregister_handlers(battle)
+        self.item.unregister_handlers(battle)
+        battle.add_turn_log(self, f"{self.name} {'退場' if self.hp else '瀕死'}")
 
     @property
     def name(self):
@@ -113,6 +120,13 @@ class Pokemon:
     @terastal.setter
     def terastal(self, type: str):
         self._terastal = type
+
+    def can_terastallize(self) -> bool:
+        return not self.is_terastallized and self._terastal is not None
+
+    def terastallize(self) -> bool:
+        self.is_terastallized = self.can_terastallize()
+        return self.is_terastallized
 
     @property
     def stats(self) -> list[int]:
@@ -225,12 +239,6 @@ class Pokemon:
             battle.events.emit(Event.ON_MODIFY_RANK,
                                EventContext(self, value={"value": delta, "by_self": by_self}))
         return delta != 0
-
-    def terastallize(self) -> bool:
-        if self.is_terastallized:
-            return False
-        self.is_terastallized = True
-        return True
 
     def find_move(self, move: Move | str) -> Move | None:
         for mv in self.moves:

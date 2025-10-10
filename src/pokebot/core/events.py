@@ -12,7 +12,7 @@ from enum import Enum, auto
 
 class Event(Enum):
     ON_START = auto()
-    ON_BEFORE_SWITCH = auto()
+    ON_SWITCH_OUT = auto()
     ON_SWITCH_IN = auto()
     ON_BEFORE_MOVE = auto()
     ON_TRY_MOVE = auto()
@@ -26,11 +26,11 @@ class Event(Enum):
 @dataclass
 class Handler:
     func: Callable
-    order: int
+    priority: int = 0
     once: bool = False
 
-    def __lt__(self, other):
-        return self.order < other.order
+    def __lt__(self, other: Handler):
+        return self.priority > other.priority
 
 
 @dataclass

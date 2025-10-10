@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle, Pokemon
 
-from pokebot.common.enums import Command, Phase
+import random
+
+from pokebot.common.enums import Command
 import pokebot.common.utils as ut
 
 
@@ -21,10 +23,15 @@ class Player:
         ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
         return new
 
-    def get_selection_command(self, battle: Battle) -> list[Command]:
-        """ターン行動の方策関数"""
-        return battle.get_available_command(self, Phase.SELECTION)[:3]
+    def get_selection_commands(self, battle: Battle) -> list[Command]:
+        n = min(3, len(self.team))
+        return random.sample(battle.get_available_selection_commands(self), n)
 
     def get_action_command(self, battle: Battle) -> Command:
-        """ターン行動の方策関数"""
-        return battle.get_available_command(self, Phase.ACTION)[0]
+        return random.choice(battle.get_available_action_commands(self))
+
+    def get_switch_command(self, battle: Battle) -> Command:
+        return random.choice(battle.get_available_switch_commands(self))
+
+    def can_use_terastal(self) -> bool:
+        return any(poke.can_terastallize() for poke in self.team if poke.is_selected)

@@ -165,14 +165,6 @@ class BoostSource(BaseEnum):
     FIELD = auto()
 
 
-class Phase(BaseEnum):
-    NONE = None
-    SELECTION = "選出"
-    ACTION = "行動"
-    SWITCH = "交代"
-    STAND_BY = "待機"
-
-
 class Time(BaseEnum):
     """時間 [s]"""
     GAME = 20*60                # 試合
@@ -184,104 +176,141 @@ class Time(BaseEnum):
 
 
 class Command(BaseEnum):
-    SELECT_0 = ("SELECT", 0)
-    SELECT_1 = ("SELECT", 1)
-    SELECT_2 = ("SELECT", 2)
-    SELECT_3 = ("SELECT", 3)
-    SELECT_4 = ("SELECT", 4)
-    SELECT_5 = ("SELECT", 5)
-    SELECT_6 = ("SELECT", 6)
-    SELECT_7 = ("SELECT", 7)
-    SELECT_8 = ("SELECT", 8)
-    SELECT_9 = ("SELECT", 9)
-    SWITCH_0 = ("SWITCH", 0)
-    SWITCH_1 = ("SWITCH", 1)
-    SWITCH_2 = ("SWITCH", 2)
-    SWITCH_3 = ("SWITCH", 3)
-    SWITCH_4 = ("SWITCH", 4)
-    SWITCH_5 = ("SWITCH", 5)
-    SWITCH_6 = ("SWITCH", 6)
-    SWITCH_7 = ("SWITCH", 7)
-    SWITCH_8 = ("SWITCH", 8)
-    SWITCH_9 = ("SWITCH", 9)
-    MOVE_0 = ("MOVE", 0)
-    MOVE_1 = ("MOVE", 1)
-    MOVE_2 = ("MOVE", 2)
-    MOVE_3 = ("MOVE", 3)
-    MOVE_4 = ("MOVE", 4)
-    MOVE_5 = ("MOVE", 5)
-    MOVE_6 = ("MOVE", 6)
-    MOVE_7 = ("MOVE", 7)
-    MOVE_8 = ("MOVE", 8)
-    MOVE_9 = ("MOVE", 9)
-    TERASTAL_0 = ("TERASTAL", 0)
-    TERASTAL_1 = ("TERASTAL", 1)
-    TERASTAL_2 = ("TERASTAL", 2)
-    TERASTAL_3 = ("TERASTAL", 3)
-    TERASTAL_4 = ("TERASTAL", 4)
-    TERASTAL_5 = ("TERASTAL", 5)
-    TERASTAL_6 = ("TERASTAL", 6)
-    TERASTAL_7 = ("TERASTAL", 7)
-    TERASTAL_8 = ("TERASTAL", 8)
-    TERASTAL_9 = ("TERASTAL", 9)
-    # MEGAEVOL_0 = ("MEGAEVOL", 0)
-    # MEGAEVOL_1 = ("MEGAEVOL", 1)
-    # MEGAEVOL_2 = ("MEGAEVOL", 2)
-    # MEGAEVOL_3 = ("MEGAEVOL", 3)
-    # MEGAEVOL_4 = ("MEGAEVOL", 4)
-    # MEGAEVOL_5 = ("MEGAEVOL", 5)
-    # MEGAEVOL_6 = ("MEGAEVOL", 6)
-    # MEGAEVOL_7 = ("MEGAEVOL", 7)
-    # MEGAEVOL_8 = ("MEGAEVOL", 8)
-    # MEGAEVOL_9 = ("MEGAEVOL", 9)
-    STRUGGLE = ("STRUGGLE", 1000)   # わるあがき
-    FORCED = ("FORCED", 1001)       # あばれる、行動不能など
-    SKIP = ("SKIP", 1002)         # 行動スキップ
-    NONE = (None, 1003)
+    NONE = None
+    STRUGGLE = auto()
+    FORCED = auto()
+    SKIP = auto()
+    SELECT_0 = auto()
+    SELECT_1 = auto()
+    SELECT_2 = auto()
+    SELECT_3 = auto()
+    SELECT_4 = auto()
+    SELECT_5 = auto()
+    SELECT_6 = auto()
+    SELECT_7 = auto()
+    SELECT_8 = auto()
+    SELECT_9 = auto()
+    SWITCH_0 = auto()
+    SWITCH_1 = auto()
+    SWITCH_2 = auto()
+    SWITCH_3 = auto()
+    SWITCH_4 = auto()
+    SWITCH_5 = auto()
+    SWITCH_6 = auto()
+    SWITCH_7 = auto()
+    SWITCH_8 = auto()
+    SWITCH_9 = auto()
+    MOVE_0 = auto()
+    MOVE_1 = auto()
+    MOVE_2 = auto()
+    MOVE_3 = auto()
+    MOVE_4 = auto()
+    MOVE_5 = auto()
+    MOVE_6 = auto()
+    MOVE_7 = auto()
+    MOVE_8 = auto()
+    MOVE_9 = auto()
+    TERASTAL_0 = auto()
+    TERASTAL_1 = auto()
+    TERASTAL_2 = auto()
+    TERASTAL_3 = auto()
+    TERASTAL_4 = auto()
+    TERASTAL_5 = auto()
+    TERASTAL_6 = auto()
+    TERASTAL_7 = auto()
+    TERASTAL_8 = auto()
+    TERASTAL_9 = auto()
+    # MEGAEVOL_0 = auto()
+    # MEGAEVOL_1 = auto()
+    # MEGAEVOL_2 = auto()
+    # MEGAEVOL_3 = auto()
+    # MEGAEVOL_4 = auto()
+    # MEGAEVOL_5 = auto()
+    # MEGAEVOL_6 = auto()
+    # MEGAEVOL_7 = auto()
+    # MEGAEVOL_8 = auto()
+    # MEGAEVOL_9 = auto()
+    # GIGAMAX_0 = auto()
+    # GIGAMAX_1 = auto()
+    # GIGAMAX_2 = auto()
+    # GIGAMAX_3 = auto()
+    # GIGAMAX_4 = auto()
+    # GIGAMAX_5 = auto()
+    # GIGAMAX_6 = auto()
+    # GIGAMAX_7 = auto()
+    # GIGAMAX_8 = auto()
+    # GIGAMAX_9 = auto()
+    # ZMOVE_0 = auto()
+    # ZMOVE_1 = auto()
+    # ZMOVE_2 = auto()
+    # ZMOVE_3 = auto()
+    # ZMOVE_4 = auto()
+    # ZMOVE_5 = auto()
+    # ZMOVE_6 = auto()
+    # ZMOVE_7 = auto()
+    # ZMOVE_8 = auto()
+    # ZMOVE_9 = auto()
+
+    def __str__(self):
+        return self.name
 
     @property
     def idx(self) -> int:
-        return self.value[1]
+        return int(self.name[-1])
+
+    def is_select(self) -> bool:
+        return self.name[:-2] == "SELECT"
 
     def is_switch(self) -> bool:
-        return self.value[0] == "SWITCH"
+        return self.name[:-2] == "SWITCH"
 
     def is_move(self) -> bool:
-        return self.value[0] == "MOVE"
+        return self.name[:-2] == "MOVE"
 
     def is_terastal(self) -> bool:
-        return self.value[0] == "TERASTAL"
+        return self.name[:-2] == "TERASTAL"
 
     def is_megaevol(self) -> bool:
-        return self.value[0] == "MEGAEVOL"
+        return self.name[:-2] == "MEGAEVOL"
+
+    def is_gigamax(self) -> bool:
+        return self.name[:-2] == "GIGAMAX"
+
+    def is_zmove(self) -> bool:
+        return self.name[:-2] == "ZMOVE"
 
     def is_action(self) -> bool:
-        return self.value[0] in ["MOVE", "TERASTAL", "MEGAEVOL"]
+        return self.is_move() or self.is_terastal() or \
+            self.is_megaevol() or self.is_gigamax() or self.is_zmove()
 
     @classmethod
     def selection_commands(cls):
-        return [x for x in cls if x.value[0] == "SELECT" in x.name]
+        return [x for x in cls if x.is_select()]
 
     @classmethod
     def switch_commands(cls):
-        return [x for x in cls if x.value[0] == "SWITCH" in x.name]
+        return [x for x in cls if x.is_switch()]
 
     @classmethod
     def action_commands(cls):
-        return [x for x in cls if x.value[0] not in ["SELECT", "SPECIAL"]]
+        return [x for x in cls if x.is_action()]
 
     @classmethod
     def move_commands(cls):
-        return [x for x in cls if "MOVE_" in x.name]
+        return [x for x in cls if x.is_move()]
 
     @classmethod
     def terastal_commands(cls):
-        return [x for x in cls if x.value[0] == "TERASTAL"]
+        return [x for x in cls if x.is_terastal()]
 
     @classmethod
     def megaevol_commands(cls):
-        return [x for x in cls if x.value[0] == "MEGAEVOL"]
+        return [x for x in cls if x.is_megaevol()]
 
+    @classmethod
+    def gigamax_commands(cls):
+        return [x for x in cls if x.is_gigamax()]
 
-if __name__ == "__main__":
-    print(Command.move_commands)
+    @classmethod
+    def zmove_commands(cls):
+        return [x for x in cls if x.is_zmove()]
