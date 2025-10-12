@@ -61,7 +61,7 @@ def _advance_turn(self: TurnManager,
                 # 方策関数に従う
                 self.battle.phase = Phase.ACTION
                 masked = self.battle.masked(idx, _called=True)
-                self.command[idx] = self.battle.players[idx].action_command(masked)
+                self.command[idx] = self.battle.player[idx].action_command(masked)
                 self.battle.phase = Phase.NONE
             else:
                 # 引数のコマンドに従う
@@ -71,7 +71,8 @@ def _advance_turn(self: TurnManager,
             if self.battle.pokemons[idx].terastal:
                 text += f"_{self.battle.pokemons[idx].terastal}T"
             self.battle.logger.append(TurnLog(self.battle.turn, idx, text))
-            self.battle.logger.append(TurnLog(self.battle.turn, idx, f"HP {self.battle.pokemons[idx].hp}/{self.battle.pokemons[idx].stats[0]}"))
+            self.battle.logger.append(TurnLog(self.battle.turn, idx,
+                                      f"HP {self.battle.pokemons[idx].hp}/{self.battle.pokemons[idx].stats[0]}"))
             self.battle.logger.append(TurnLog(self.battle.turn, idx, f"コマンド {self.command[idx].name}"))
 
         # 行動順を更新

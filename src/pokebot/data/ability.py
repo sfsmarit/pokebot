@@ -1,6 +1,6 @@
 from pokebot.core.events import Event, Handler
 from .registry import AbilityData
-from pokebot.handlers.ability import after_stat_change, on_switch_in
+from pokebot.handlers.ability import after_stat_change, on_switch_in, on_trap
 
 ABILITIES: dict[str, AbilityData] = {
     "": AbilityData(name=""),
@@ -16,9 +16,10 @@ ABILITIES: dict[str, AbilityData] = {
     "あまのじゃく": {},
     "あめうけざら": {},
     "あめふらし": {},
-    "ありじごく": {},
+    "ありじごく": AbilityData(
+        handlers={Event.ON_TRAP: Handler(on_trap.ありじごく)}
+    ),
     "いかく": AbilityData(
-        name="いかく",
         handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.いかく, 4, True)}
     ),
     "いかりのこうら": {},
@@ -68,9 +69,8 @@ ABILITIES: dict[str, AbilityData] = {
     "かたいツメ": {},
     "かたやぶり": {},
     "かちき": AbilityData(
-        name="かちき",
         flags=["undeniable"],
-        handlers={Event.ON_MODIFY_RANK: Handler(after_stat_change.かちき, 0)}
+        handlers={Event.ON_MODIFY_STAT: Handler(after_stat_change.かちき, 0)}
     ),
     "かるわざ": {},
     "かわりもの": {
@@ -102,7 +102,6 @@ ABILITIES: dict[str, AbilityData] = {
     "きれあじ": {},
     "きんしのちから": {},
     "きんちょうかん": AbilityData(
-        name="きんちょうかん",
         handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.きんちょうかん, 3)}
     ),
     "ぎたい": {
@@ -220,13 +219,14 @@ ABILITIES: dict[str, AbilityData] = {
     },
     "せいしんりょく": {},
     "せいでんき": {},
-    "ぜったいねむり": {
-        "flags": [
+    "ぜったいねむり": AbilityData(
+        flags=[
             "unreproducible",
             "protected",
             "undeniable"
-        ]
-    },
+        ],
+        handlers={Event.ON_SWITCH_IN: on_switch_in.ぜったいねむり}
+    ),
     "そうしょく": {},
     "そうだいしょう": {},
     "たいねつ": {},
@@ -290,7 +290,7 @@ ABILITIES: dict[str, AbilityData] = {
     "どしょく": {},
     "どんかん": {},
     "なまけ": {},
-    "にげあし": {},
+    "にげあし": AbilityData(),
     "にげごし": {
         "flags": [
             "undeniable"

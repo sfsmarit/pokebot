@@ -8,8 +8,8 @@ from pokebot.common.enums import Stat, BoostSource
 from .move import Move
 
 
-class ActiveStatus:
-    def __init__(self, owner: Pokemon) -> None:
+class FieldStatus:
+    def __init__(self) -> None:
         self.choice_locked: bool = False
         self.nervous: bool = False
         self.hidden: bool = False
@@ -27,3 +27,5 @@ class ActiveStatus:
         self.executed_move: Move | None = None
         self.expended_moves: list[Move] = []
         self.count: dict = {}
+
+        self._trapped: bool = False

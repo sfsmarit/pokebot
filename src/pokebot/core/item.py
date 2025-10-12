@@ -1,8 +1,3 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from pokebot.core import Battle, Pokemon
-
 import pokebot.common.utils as ut
 from pokebot.data.registry import ItemData
 
@@ -19,3 +14,7 @@ class Item(Effect):
         memo[id(self)] = new
         ut.selective_deepcopy(self, new)
         return new
+
+    def consume(self):
+        self.active = False
+        self.observed = True

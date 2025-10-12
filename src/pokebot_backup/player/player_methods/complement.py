@@ -12,7 +12,7 @@ from pokebot.core.battle import Battle
 def _complement_opponent_selection(self: Player, battle: Battle):
     """相手の選出情報を補完する"""
     opp = int(not self.idx)
-    opponent = battle.players[opp]
+    opponent = battle.player[opp]
 
     selection_indexes = battle.selection_indexes[opp]
     n = battle.n_selection

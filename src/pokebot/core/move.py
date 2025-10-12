@@ -11,6 +11,7 @@ from .base import Effect
 
 class Move(Effect):
     def __init__(self, data: MoveData, pp: int | None = None):
+        self.data: MoveData
         super().__init__(data)
 
         self.pp: int = pp if pp else data.pp

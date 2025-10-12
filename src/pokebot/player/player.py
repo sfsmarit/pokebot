@@ -23,6 +23,9 @@ class Player:
         ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
         return new
 
+    def get_selected_pokemons(self) -> list[Pokemon]:
+        return [poke for poke in self.team if poke.is_selected]
+
     def get_selection_commands(self, battle: Battle) -> list[Command]:
         n = min(3, len(self.team))
         return random.sample(battle.get_available_selection_commands(self), n)
@@ -34,4 +37,4 @@ class Player:
         return random.choice(battle.get_available_switch_commands(self))
 
     def can_use_terastal(self) -> bool:
-        return any(poke.can_terastallize() for poke in self.team if poke.is_selected)
+        return any(poke.can_terastallize() for poke in self.get_selected_pokemons())

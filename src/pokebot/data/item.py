@@ -1,6 +1,8 @@
 from pokebot.core.events import Event, Handler
 from .registry import ItemData
-from pokebot.handlers.item import on_hit, on_turn_end
+
+from pokebot.handlers.item import on_hit, on_damage, on_turn_end, on_modify_stat, on_trap
+
 
 ITEMS: dict[str, ItemData] = {
     "": ItemData(name=""),
@@ -29,10 +31,9 @@ ITEMS: dict[str, ItemData] = {
         "throw_power": 60
     },
     "いのちのたま": ItemData(
-        name="いのちのたま",
         throw_power=30,
         consumable=False,
-        handlers={Event.ON_HIT: Handler(on_hit.いのちのたま, 0)}
+        handlers={Event.ON_HIT: Handler(on_hit.いのちのたま)}
     ),
     "エレキシード": {
         "consumable": True,
@@ -90,10 +91,11 @@ ITEMS: dict[str, ItemData] = {
         "consumable": True,
         "throw_power": 30
     },
-    "きれいなぬけがら": {
-        "consumable": False,
-        "throw_power": 10
-    },
+    "きれいなぬけがら": ItemData(
+        consumable=False,
+        throw_power=10,
+        handlers={Event.ON_TRAP: Handler(on_trap.きれいなぬけがら, -100)},
+    ),
     "ぎんのこな": {
         "consumable": False,
         "throw_power": 10
@@ -222,22 +224,23 @@ ITEMS: dict[str, ItemData] = {
         "consumable": False,
         "throw_power": 80
     },
-    "だっしゅつパック": {
-        "consumable": True,
-        "throw_power": 50
-    },
-    "だっしゅつボタン": {
-        "consumable": True,
-        "throw_power": 30
-    },
+    "だっしゅつパック": ItemData(
+        consumable=True,
+        throw_power=50,
+        handlers={Event.ON_MODIFY_STAT: Handler(on_modify_stat.だっしゅつパック)}
+    ),
+    "だっしゅつボタン": ItemData(
+        consumable=True,
+        throw_power=30,
+        handlers={Event.ON_DAMAGE: Handler(on_damage.だっしゅつボタン)}
+    ),
     "たつじんのおび": {
         "consumable": False,
         "throw_power": 10
     },
     "たべのこし": ItemData(
-        name="たべのこし",
         throw_power=10,
-        handlers={Event.ON_TURN_END: Handler(on_turn_end.たべのこし, 0)}
+        handlers={Event.ON_TURN_END: Handler(on_turn_end.たべのこし)}
     ),
     "ちからのハチマキ": {
         "consumable": False,

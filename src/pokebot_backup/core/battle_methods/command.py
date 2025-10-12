@@ -39,9 +39,9 @@ def _command_to_str(self: Battle,
                     command: Command) -> str:
     match command.value[0]:
         case "SELECT":
-            return f"選出 {self.players[idx].team[command.value[1]].name}"
+            return f"選出 {self.player[idx].team[command.value[1]].name}"
         case "SWITCH":
-            return f"交代 -> {self.players[idx].team[command.value[1]].name}"
+            return f"交代 -> {self.player[idx].team[command.value[1]].name}"
         case "MOVE":
             return self.pokemons[idx].moves[command.value[1]].name
         case "TERASTAL":
@@ -65,7 +65,7 @@ def _available_commands(self: Battle,
 
     match phase:
         case Phase.SELECTION:
-            return Command.selection_commands()[:len(self.players[idx].team)]
+            return Command.selection_commands()[:len(self.player[idx].team)]
 
         case Phase.ACTION:
             if self.poke_mgrs[idx].forced_turn:

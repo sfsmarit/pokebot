@@ -32,7 +32,7 @@ def _switch_pokemon(self: TurnManager,
     self.battle.poke_mgrs[idx].bench_reset()
 
     # 交代
-    self.battle.players[idx].team[command.idx].active = True
+    self.battle.player[idx].team[command.idx].active = True
 
     self._already_switched[idx] = True
     self.battle.pokemons[idx].observed = True  # 観測

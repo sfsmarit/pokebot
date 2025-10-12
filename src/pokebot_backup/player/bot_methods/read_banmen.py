@@ -16,7 +16,7 @@ def _read_banmen(self: Bot) -> bool:
     opp_terastal = ""
 
     # 相手にテラスタル権があればテラスタイプを確認
-    if self.battle.players[1].team and self.battle.can_terastallize(1):
+    if self.battle.player[1].team and self.battle.can_terastallize(1):
         opp_terastal = self.read_opponent_terastal()
 
     # 自分の盤面を取得
@@ -79,7 +79,7 @@ def _read_banmen(self: Bot) -> bool:
             poke = Pokemon(name)
             poke.active = True
             poke.observed = True
-            self.battle.players[1].team = [poke]
+            self.battle.player[1].team = [poke]
 
             self.battle.selection_indexes[1] = [0]
             self.battle.pokemons[1].level = 80
@@ -89,7 +89,7 @@ def _read_banmen(self: Bot) -> bool:
 
             # 初見なら相手選出に追加
             if label not in [p.label for p in self.battle.selected_pokemons(1)]:
-                switch_idx = Pokemon.index(self.battle.players[1].team, label=label)
+                switch_idx = Pokemon.index(self.battle.player[1].team, label=label)
                 if switch_idx is not None:
                     self.battle.selection_indexes[1].append(switch_idx)  # 選出
                     self.battle.turn_mgr.switch_pokemon(1, switch_idx=switch_idx, landing=False)  # 交代

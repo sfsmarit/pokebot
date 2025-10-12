@@ -1,25 +1,36 @@
 from pokebot import Battle, Player, PokeDB
+from pokebot.common.enums import Command
 
-player = Player()
+
+class CustomPlayer(Player):
+    def get_selection_commands(self, battle: Battle) -> list[Command]:
+        return battle.get_available_selection_commands(self)
+
+    def get_action_command(self, battle: Battle) -> Command:
+        return battle.get_available_action_commands(self)[0]
+
+
+player = CustomPlayer()
 player.team.append(PokeDB.create_pokemon("リザードン"))
-player.team[-1].ability = PokeDB.create_ability("いかく")
-player.team[-1].item = PokeDB.create_item("いのちのたま")
-player.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# player.team[-1].ability = PokeDB.create_ability("いかく")
+# player.team[-1].item = PokeDB.create_item("だっしゅつボタン")
+# player.team[-1].moves = [PokeDB.create_move("とんぼがえり")]
 
 player.team.append(PokeDB.create_pokemon("ピカチュウ"))
+# player.team[-1].moves = [PokeDB.create_move("とんぼがえり")]
 
 for poke in player.team:
     poke.show()
 
 print("-"*50)
 
-opponent = Player()
+opponent = CustomPlayer()
 opponent.team.append(PokeDB.create_pokemon("カメックス"))
-opponent.team[-1].ability = PokeDB.create_ability("きんちょうかん")
-opponent.team[-1].item = PokeDB.create_item("たべのこし")
-opponent.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+# opponent.team[-1].ability = PokeDB.create_ability("いかく")
+# opponent.team[-1].item = PokeDB.create_item("たべのこし")
+opponent.team[-1].moves = [PokeDB.create_move("ふきとばし")]
 
-opponent.team.append(PokeDB.create_pokemon("フシギバナ"))
+# opponent.team.append(PokeDB.create_pokemon("フシギバナ"))
 
 for poke in opponent.team:
     poke.show()
@@ -28,8 +39,12 @@ print("-"*50)
 
 battle = Battle(player, opponent)
 
-for _ in range(4):
+while 1:
     battle.advance_turn()
-    print(f"{battle.turn=} {[str(cmd) for cmd in battle.commands]}")
-    for log in battle.get_turn_logs():
-        print(f"\t{log}")
+
+    print(f"{battle.turn=}")
+    for cmd, log in zip(battle.command, battle.get_turn_logs()):
+        print(f"\t{cmd}\t{log}")
+
+    if battle.winner() is not None:
+        break

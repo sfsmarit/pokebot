@@ -20,7 +20,7 @@ def _read_opponent_team(self: Bot, capture: bool = True):
 
     print('相手パーティ')
 
-    self.battle.players[1].team.clear()
+    self.battle.player[1].team.clear()
     trims = []
 
     # アイコン
@@ -57,7 +57,7 @@ def _read_opponent_team(self: Bot, capture: bool = True):
             name = 'イルカマン(ナイーブ)'
 
         # ポケモンを追加
-        self.battle.players[1].team.append(Pokemon(name))
+        self.battle.player[1].team.append(Pokemon(name))
         print(f"\t{i+1}: {name}")
 
     # 性別

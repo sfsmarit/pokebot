@@ -68,10 +68,10 @@ def _real_game(self: Bot):
                 dt = time.time() - t0
 
                 # コマンドを取得
-                commands = self.battle.players[0].selection_commands(deepcopy(self.battle))
+                commands = self.battle.player[0].selection_commands(deepcopy(self.battle))
                 self.battle.selection_indexes[0] = [cmd.index for cmd in commands]
 
-                labels = [self.battle.players[0].team[i].label for i in self.battle.selection_indexes[0]]
+                labels = [self.battle.player[0].team[i].label for i in self.battle.selection_indexes[0]]
                 print(f"{'='*50}\n選出 {labels}\n{'='*50}")
 
                 # コマンド入力
@@ -122,7 +122,7 @@ def _real_game(self: Bot):
 
                     # コマンドを取得
                     dt = time.time() - t0
-                    command = self.battle.players[0].action_command(deepcopy(self.battle))
+                    command = self.battle.player[0].action_command(deepcopy(self.battle))
                     print(f"{'='*50}\n\t{self.battle.command_to_str(0, command)}\n{'='*50}")
                     t0 = time.time()
 
@@ -183,7 +183,7 @@ def _real_game(self: Bot):
 
                 # コマンドを取得
                 dt = time.time() - t0
-                command = self.battle.players[0].switch_command(deepcopy(self.battle))
+                command = self.battle.player[0].switch_command(deepcopy(self.battle))
                 print(f"{'='*50}\n\t{self.battle.command_to_str(0, command)}\n{'='*50}")
                 t0 = time.time()
 

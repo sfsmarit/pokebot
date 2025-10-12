@@ -11,16 +11,17 @@ from enum import Enum, auto
 
 
 class Event(Enum):
-    ON_START = auto()
-    ON_SWITCH_OUT = auto()
+    ON_BEFORE_ACTION = auto()
     ON_SWITCH_IN = auto()
+    ON_SWITCH_OUT = auto()
     ON_BEFORE_MOVE = auto()
     ON_TRY_MOVE = auto()
     ON_HIT = auto()
     ON_DAMAGE = auto()
     ON_TURN_END = auto()
-    ON_MODIFY_RANK = auto()
+    ON_MODIFY_STAT = auto()
     ON_END = auto()
+    ON_TRAP = auto()
 
 
 @dataclass
@@ -57,12 +58,13 @@ class EventManager:
 
     def emit(self, event: Event, ctx: EventContext | None = None):
         """イベントを発火"""
-        if ctx is None:
-            ctx = EventContext()
-
         for h in sorted(self.handlers.get(event, [])):
-            for idx in self.battle.get_action_order():
-                ctx.source = self.battle.actives[idx]
+            if ctx is None:
+                ctxs = [EventContext(self.battle.actives[i]) for i in self.battle.get_action_order()]
+            else:
+                ctxs = [ctx]
+
+            for ctx in ctxs:
                 result = h.func(self.battle, ctx)
 
                 # 単発ハンドラを削除
@@ -70,6 +72,4 @@ class EventManager:
                     self.off(event, h)
 
                 if result == False:
-                    break
-
-        return ctx.value
+                    return

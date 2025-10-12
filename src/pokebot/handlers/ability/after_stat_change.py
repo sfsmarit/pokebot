@@ -11,5 +11,5 @@ def かちき(battle: Battle, ctx: EventContext):
     if ctx.source.ability == "かちき" and \
             ctx.value["value"] < 0 and \
             not ctx.value["by_self"] and \
-            ctx.source.modify_rank(battle, Stat.C, +2):
-        battle.insert_turn_log(-1, ctx.source, ctx.source.ability.name)
+            ctx.source.modify_stat(battle, Stat.C, +2):
+        battle.add_turn_log(ctx.source, ctx.source.ability.name)

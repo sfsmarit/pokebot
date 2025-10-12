@@ -41,7 +41,7 @@ def _read_active_label(self: Bot, idx: PlayerIndex | int, capture: bool = True):
     if not self.online and idx == 1:
         candidates = list(PokeDB.label_to_names.keys())
     else:
-        for p in self.battle.players[idx].team:
+        for p in self.battle.player[idx].team:
             candidates += PokeDB.jpn_to_foreign_labels[p.label]
     s = iut.OCR(img, lang='all', candidates=candidates, log_dir=type(self).ocr_log_dir / "label")
     label = PokeDB.foreign_to_jpn_label[s]  # 和訳
@@ -219,7 +219,7 @@ def _read_fainting_opponent(self: Bot, capture: bool = True):
     if capture:
         type(self).capture()
     dy = 102
-    for i, poke in enumerate(self.battle.players[1].team):
+    for i, poke in enumerate(self.battle.player[1].team):
         img = iut.BGR2BIN(self.img[280+dy*i:302+dy*i, 1314:1334], threshold=128)
         if iut.template_match_score(img, TemplateImage.fainting_symbol) > 0.99:
             self.battle.selection_indexes[1].append(i)  # 出オチした相手ポケモンを選出に追加

@@ -35,7 +35,7 @@ class ItemData:
 class MoveData:
     type: str
     category: MoveCategory
-    pp: int | None = None
+    pp: int
     power: int | None = None
     accuracy: int | None = None
     priority: int = 0

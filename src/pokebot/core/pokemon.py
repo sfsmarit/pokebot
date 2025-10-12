@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.common.enums import Gender, Ailment, Stat
+from pokebot.common.enums import Gender, Ailment, Stat, Condition
 from pokebot.common.constants import NATURE_MODIFIER
 import pokebot.common.utils as ut
 
@@ -13,7 +13,7 @@ from pokebot.data.registry import PokemonData
 from .ability import Ability
 from .item import Item
 from .move import Move
-from .active_status import ActiveStatus
+from .active_status import FieldStatus
 
 
 def calc_hp(level, base, indiv, effort):
@@ -45,10 +45,13 @@ class Pokemon:
         self.sleep_count: int
         self.ailment: Ailment
 
-        self.active_status: ActiveStatus = ActiveStatus(self)
+        self.field_status: FieldStatus = FieldStatus()
 
         self.update_stats()
         self.hp: int = self.max_hp
+
+        self.added_types: list[str] = []
+        self.lost_types: list[str] = []
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -62,8 +65,10 @@ class Pokemon:
 
     def switch_in(self, battle: Battle):
         self.observed = True
-        self.ability.register_handlers(battle)
-        self.item.register_handlers(battle)
+        if self.ability.active:
+            self.ability.register_handlers(battle)
+        if self.item.active:
+            self.item.register_handlers(battle)
         battle.add_turn_log(self, f"{self.name} 入場")
 
     def switch_out(self, battle: Battle):
@@ -74,6 +79,21 @@ class Pokemon:
     @property
     def name(self):
         return self.data.name
+
+    @property
+    def types(self) -> list[str]:
+        if self.terastal:
+            if self.terastal == 'ステラ':
+                return self.data.types.copy()
+            else:
+                return [self.terastal]
+        else:
+            if self.name == 'アルセウス':
+                # TODO アルセウスのタイプ変化
+                return ["ノーマル"]
+            else:
+                return [t for t in self.data.types if t not in
+                        self.lost_types + self.added_types] + self.added_types
 
     @property
     def max_hp(self) -> int:
@@ -227,16 +247,16 @@ class Pokemon:
         self.hp = max(0, min(self.max_hp, old + v))
         diff = self.hp - old
         if diff:
-            battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff}")
+            battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff} -> {self.hp}")
         return diff != 0
 
-    def modify_rank(self, battle: Battle, stat: Stat, v: int, by_self: bool = True) -> bool:
-        old = self.active_status.rank[stat.idx]
-        self.active_status.rank[stat.idx] = max(-6, min(6, old + v))
-        delta = self.active_status.rank[stat.idx] - old
+    def modify_stat(self, battle: Battle, stat: Stat, v: int, by_self: bool = True) -> bool:
+        old = self.field_status.rank[stat.idx]
+        self.field_status.rank[stat.idx] = max(-6, min(6, old + v))
+        delta = self.field_status.rank[stat.idx] - old
         if delta:
             battle.add_turn_log(self, f"{stat}{'+' if delta >= 0 else ''}{delta}")
-            battle.events.emit(Event.ON_MODIFY_RANK,
+            battle.events.emit(Event.ON_MODIFY_STAT,
                                EventContext(self, value={"value": delta, "by_self": by_self}))
         return delta != 0
 
@@ -248,5 +268,13 @@ class Pokemon:
     def knows(self, move: Move | str) -> bool:
         return self.find_move(move) is not None
 
-    def is_sleeping(self) -> bool:
-        return self.ailment == Ailment.SLP or self.ability.name == "ぜったいねむり"
+    def floating(self, battle: Battle) -> bool:
+        return False
+
+    def trapped(self, battle: Battle) -> bool:
+        self.field_status._trapped = \
+            self.field_status.count[Condition.SWITCH_BLOCK] or \
+            self.field_status.count[Condition.BIND]
+        battle.events.emit(Event.ON_TRAP)
+        self.field_status._trapped &= "ゴースト" not in self.types
+        return self.field_status._trapped

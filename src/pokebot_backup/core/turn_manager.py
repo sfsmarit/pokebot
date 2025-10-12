@@ -216,7 +216,7 @@ class TurnManager:
             # 方策関数からコマンドを取得
             self.battle.phase = Phase.SWITCH
             masked = self.battle.masked(idx, _called=True)
-            command = self.battle.players[idx].switch_command(masked)
+            command = self.battle.player[idx].switch_command(masked)
             self.battle.phase = Phase.NONE
 
         self.switch_history[idx].append(command)
