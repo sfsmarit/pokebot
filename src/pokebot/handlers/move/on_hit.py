@@ -3,20 +3,20 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.common.enums import Breakpoint, Stat
+from pokebot.common.enums import Interrupt, Stat
 from pokebot.core.events import EventContext
 
 
 def modify_stat(battle: Battle, ctx: EventContext, move: str, stat: Stat, value: int):
     if ctx.source.field_status.executed_move == move and \
             battle.modify_stat(ctx.source, stat, value):
-        battle.add_turn_log(ctx.source, "追加効果")
+        battle.write_log(ctx.source, "追加効果")
 
 
 def pivot(battle: Battle, ctx: EventContext, move: str):
     if ctx.source.field_status.executed_move == move:
         idx = battle.get_player_index(ctx.source)
-        battle.breakpoint[idx] = Breakpoint.PIVOT
+        battle.interrupt[idx] = Interrupt.PIVOT
 
 
 def アームハンマー(battle: Battle, ctx: EventContext):
@@ -47,4 +47,4 @@ def ふきとばし(battle: Battle, ctx: EventContext):
 def わるあがき(battle: Battle, ctx: EventContext):
     if ctx.source.field_status.executed_move == "わるあがき" and \
             battle.modify_hp(ctx.source, -ctx.source.max_hp // 4):
-        battle.add_turn_log(ctx.source, "追加効果")
+        battle.write_log(ctx.source, "追加効果")

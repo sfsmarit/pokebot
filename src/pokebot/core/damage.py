@@ -47,19 +47,19 @@ class DamageCalculator:
                            attacker: Pokemon,
                            defender: Pokemon,
                            move: Move,
-                           dctx: DamageContext | None = None) -> list[int]:
+                           dmg_ctx: DamageContext | None = None) -> list[int]:
         # ダメージを与えない技なら中断
         if not move.data.power:
             return [0]
 
-        if dctx is None:
-            dctx = DamageContext()
+        if dmg_ctx is None:
+            dmg_ctx = DamageContext()
 
         move_category = attacker.effective_move_category(move, self.events)
 
         # ---------------- 最終威力 ----------------
         # 技威力
-        final_pow = move.data.power * dctx.power_multiplier
+        final_pow = move.data.power * dmg_ctx.power_multiplier
 
         # その他の補正
         r_pow = self.events.emit(Event.ON_CALC_POWER_MODIFIER,
@@ -90,7 +90,7 @@ class DamageCalculator:
             r_rank = 1
             self.logs.append(f"{def_ability}")
 
-        if dctx.critical and r_rank < 1:
+        if dmg_ctx.critical and r_rank < 1:
             r_rank = 1
             self.logs.append('急所 AC下降無視')
 
@@ -125,7 +125,7 @@ class DamageCalculator:
             r_rank = 1
             self.logs.append(f"{def_ability}")
 
-        if dctx.critical and r_rank > 1:
+        if dmg_ctx.critical and r_rank > 1:
             r_rank = 1
             self.logs.append('急所 BD上昇無視')
 
@@ -143,11 +143,11 @@ class DamageCalculator:
 
         # ---------------- ダメージ計算 ----------------
         # 最大乱数ダメージ
-        max_damage = int(int(int(attacker.level*0.4+2)*final_pow*final_atk/final_def)/50+2)
+        max_dmg = int(int(int(attacker.level*0.4+2)*final_pow*final_atk/final_def)/50+2)
 
         # 急所
-        if dctx.critical:
-            max_damage = ut.round_half_down(max_damage * 1.5)
+        if dmg_ctx.critical:
+            max_dmg = ut.round_half_down(max_dmg * 1.5)
             self.logs.append("急所 x1.5")
 
         # その他の補正
@@ -155,25 +155,21 @@ class DamageCalculator:
                                       EventContext(defender, move, value=4096))
         r_def_type = self.events.emit(Event.ON_CALC_DEF_TYPE_MODIFIER,
                                       EventContext(defender, move, value=1))
-        r_damage = self.events.emit(Event.ON_CALC_DAMAGE_MODIFIER,
-                                    EventContext(defender, move, value=1))
+        r_dmg = self.events.emit(Event.ON_CALC_DAMAGE_MODIFIER,
+                                 EventContext(defender, move, value=1))
 
-        damages = [0]*16
-
+        dmgs = [0]*16
         for i in range(16):
             # 乱数 85~100%
-            damages[i] = int(max_damage * (0.85+0.01*i))
+            dmgs[i] = int(max_dmg * (0.85+0.01*i))
 
             # 補正
-            damages[i] = ut.round_half_down(damages[i] * r_atk_type)
-            damages[i] = int(damages[i] * r_def_type)
-            damages[i] = ut.round_half_down(damages[i] * r_damage/4096)
+            dmgs[i] = ut.round_half_down(dmgs[i] * r_atk_type)
+            dmgs[i] = int(dmgs[i] * r_def_type)
+            dmgs[i] = ut.round_half_down(dmgs[i] * r_dmg/4096)
 
             # 最低ダメージ補償
-            if damages[i] == 0 and r_def_type * r_damage > 0:
-                damages[i] = 1
+            if dmgs[i] == 0 and r_def_type * r_dmg > 0:
+                dmgs[i] = 1
 
-        print(f"{final_pow=} {final_atk=} {final_def=}")
-        print(f"{damages=}")
-
-        return damages
+        return dmgs

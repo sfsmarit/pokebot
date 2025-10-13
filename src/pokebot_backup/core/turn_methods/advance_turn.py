@@ -85,6 +85,7 @@ def _advance_turn(self: TurnManager,
             # 相手のS推定
             self.update_opponent_speed_limit(idx)
 
+    # 交代
     for idx in range(2):
         if not any(self.breakpoint):
             # ターンコマンドによる交代

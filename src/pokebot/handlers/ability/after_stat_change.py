@@ -12,4 +12,4 @@ def かちき(battle: Battle, ctx: EventContext):
             ctx.value < 0 and \
             ctx.by_foe and \
             battle.modify_stat(ctx.source, Stat.C, +2):
-        battle.add_turn_log(ctx.source, ctx.source.ability.name)
+        battle.write_log(ctx.source, ctx.source.ability.name)
