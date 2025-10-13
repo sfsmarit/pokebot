@@ -9,7 +9,7 @@ from pokebot.core.events import EventContext
 
 def modify_stat(battle: Battle, ctx: EventContext, move: str, stat: Stat, value: int):
     if ctx.source.field_status.executed_move == move and \
-            ctx.source.modify_stat(battle, stat, value):
+            battle.modify_stat(ctx.source, stat, value):
         battle.add_turn_log(ctx.source, "追加効果")
 
 
@@ -46,5 +46,5 @@ def ふきとばし(battle: Battle, ctx: EventContext):
 
 def わるあがき(battle: Battle, ctx: EventContext):
     if ctx.source.field_status.executed_move == "わるあがき" and \
-            ctx.source.modify_hp(battle, -ctx.source.max_hp // 4):
+            battle.modify_hp(ctx.source, -ctx.source.max_hp // 4):
         battle.add_turn_log(ctx.source, "追加効果")

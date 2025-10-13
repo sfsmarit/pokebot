@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pokebot.core.battle import Battle
+    from pokebot.core.events import EventManager
+    from pokebot.logger import TurnLog
 
-from pokebot.common.enums import Gender, Ailment, Stat, Condition
+from pokebot.common.enums import Gender, Ailment, Stat, MoveCategory
 from pokebot.common.constants import NATURE_MODIFIER
 import pokebot.common.utils as ut
 
@@ -63,18 +64,16 @@ class Pokemon:
     def __str__(self):
         return self.name
 
-    def switch_in(self, battle: Battle):
+    def switch_in(self, events: EventManager):
         self.observed = True
         if self.ability.active:
-            self.ability.register_handlers(battle)
+            self.ability.register_handlers(events)
         if self.item.active:
-            self.item.register_handlers(battle)
-        battle.add_turn_log(self, f"{self.name} 入場")
+            self.item.register_handlers(events)
 
-    def switch_out(self, battle: Battle):
-        self.ability.unregister_handlers(battle)
-        self.item.unregister_handlers(battle)
-        battle.add_turn_log(self, f"{self.name} {'退場' if self.hp else '瀕死'}")
+    def switch_out(self, events: EventManager):
+        self.ability.unregister_handlers(events)
+        self.item.unregister_handlers(events)
 
     @property
     def name(self):
@@ -242,23 +241,15 @@ class Pokemon:
         self._effort[idx] = value
         self.update_stats()
 
-    def modify_hp(self, battle: Battle, v: int) -> bool:
+    def modify_hp(self, v: int) -> int:
         old = self.hp
         self.hp = max(0, min(self.max_hp, old + v))
-        diff = self.hp - old
-        if diff:
-            battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff} -> {self.hp}")
-        return diff != 0
+        return self.hp - old
 
-    def modify_stat(self, battle: Battle, stat: Stat, v: int, by_self: bool = True) -> bool:
+    def modify_stat(self, stat: Stat, v: int) -> int:
         old = self.field_status.rank[stat.idx]
         self.field_status.rank[stat.idx] = max(-6, min(6, old + v))
-        delta = self.field_status.rank[stat.idx] - old
-        if delta:
-            battle.add_turn_log(self, f"{stat}{'+' if delta >= 0 else ''}{delta}")
-            battle.events.emit(Event.ON_MODIFY_STAT,
-                               EventContext(self, value={"value": delta, "by_self": by_self}))
-        return delta != 0
+        return self.field_status.rank[stat.idx] - old
 
     def find_move(self, move: Move | str) -> Move | None:
         for mv in self.moves:
@@ -268,13 +259,21 @@ class Pokemon:
     def knows(self, move: Move | str) -> bool:
         return self.find_move(move) is not None
 
-    def floating(self, battle: Battle) -> bool:
+    def floating(self, events: EventManager) -> bool:
         return False
 
-    def trapped(self, battle: Battle) -> bool:
-        self.field_status._trapped = \
-            self.field_status.count[Condition.SWITCH_BLOCK] or \
-            self.field_status.count[Condition.BIND]
-        battle.events.emit(Event.ON_TRAP)
+    def trapped(self, events: EventManager) -> bool:
+        self.field_status._trapped = False
+        # self.field_status._trapped |= self.field_status.count[Condition.SWITCH_BLOCK] > 0
+        # self.field_status._trapped |= self.field_status.count[Condition.BIND] > 0
+        events.emit(Event.ON_CHECK_TRAP)
         self.field_status._trapped &= "ゴースト" not in self.types
         return self.field_status._trapped
+
+    def effective_move_type(self, move: Move, events: EventManager) -> str:
+        events.emit(Event.ON_CHECK_MOVE_TYPE, EventContext(self, move))
+        return move._type
+
+    def effective_move_category(self, move: Move, events: EventManager) -> MoveCategory:
+        events.emit(Event.ON_CHECK_MOVE_CATEGORY, EventContext(self, move))
+        return move._category

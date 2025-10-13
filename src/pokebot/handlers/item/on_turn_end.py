@@ -9,5 +9,5 @@ from .common import write_log_and_consume
 
 def たべのこし(battle: Battle, ctx: EventContext):
     if ctx.source.item == "たべのこし" and \
-            ctx.source.modify_hp(battle, ctx.source.max_hp // 16):
+            battle.modify_hp(ctx.source, ctx.source.max_hp // 16):
         write_log_and_consume(battle, ctx.source)

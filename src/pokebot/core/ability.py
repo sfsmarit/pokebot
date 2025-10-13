@@ -6,8 +6,12 @@ from .base import Effect
 
 class Ability(Effect):
     def __init__(self, data: AbilityData) -> None:
+        self.data: AbilityData
         super().__init__(data)
 
+        self.bench_reset()
+
+    def bench_reset(self):
         self.count: int = 0
 
     def __deepcopy__(self, memo):

@@ -1,9 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pokebot.core import Battle, Pokemon
+    from pokebot.core.events import EventManager
 
 import pokebot.common.utils as ut
+from pokebot.common.enums import MoveCategory
 from pokebot.data.move import MoveData
 
 from .base import Effect
@@ -15,6 +16,11 @@ class Move(Effect):
         super().__init__(data)
 
         self.pp: int = pp if pp else data.pp
+        self.bench_reset()
+
+    def bench_reset(self):
+        self._type: str = self.data.type
+        self._category: MoveCategory = self.data.category
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -25,3 +31,11 @@ class Move(Effect):
 
     def modify_pp(self, v: int):
         self.pp = max(0, min(self.data.pp, self.pp + v))
+
+    @property
+    def type(self) -> str:
+        return self._type
+
+    @property
+    def category(self) -> MoveCategory:
+        return self._category

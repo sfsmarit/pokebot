@@ -8,5 +8,6 @@ from .common import write_log_and_consume
 
 
 def きれいなぬけがら(battle: Battle, ctx: EventContext):
-    if ctx.source.item == "きれいなぬけがら":
-        ctx.source.field_status._trapped = False
+    ctx.source.field_status._trapped &= (
+        ctx.source.item != "きれいなぬけがら"
+    )

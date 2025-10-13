@@ -6,15 +6,16 @@ if TYPE_CHECKING:
 import time
 from random import Random
 
-from pokebot.common.enums import Command, Breakpoint
+from pokebot.common.enums import Command, Breakpoint, Stat
 from pokebot.logger import Logger, TurnLog, CommandLog
 
-from .events import EventManager, Event
+from .events import EventManager, Event, EventContext
 from .pokedb import PokeDB
 from .pokemon import Pokemon
 from .move import Move
 
 from . import battle_methods as methods
+from .damage import DamageCalculator, DamageContext
 
 
 class Battle:
@@ -27,6 +28,7 @@ class Battle:
 
         if seed is None:
             seed = int(time.time())
+
         self.init_game(seed)
 
     def init_game(self, seed: int):
@@ -35,6 +37,7 @@ class Battle:
 
         self.events = EventManager(self)
         self.logger = Logger()
+        self.damage_calculator: DamageCalculator = DamageCalculator(self.events)
 
         self._winner: Player | None = None
         self.breakpoint: list[Breakpoint | None] = [None, None]
@@ -164,3 +167,33 @@ class Battle:
             return PokeDB.create_move("わるあがき")
         else:
             return self.actives[player_idx].moves[command.idx]
+
+    def modify_hp(self, target: Pokemon, v: int):
+        if v and (delta := target.modify_hp(v)):
+            self.add_turn_log(target, f"HP {'+' if delta >= 0 else ''}{delta} >> {target.hp}")
+
+    def modify_stat(self, target: Pokemon, stat: Stat, v: int, by_foe: bool = False):
+        if v and (delta := target.modify_stat(stat, v)):
+            self.add_turn_log(target, f"{stat}{'+' if delta >= 0 else ''}{delta}")
+            self.events.emit(Event.ON_MODIFY_STAT,
+                             EventContext(target, value=delta, by_foe=by_foe))
+
+    def calc_damage(self,
+                    attacker: Pokemon,
+                    move: Move | str,
+                    critical: bool = False,
+                    self_harm: bool = False) -> int:
+        return self.random.choice(
+            self.calc_damages(attacker, move, critical, self_harm))
+
+    def calc_damages(self,
+                     attacker: Pokemon,
+                     move: Move | str,
+                     critical: bool = False,
+                     self_harm: bool = False) -> list[int]:
+        if isinstance(move, str):
+            move = PokeDB.create_move(move)
+        defender = attacker if self_harm else self.foe(attacker)
+        dctx = DamageContext(critical, self_harm)
+        return self.damage_calculator.single_hit_damages(
+            attacker, defender, move, dctx)

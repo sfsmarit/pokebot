@@ -16,11 +16,13 @@ def run_switch(self: Battle,
     old = self.actives[player_idx]
     if old is not None:
         self.events.emit(Event.ON_SWITCH_OUT, EventContext(self.actives[player_idx]))
-        old.switch_out(self)
+        old.switch_out(self.events)
+        self.add_turn_log(old, f"{old} {'退場' if old.hp else '瀕死'}")
 
     # 入場
     self.actives[player_idx] = new
-    new.switch_in(self)
+    new.switch_in(self.events)
+    self.add_turn_log(new, f"{new} 入場")
     if emit_switch_in:
         self.events.emit(Event.ON_SWITCH_IN, EventContext(self.actives[player_idx]))
 

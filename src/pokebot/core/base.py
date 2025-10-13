@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Self
 if TYPE_CHECKING:
-    from pokebot.core import Battle
+    from pokebot.core.events import EventManager
 
 
 class Effect:
@@ -14,13 +14,13 @@ class Effect:
     def name(self):
         return self.data.name
 
-    def register_handlers(self, battle: Battle):
+    def register_handlers(self, events: EventManager):
         for event, handler in self.data.handlers.items():
-            battle.events.on(event, handler)
+            events.on(event, handler)
 
-    def unregister_handlers(self, battle: Battle):
+    def unregister_handlers(self, events: EventManager):
         for event, handler in self.data.handlers.items():
-            battle.events.off(event, handler)
+            events.off(event, handler)
 
     def __str__(self):
         return self.name

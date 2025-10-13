@@ -9,7 +9,7 @@ from pokebot.core.events import EventContext
 
 def いかく(battle: Battle, ctx: EventContext):
     if ctx.source.ability == "いかく" and \
-            battle.foe(ctx.source).modify_stat(battle, Stat.A, -1, by_self=False):
+            battle.modify_stat(battle.foe(ctx.source), Stat.A, -1, by_foe=True):
         battle.add_turn_log(ctx.source, ctx.source.ability.name)
 
 

@@ -26,6 +26,5 @@ class FieldStatus:
         self.lost_types: list[str] = []
         self.executed_move: Move | None = None
         self.expended_moves: list[Move] = []
-        self.count: dict = {}
 
         self._trapped: bool = False

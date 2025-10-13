@@ -94,7 +94,7 @@ ITEMS: dict[str, ItemData] = {
     "きれいなぬけがら": ItemData(
         consumable=False,
         throw_power=10,
-        handlers={Event.ON_TRAP: Handler(on_trap.きれいなぬけがら, -100)},
+        handlers={Event.ON_CHECK_TRAP: Handler(on_trap.きれいなぬけがら, -100)},
     ),
     "ぎんのこな": {
         "consumable": False,

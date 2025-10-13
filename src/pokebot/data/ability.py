@@ -17,7 +17,7 @@ ABILITIES: dict[str, AbilityData] = {
     "あめうけざら": {},
     "あめふらし": {},
     "ありじごく": AbilityData(
-        handlers={Event.ON_TRAP: Handler(on_trap.ありじごく)}
+        handlers={Event.ON_CHECK_TRAP: Handler(on_trap.ありじごく)}
     ),
     "いかく": AbilityData(
         handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.いかく, 4, True)}
