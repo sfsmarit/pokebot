@@ -240,7 +240,7 @@ ITEMS: dict[str, ItemData] = {
     },
     "たべのこし": ItemData(
         throw_power=10,
-        handlers={Event.ON_TURN_END: Handler(on_turn_end.たべのこし)}
+        handlers={Event.ON_TURN_END_2: Handler(on_turn_end.たべのこし)}
     ),
     "ちからのハチマキ": {
         "consumable": False,
