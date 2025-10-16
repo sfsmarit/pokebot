@@ -63,7 +63,8 @@ class DamageCalculator:
 
         # その他の補正
         r_pow = self.events.emit(Event.ON_CALC_POWER_MODIFIER,
-                                 EventContext(attacker, move, value=4096))
+                                 value=4096,
+                                 ctx=EventContext(attacker, move))
         final_pow = ut.round_half_down(final_pow * r_pow/4096)
         final_pow = max(1, final_pow)
 
@@ -84,7 +85,8 @@ class DamageCalculator:
 
         # ランク補正の修正
         def_ability = self.events.emit(Event.ON_CHECK_DEF_ABILITY,
-                                       ctx=EventContext(defender, move, defender.ability))
+                                       value=defender.ability,
+                                       ctx=EventContext(defender, move))
 
         if def_ability == 'てんねん' and r_rank != 1:
             r_rank = 1
@@ -102,7 +104,8 @@ class DamageCalculator:
 
         # その他の補正
         r_atk = self.events.emit(Event.ON_CALC_ATK_MODIFIER,
-                                 EventContext(attacker, move, value=4096))
+                                 value=4096,
+                                 ctx=EventContext(attacker, move))
         final_atk = ut.round_half_down(final_atk * r_atk/4096)
         final_atk = max(1, final_atk)
 
@@ -137,7 +140,8 @@ class DamageCalculator:
 
         # その他の補正
         r_def = self.events.emit(Event.ON_CALC_DEF_MODIFIER,
-                                 EventContext(defender, move, value=4096))
+                                 value=4096,
+                                 ctx=EventContext(defender, move))
         final_def = ut.round_half_down(final_def * r_def/4096)
         final_def = max(1, final_def)
 
@@ -152,11 +156,14 @@ class DamageCalculator:
 
         # その他の補正
         r_atk_type = self.events.emit(Event.ON_CALC_ATK_TYPE_MODIFIER,
-                                      EventContext(defender, move, value=4096))
+                                      value=4096,
+                                      ctx=EventContext(defender, move))
         r_def_type = self.events.emit(Event.ON_CALC_DEF_TYPE_MODIFIER,
-                                      EventContext(defender, move, value=1))
+                                      value=1,
+                                      ctx=EventContext(defender, move))
         r_dmg = self.events.emit(Event.ON_CALC_DAMAGE_MODIFIER,
-                                 EventContext(defender, move, value=1))
+                                 value=1,
+                                 ctx=EventContext(defender, move))
 
         dmgs = [0]*16
         for i in range(16):

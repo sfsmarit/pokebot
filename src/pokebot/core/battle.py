@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
 import time
 from random import Random
+from dataclasses import dataclass, field
 
 from pokebot.common.enums import Command, Interrupt, Stat
 from pokebot.logger import Logger, TurnLog, CommandLog
@@ -17,48 +18,64 @@ from .move import Move
 from .damage import DamageCalculator, DamageContext
 
 
+@dataclass
+class PlayerState:
+    selection_idxes: list[int] = field(default_factory=list)
+    active: Pokemon = None  # type: ignore
+    interrupt: Interrupt = Interrupt.NONE
+    already_switched: bool = False
+    command: Command = Command.NONE
+    scheduled_switch_commands: list[Command] = field(default_factory=list)
+
+    def turn_reset(self):
+        self.command = Command.NONE
+        self.already_switched = False
+
+
 class Battle:
     def __init__(self,
-                 player1: Player,
-                 player2: Player,
+                 players: list[Player],
                  seed: int | None = None) -> None:
 
-        self.player: list[Player] = [player1, player2]
+        self.states: dict[Player, PlayerState] = \
+            {player: PlayerState() for player in players}
 
-        if seed is None:
-            seed = int(time.time())
+        self.init_game(seed if seed is not None else int(time.time()))
 
-        self.init_game(seed)
+    @property
+    def players(self):
+        return list(self.states.keys())
+
+    @property
+    def actives(self):
+        return [state.active for state in self.states.values()]
 
     def init_game(self, seed: int):
         self.seed = seed
+        self.turn: int = -1
+        self._winner: Player | None = None
 
         self.random = Random(seed)
         self.events = EventManager(self)
         self.logger = Logger()
         self.damage_calculator: DamageCalculator = DamageCalculator(self.events)
 
-        self._winner: Player | None = None
-        self.interrupt: list[Interrupt] = [Interrupt.NONE] * 2
-        self.scheduled_switch_commands: list[list[Command]] = [[], []]
-
-        self.turn: int = -1
-        self.selection_idxes: list[list[int]] = [[], []]
-        self.actives: list[Pokemon] = [None] * 2  # type: ignore
-
     def init_turn(self):
-        self.command: list[Command] = [Command.NONE] * 2
-        self.already_switched: list[bool] = [False] * 2
+        for state in self.states.values():
+            state.turn_reset()
         self.turn += 1
 
-    def get_player_index(self, obj: Pokemon | Player) -> int:
-        if isinstance(obj, Pokemon):
-            return self.actives.index(obj)
-        else:
-            return self.player.index(obj)
+    def get_player(self, active: Pokemon) -> Player:
+        for player, state in self.states.items():
+            if state.active is active:
+                return player
+        raise Exception("Player not found.")
 
     def foe(self, poke: Pokemon) -> Pokemon:
         return self.actives[(self.actives.index(poke)+1) % 2]
+
+    def rival(self, player: Player) -> Player:
+        return self.players[(self.players.index(player)+1) % 2]
 
     def get_available_selection_commands(self, player: Player) -> list[Command]:
         return Command.selection_commands()[:len(player.team)]
@@ -68,8 +85,7 @@ class Battle:
                 if poke.is_selected and poke not in self.actives]
 
     def get_available_action_commands(self, player: Player) -> list[Command]:
-        idx = self.player.index(player)
-        n = len(self.actives[idx].moves)
+        n = len(self.states[player].active.moves)
 
         # 通常技
         commands = Command.move_commands()[:n]
@@ -92,11 +108,9 @@ class Battle:
             turn = self.turn
         return self.logger.get_turn_logs(turn)
 
-    def write_log(self, obj: int | Pokemon | Player, text: str):
+    def write_log(self, obj: Player | Pokemon, text: str):
         if isinstance(obj, Pokemon):
-            obj = self.actives.index(obj)
-        elif not isinstance(obj, int):
-            obj = self.player.index(obj)
+            obj = self.get_player(obj)
         self.logger.append(TurnLog(self.turn, obj, text))
 
     def get_speed_order(self) -> list[int]:
@@ -144,12 +158,12 @@ class Battle:
         move.register_handlers(self.events)
 
         # 技判定より前の処理
-        self.events.emit(Event.ON_BEFORE_MOVE, EventContext(source))
+        self.events.emit(Event.ON_BEFORE_MOVE, ctx=EventContext(source))
 
         self.write_log(self.get_player_index(source), f"{move}")
 
         # 発動成功判定
-        self.events.emit(Event.ON_TRY_MOVE, EventContext(source))
+        self.events.emit(Event.ON_TRY_MOVE, ctx=EventContext(source))
 
         # 命中判定
         pass
@@ -163,11 +177,11 @@ class Battle:
         self.modify_hp(foe, -damage)
 
         # 技が命中したときの処理
-        self.events.emit(Event.ON_HIT, EventContext(source))
+        self.events.emit(Event.ON_HIT, ctx=EventContext(source))
 
         # 技によってダメージを与えたときの処理
         if damage:
-            self.events.emit(Event.ON_DAMAGE, EventContext(source))
+            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
 
         move.unregister_handlers(self.events)
 
@@ -193,8 +207,8 @@ class Battle:
     def modify_stat(self, target: Pokemon, stat: Stat, v: int, by_foe: bool = False):
         if v and (delta := target.modify_stat(stat, v)):
             self.write_log(target, f"{stat}{'+' if delta >= 0 else ''}{delta}")
-            self.events.emit(Event.ON_MODIFY_STAT,
-                             EventContext(target, value=delta, by_foe=by_foe))
+            self.events.emit(Event.ON_MODIFY_STAT, value=delta,
+                             ctx=EventContext(target, by_foe=by_foe))
 
     def calc_damage(self,
                     attacker: Pokemon,
@@ -229,7 +243,7 @@ class Battle:
         # 退場
         old = self.actives[player_idx]
         if old is not None:
-            self.events.emit(Event.ON_SWITCH_OUT, EventContext(self.actives[player_idx]))
+            self.events.emit(Event.ON_SWITCH_OUT, ctx=EventContext(self.actives[player_idx]))
             old.switch_out(self.events)
             self.write_log(old, f"{old} {'退場' if old.hp else '瀕死'}")
 
@@ -238,7 +252,7 @@ class Battle:
         new.switch_in(self.events)
         self.write_log(new, f"{new} 入場")
         if emit_switch_in:
-            self.events.emit(Event.ON_SWITCH_IN, EventContext(self.actives[player_idx]))
+            self.events.emit(Event.ON_SWITCH_IN, ctx=EventContext(self.actives[player_idx]))
 
         # 割り込みフラグを破棄
         self.interrupt[player_idx] = Interrupt.NONE
@@ -265,7 +279,7 @@ class Battle:
         for idx in self.get_speed_order():
             if self.interrupt[idx] == flag:
                 self.events.emit(Event.ON_SWITCH_IN,
-                                 EventContext(self.actives[idx]))
+                                 ctx=EventContext(self.actives[idx]))
 
     def run_faint_switch(self):
         while self.winner() is None:
@@ -284,7 +298,8 @@ class Battle:
             # 瀕死による交代
             self.run_interrupt_switch(Interrupt.FAINTED)
 
-    def advance_turn(self: Battle):
+    def advance_turn(self: Battle,
+                     reserved_command: list[Command] = [Command.NONE] * 2):
         if not self.has_interrupt():
             self.init_turn()
 
@@ -349,7 +364,7 @@ class Battle:
             if not self.has_interrupt():
                 # 交代技の後の処理
                 self.events.emit(Event.ON_AFTER_PIVOT,
-                                 EventContext(self.actives[idx]))
+                                 ctx=EventContext(self.actives[idx]))
 
                 # だっしゅつパックによる割り込みフラグを更新
                 self.update_ejectpack_interrupt(Interrupt.get_ejectpack_on_after_move(idx))

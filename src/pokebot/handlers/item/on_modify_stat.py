@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
@@ -8,8 +8,8 @@ from pokebot.core.events import EventContext
 from .common import write_log_and_consume
 
 
-def だっしゅつパック(battle: Battle, ctx: EventContext):
+def だっしゅつパック(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.item == "だっしゅつパック":
-        idx = battle.get_player_index(ctx.source)
-        battle.interrupt[idx] = Interrupt.EJECTPACK_REQUESTED
+        player = battle.get_player(ctx.source)
+        battle.states[player].interrupt = Interrupt.EJECTPACK_REQUESTED
         write_log_and_consume(battle, ctx.source)

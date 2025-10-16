@@ -271,9 +271,11 @@ class Pokemon:
         return self.field_status._trapped
 
     def effective_move_type(self, move: Move, events: EventManager) -> str:
-        events.emit(Event.ON_CHECK_MOVE_TYPE, EventContext(self, move))
+        events.emit(Event.ON_CHECK_MOVE_TYPE,
+                    ctx=EventContext(self, move))
         return move._type
 
     def effective_move_category(self, move: Move, events: EventManager) -> MoveCategory:
-        events.emit(Event.ON_CHECK_MOVE_CATEGORY, EventContext(self, move))
+        events.emit(Event.ON_CHECK_MOVE_CATEGORY,
+                    ctx=EventContext(self, move))
         return move._category

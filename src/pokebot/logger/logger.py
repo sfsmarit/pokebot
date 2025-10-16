@@ -1,7 +1,11 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pokebot.player.player import Player
+
 from copy import deepcopy
 
 import pokebot.common.utils as ut
-
 from .command_log import CommandLog
 from .turn_log import TurnLog
 
@@ -22,14 +26,13 @@ class Logger:
         ut.selective_deepcopy(self, new)
         return new
 
-    def get_turn_logs(self, turn: int | None = None) -> list[list[str]]:
-        logs = [[], []]
+    def get_turn_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
+        logs = {}
         for log in self.turn_logs:
             if log.turn != turn:
                 continue
-            idxes = [log.idx] if log.idx is not None else [0, 1]
-            for idx in idxes:
-                logs[idx].append(log.text)
+            for player in log.players:
+                logs.setdefault(player, []).append(log.text)
         return logs
 
     def append(self, log: TurnLog | CommandLog):

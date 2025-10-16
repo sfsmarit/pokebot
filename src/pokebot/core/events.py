@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
-    from .pokemon import Pokemon
-    from .move import Move
+    from pokebot.core.pokemon import Pokemon
+    from pokebot.core.move import Move
 
 from typing import Callable, Any
 from dataclasses import dataclass
@@ -51,9 +51,8 @@ class Handler:
 
 @dataclass
 class EventContext:
-    source: Pokemon = None  # type: ignore
+    source: Pokemon
     move: Move = None  # type: ignore
-    value: Any = 0
     by_foe: bool = False
 
 
@@ -72,7 +71,10 @@ class EventManager:
                 h for h in self.handlers[event] if h != handler
             ]
 
-    def emit(self, event: Event, ctx: EventContext | None = None) -> Any:
+    def emit(self,
+             event: Event,
+             value: Any = 0,
+             ctx: EventContext | None = None) -> Any:
         """イベントを発火"""
         for h in sorted(self.handlers.get(event, [])):
             if ctx is None:
@@ -82,14 +84,16 @@ class EventManager:
                 ctxs = [ctx]
 
             for c in ctxs:
-                result = h.func(self.battle, c)
+                result = h.func(self.battle, value, c)
 
                 # 単発ハンドラを削除
                 if h.once:
                     self.off(event, h)
 
-                # 処理を中断
+                # ハンドラの返り値が False なら処理を中断
                 if result == False:
-                    return c.value
+                    return value
 
-        return ctx.value if ctx else 0
+                value = result
+
+        return value

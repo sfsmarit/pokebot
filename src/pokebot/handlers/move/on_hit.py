@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
@@ -15,36 +15,35 @@ def modify_stat(battle: Battle, ctx: EventContext, move: str, stat: Stat, value:
 
 def pivot(battle: Battle, ctx: EventContext, move: str):
     if ctx.source.field_status.executed_move == move:
-        idx = battle.get_player_index(ctx.source)
-        battle.interrupt[idx] = Interrupt.PIVOT
+        player = battle.get_player(ctx.source)
+        battle.states[player].interrupt = Interrupt.PIVOT
 
 
-def アームハンマー(battle: Battle, ctx: EventContext):
+def アームハンマー(battle: Battle, value: Any, ctx: EventContext):
     modify_stat(battle, ctx, "アームハンマー", Stat.S, -1)
 
 
-def クイックターン(battle: Battle, ctx: EventContext):
+def クイックターン(battle: Battle, value: Any, ctx: EventContext):
     return pivot(battle, ctx, "クイックターン")
 
 
-def とんぼがえり(battle: Battle, ctx: EventContext):
+def とんぼがえり(battle: Battle, value: Any, ctx: EventContext):
     return pivot(battle, ctx, "とんぼがえり")
 
 
-def ボルトチェンジ(battle: Battle, ctx: EventContext):
+def ボルトチェンジ(battle: Battle, value: Any, ctx: EventContext):
     return pivot(battle, ctx, "ボルトチェンジ")
 
 
-def ふきとばし(battle: Battle, ctx: EventContext):
+def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.field_status.executed_move == "ふきとばし":
-        idx = not battle.get_player_index(ctx.source)
-        switches = battle.get_available_switch_commands(battle.player[idx])
-        command = battle.random.choice(switches)
-        new = battle.player[idx].team[command.idx]
-        battle.run_switch(idx, new)
+        player = battle.get_player(ctx.source)
+        commands = battle.get_available_switch_commands(player)
+        command = battle.random.choice(commands)
+        battle.run_switch(idx, player.team[command.idx])
 
 
-def わるあがき(battle: Battle, ctx: EventContext):
+def わるあがき(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.field_status.executed_move == "わるあがき" and \
             battle.modify_hp(ctx.source, -ctx.source.max_hp // 4):
         battle.write_log(ctx.source, "追加効果")
