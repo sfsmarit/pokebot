@@ -33,11 +33,11 @@ class Interrupt(Enum):
     EJECTPACK_ON_TURN_END = auto()
 
     @classmethod
-    def get_ejectpack_on_switch(cls, idx: int):
+    def ejectpack_on_switch(cls, idx: int):
         return cls[f"EJECTPACK_ON_SWITCH_{idx}"]
 
     @classmethod
-    def get_ejectpack_on_after_move(cls, idx: int):
+    def ejectpack_on_after_move(cls, idx: int):
         return cls[f"EJECTPACK_ON_AFTER_MOVE_{idx}"]
 
 

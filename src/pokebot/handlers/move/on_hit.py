@@ -10,12 +10,12 @@ from pokebot.core.events import EventContext
 def modify_stat(battle: Battle, ctx: EventContext, move: str, stat: Stat, value: int):
     if ctx.source.field_status.executed_move == move and \
             battle.modify_stat(ctx.source, stat, value):
-        battle.write_log(ctx.source, "追加効果")
+        battle.add_turn_log(ctx.source, "追加効果")
 
 
 def pivot(battle: Battle, ctx: EventContext, move: str):
     if ctx.source.field_status.executed_move == move:
-        player = battle.get_player(ctx.source)
+        player = battle.find_player(ctx.source)
         battle.states[player].interrupt = Interrupt.PIVOT
 
 
@@ -37,7 +37,7 @@ def ボルトチェンジ(battle: Battle, value: Any, ctx: EventContext):
 
 def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.field_status.executed_move == "ふきとばし":
-        player = battle.get_player(ctx.source)
+        player = battle.find_player(ctx.source)
         commands = battle.get_available_switch_commands(player)
         command = battle.random.choice(commands)
         battle.run_switch(idx, player.team[command.idx])
@@ -46,4 +46,4 @@ def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
 def わるあがき(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.field_status.executed_move == "わるあがき" and \
             battle.modify_hp(ctx.source, -ctx.source.max_hp // 4):
-        battle.write_log(ctx.source, "追加効果")
+        battle.add_turn_log(ctx.source, "追加効果")

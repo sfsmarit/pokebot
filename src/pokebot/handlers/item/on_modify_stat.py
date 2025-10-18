@@ -10,6 +10,6 @@ from .common import write_log_and_consume
 
 def だっしゅつパック(battle: Battle, value: Any, ctx: EventContext):
     if ctx.source.item == "だっしゅつパック":
-        player = battle.get_player(ctx.source)
+        player = battle.find_player(ctx.source)
         battle.states[player].interrupt = Interrupt.EJECTPACK_REQUESTED
         write_log_and_consume(battle, ctx.source)

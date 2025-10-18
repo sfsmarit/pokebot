@@ -3,46 +3,56 @@ from pokebot.common.enums import Command
 
 
 class CustomPlayer(Player):
-    def get_selection_commands(self, battle: Battle) -> list[Command]:
+    def choose_selection_commands(self, battle: Battle) -> list[Command]:
         return battle.get_available_selection_commands(self)
 
-    def get_action_command(self, battle: Battle) -> Command:
+    def choose_action_command(self, battle: Battle) -> Command:
         return battle.get_available_action_commands(self)[0]
 
 
-player = CustomPlayer()
+# ---------------------------------------------------------------------
+
+player = CustomPlayer("Player 1")
 player.team.append(PokeDB.create_pokemon("リザードン"))
-# player.team[-1].ability = PokeDB.create_ability("いかく")
-# player.team[-1].item = PokeDB.create_item("だっしゅつボタン")
+player.team[-1].ability = PokeDB.create_ability("いかく")
+player.team[-1].item = PokeDB.create_item("だっしゅつパック")
 player.team[-1].moves = [PokeDB.create_move("たいあたり")]
 
-# player.team.append(PokeDB.create_pokemon("ピカチュウ"))
+player.team.append(PokeDB.create_pokemon("ピカチュウ"))
+player.team[-1].moves = [PokeDB.create_move("たいあたり")]
 
-for poke in player.team:
-    poke.show()
-print("-"*50)
+# ---------------------------------------------------------------------
 
-opponent = CustomPlayer()
-opponent.team.append(PokeDB.create_pokemon("カメックス"))
-# opponent.team[-1].ability = PokeDB.create_ability("いかく")
-# opponent.team[-1].item = PokeDB.create_item("たべのこし")
-opponent.team[-1].moves = [PokeDB.create_move("たいあたり")]
+rival = CustomPlayer("Player 2")
+rival.team.append(PokeDB.create_pokemon("カメックス"))
+rival.team[-1].ability = PokeDB.create_ability("いかく")
+rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
+rival.team[-1].moves = [PokeDB.create_move("たいあたり")]
 
-# opponent.team.append(PokeDB.create_pokemon("フシギバナ"))
+rival.team.append(PokeDB.create_pokemon("フシギバナ"))
+rival.team[-1].moves = [PokeDB.create_move("たいあたり")]
 
-for poke in opponent.team:
-    poke.show()
-print("-"*50)
+# ---------------------------------------------------------------------
 
+max_turn = 1
 
-battle = Battle(player, opponent)
+# ---------------------------------------------------------------------
+
+for pl in [player, rival]:
+    for poke in pl.team:
+        print(poke)
+    print("-"*50)
+
+# ---------------------------------------------------------------------
+
+battle = Battle([player, rival])
 
 while 1:
     battle.advance_turn()
 
-    print(f"{battle.turn=}")
-    for cmd, log in zip(battle.command, battle.get_turn_logs()):
-        print(f"\t{cmd}\t{log}")
+    print(f"Turn {battle.turn}")
+    for player, log in battle.get_turn_logs().items():
+        print(f"\t{player.name}\t{log}")
 
-    if battle.turn == 1 or battle.winner():
+    if battle.winner() or battle.turn == max_turn:
         break

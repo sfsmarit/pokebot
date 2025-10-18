@@ -22,9 +22,6 @@ class Effect:
         for event, handler in self.data.handlers.items():
             events.off(event, handler)
 
-    def __str__(self):
-        return self.name
-
     def __eq__(self, value: Self | str) -> bool:
         if isinstance(value, str):
             return self.name == value

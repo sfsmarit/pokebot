@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.pokemon import Pokemon
+    from pokebot.core.ability import Ability
     from pokebot.core.move import Move
 
 from dataclasses import dataclass
@@ -9,7 +10,6 @@ from dataclasses import dataclass
 from .events import EventManager, Event, EventContext
 import pokebot.common.utils as ut
 from pokebot.common.enums import MoveCategory, Stat
-from pokebot.core.pokedb import PokeDB
 
 
 @dataclass
@@ -84,13 +84,13 @@ class DamageCalculator:
             r_rank = rank_modifier(attacker.field_status.rank[stat.idx])
 
         # ランク補正の修正
-        def_ability = self.events.emit(Event.ON_CHECK_DEF_ABILITY,
-                                       value=defender.ability,
-                                       ctx=EventContext(defender, move))
+        def_ability: Ability = self.events.emit(Event.ON_CHECK_DEF_ABILITY,
+                                                value=defender.ability,
+                                                ctx=EventContext(defender, move))
 
         if def_ability == 'てんねん' and r_rank != 1:
             r_rank = 1
-            self.logs.append(f"{def_ability}")
+            self.logs.append(f"{def_ability.name}")
 
         if dmg_ctx.critical and r_rank < 1:
             r_rank = 1
@@ -122,11 +122,11 @@ class DamageCalculator:
         # ランク補正の修正
         if "ignore_rank" in move.data.flags and r_rank != 1:
             r_rank = 1
-            self.logs.append(f"{move} 防御ランク無視")
+            self.logs.append(f"{move.name} 防御ランク無視")
 
         if attacker.ability == 'てんねん' and r_rank != 1:
             r_rank = 1
-            self.logs.append(f"{def_ability}")
+            self.logs.append(f"{def_ability.name}")
 
         if dmg_ctx.critical and r_rank > 1:
             r_rank = 1

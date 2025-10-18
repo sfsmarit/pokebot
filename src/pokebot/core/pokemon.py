@@ -42,7 +42,6 @@ class Pokemon:
         self._terastal: str = ""
         self.is_terastallized: bool = False
 
-        self.is_selected: bool = False
         self.sleep_count: int
         self.ailment: Ailment
 
@@ -54,15 +53,29 @@ class Pokemon:
         self.added_types: list[str] = []
         self.lost_types: list[str] = []
 
+    def __str__(self):
+        sep = '\n\t'
+        s = f"{self.name}{sep}"
+        s += f"HP {self.hp}/{self.max_hp} ({self.hp_ratio*100:.0f}%){sep}"
+        s += f"{self._nature}{sep}"
+        s += f"{self.ability.name}{sep}"
+        s += f"{self.item.name or 'No item'}{sep}"
+        if self._terastal:
+            s += f"{self._terastal}T{sep}"
+        else:
+            s += f"No terastal{sep}"
+        for st, ef in zip(self._stats, self._effort):
+            s += f"{st}({ef})-" if ef else f"{st}-"
+        s = s[:-1] + sep
+        s += "/".join(move.name for move in self.moves)
+        return s
+
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
         ut.selective_deepcopy(self, new, keys_to_deepcopy=['ability', 'item', 'moves'])
         return new
-
-    def __str__(self):
-        return self.name
 
     def switch_in(self, events: EventManager):
         self.observed = True
@@ -193,22 +206,6 @@ class Pokemon:
     def effort(self, effort: list[int]):
         self._effort = effort
         self.update_stats()
-
-    def show(self, sep: str = '\n\t'):
-        s = f"{self.name}{sep}"
-        s += f"HP {self.hp}/{self.stats[0]} ({self.hp_ratio*100:.0f}%){sep}"
-        s += f"{self._nature}{sep}"
-        s += f"{self.ability}{sep}"
-        s += f"{self.item.name or 'No item'}{sep}"
-        if self._terastal:
-            s += f"{self._terastal}T{sep}"
-        else:
-            s += f"No terastal{sep}"
-        for st, ef in zip(self._stats, self._effort):
-            s += f"{st}({ef})-" if ef else f"{st}-"
-        s = s[:-1] + sep
-        s += "/".join(move.name for move in self.moves)
-        print(s)
 
     def update_stats(self, keep_damage: bool = False):
         if keep_damage:

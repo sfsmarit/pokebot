@@ -11,6 +11,6 @@ from .common import write_log_and_consume
 def だっしゅつボタン(battle: Battle, value: Any, ctx: EventContext):
     target = battle.foe(ctx.source)
     if target.item == "だっしゅつボタン":
-        player = battle.get_player(target)
+        player = battle.find_player(target)
         battle.states[player].interrupt = Interrupt.EJECTBUTTON
         write_log_and_consume(battle, target)

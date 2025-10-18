@@ -78,8 +78,8 @@ class EventManager:
         """イベントを発火"""
         for h in sorted(self.handlers.get(event, [])):
             if ctx is None:
-                ctxs = [EventContext(self.battle.actives[i])
-                        for i in self.battle.get_action_order()]
+                ctxs = [EventContext(self.battle.states[pl].active)
+                        for pl in self.battle.get_action_order()]
             else:
                 ctxs = [ctx]
 

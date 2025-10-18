@@ -7,8 +7,9 @@ from pokebot.core.pokemon import Pokemon
 
 
 def write_log_and_consume(battle: Battle, target: Pokemon):
+    player = battle.find_player(target)
     if target.item.data.consumable:
-        battle.write_log(target, f"{target.item}消費")
+        battle.add_turn_log(player, f"{target.item.name}消費")
         target.item.consume()
     else:
-        battle.write_log(target, f"{target.item}発動")
+        battle.add_turn_log(player, f"{target.item.name}発動")
