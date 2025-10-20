@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pokebot import Battle, Player, PokeDB
 from pokebot.common.enums import Command
 
@@ -14,14 +15,14 @@ class CustomPlayer(Player):
 
 player = CustomPlayer("Player 1")
 player.team.append(PokeDB.create_pokemon("リザードン"))
-# player.team[-1].ability = PokeDB.create_ability("いかく")
+player.team[-1].ability = PokeDB.create_ability("かちき")
 # player.team[-1].item = PokeDB.create_item("だっしゅつパック")
 player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
-player.team.append(PokeDB.create_pokemon("ピカチュウ"))
+# player.team.append(PokeDB.create_pokemon("ピカチュウ"))
 # player.team[-1].ability = PokeDB.create_ability("いかく")
 # player.team[-1].item = PokeDB.create_item("だっしゅつパック")
-player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+# player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 # ---------------------------------------------------------------------
 
@@ -31,14 +32,14 @@ rival.team.append(PokeDB.create_pokemon("カメックス"))
 # rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
 rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
-rival.team.append(PokeDB.create_pokemon("フシギバナ"))
+# rival.team.append(PokeDB.create_pokemon("フシギバナ"))
 # rival.team[-1].ability = PokeDB.create_ability("いかく")
 # rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
-rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+# rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 # ---------------------------------------------------------------------
 
-max_turn = 10
+max_turn = 0
 
 # ---------------------------------------------------------------------
 
@@ -60,3 +61,10 @@ while 1:
 
     if battle.winner() or battle.turn == max_turn:
         break
+
+print(repr(battle.players[0].team[0]))
+print(battle.events.handlers)
+
+battle = deepcopy(battle)
+print(repr(battle.players[0].team[0]))
+print(battle.events.handlers)

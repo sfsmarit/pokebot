@@ -55,7 +55,7 @@ class Interrupt(Enum):
     EJECTPACK_ON_AFTER_MOVE_1 = auto()
     EJECTPACK_ON_TURN_END = auto()
 
-    def by_consumable_item(self) -> bool:
+    def consume_item(self) -> bool:
         return "EJECT" in self.name
 
     @classmethod
@@ -87,7 +87,7 @@ class EventContext:
 class EventManager:
     def __init__(self, battle: Battle) -> None:
         self.battle = battle
-        self.handlers: dict[Event, dict[Handler, list[int]]] = {}
+        self.handlers: dict[Event, dict[Handler, list[Pokemon]]] = {}
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -99,7 +99,7 @@ class EventManager:
         """イベントを指定してハンドラを登録"""
         self.handlers.setdefault(event, {})
         sources = self.handlers[event].setdefault(handler, [])
-        if source not in sources and None not in sources:
+        if all(x not in sources for x in [source, None]):
             self.handlers[event][handler].append(source)  # type: ignore
 
     def off(self, event: Event, handler: Handler, source: Pokemon | None = None):

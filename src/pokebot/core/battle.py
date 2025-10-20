@@ -46,6 +46,21 @@ class Battle:
         new.events.battle = new
         new.damage_calculator.events = new.events
 
+        # 複製した EventManager.handlers[event][handler]: list[Pokemon | None] の
+        # 参照先を複製した後のポケモンに差し替える
+        for event, data in new.events.handlers.items():
+            for handler, pokes in data.items():
+                new_pokes = []
+                for p in pokes:
+                    if isinstance(p, Pokemon):
+                        player = self.find_player(p)
+                        player_idx = self.players.index(player)
+                        team_idx = player.team.index(p)
+                        new_pokes.append(new.players[player_idx].team[team_idx])
+                    else:
+                        new_pokes.append(p)
+                new.events.handlers[event][handler] = new_pokes
+
         # 乱数の隠蔽
         new.random.seed(int(time.time()))
 
@@ -56,7 +71,10 @@ class Battle:
         return list(self.states.keys())
 
     def active(self, player: Player) -> Pokemon:
-        return player.team[self.states[player].active_idx]
+        if (i := self.states[player].active_idx) is not None:
+            return player.team[i]
+        else:
+            return None  # type: ignore
 
     def selected(self, player: Player) -> list[Pokemon]:
         return [player.team[i] for i in self.states[player].selected_idxes]
@@ -72,12 +90,16 @@ class Battle:
                 return player
         raise Exception("Player not found.")
 
+    def team_idx(self, poke: Pokemon) -> int:
+        player = self.find_player(poke)
+        return player.team.index(poke)
+
     def foe(self, active: Pokemon) -> Pokemon:
         actives = [self.active(pl) for pl in self.players]
-        return actives[(actives.index(active)+1) % 2]
+        return actives[not actives.index(active)]
 
     def rival(self, player: Player) -> Player:
-        return self.players[(self.players.index(player)+1) % 2]
+        return self.players[not self.players.index(player)]
 
     def can_use_terastal(self, player: Player) -> bool:
         return all(poke.can_terastallize() for poke in self.selected(player))
@@ -296,7 +318,7 @@ class Battle:
                 continue
 
             # アイテム消費
-            if flag.by_consumable_item():
+            if flag.consume_item():
                 self.add_turn_log(player, f"{self.active(player).item.name}消費")
                 self.active(player).item.consume()
 
