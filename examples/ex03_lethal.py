@@ -7,7 +7,7 @@ from pokebot import Pokemon, Battle, Player, enums
 
 
 battle = Battle(Player(), Player())
-battle.init_game()
+battle.reset()
 
 # ------------------------------ プレイヤー0 ------------------------------
 poke = Pokemon('カイリュー')

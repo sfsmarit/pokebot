@@ -74,19 +74,19 @@ class Pokemon:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=['ability', 'item', 'moves'])
+        ut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves'])
         return new
 
     def switch_in(self, events: EventManager):
         self.observed = True
         if self.ability.active:
-            self.ability.register_handlers(events)
+            self.ability.register_handlers(events, self)
         if self.item.active:
-            self.item.register_handlers(events)
+            self.item.register_handlers(events, self)
 
     def switch_out(self, events: EventManager):
-        self.ability.unregister_handlers(events)
-        self.item.unregister_handlers(events)
+        self.ability.unregister_handlers(events, self)
+        self.item.unregister_handlers(events, self)
 
     @property
     def name(self):

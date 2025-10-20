@@ -15,13 +15,14 @@ def timer(func, *args, **kwargs) -> None:
     print(f"{func.__name__} {(time.time()-t0)*1e3}ms")
 
 
-def selective_deepcopy(old, new, keys_to_deepcopy: list[str] = []):
+def fast_copy(old, new, keys_to_deepcopy: list[str] = []):
     """指定されたkeyのみdeep copyし、それ以外はshallow copyする"""
     for key, val in old.__dict__.items():
         if key in keys_to_deepcopy:
             setattr(new, key, deepcopy(val))
         else:
             setattr(new, key, recursive_copy(val))
+    return new
 
 
 def recursive_copy(obj):

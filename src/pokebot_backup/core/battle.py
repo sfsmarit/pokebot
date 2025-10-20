@@ -96,7 +96,7 @@ class Battle:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=[
+        ut.fast_copy(self, new, keys_to_deepcopy=[
             "players", "random", "logger", "turn_mgr",
             "poke_mgrs", "field_mgr", "damage_mgr"
         ])

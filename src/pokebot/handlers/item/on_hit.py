@@ -8,6 +8,5 @@ from .common import write_log_and_consume
 
 
 def いのちのたま(battle: Battle, value: Any, ctx: EventContext):
-    if ctx.source.item == "いのちのたま" and \
-            battle.modify_hp(ctx.source, -ctx.source.max_hp // 8):
+    if battle.modify_hp(ctx.source, -ctx.source.max_hp // 8):
         write_log_and_consume(battle, ctx.source)

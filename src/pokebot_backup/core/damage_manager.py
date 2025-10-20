@@ -39,7 +39,7 @@ class DamageManager:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=["log"])
+        ut.fast_copy(self, new, keys_to_deepcopy=["log"])
         return new
 
     def single_hit_damages(self,

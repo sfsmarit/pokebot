@@ -23,8 +23,7 @@ class Player:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
-        return new
+        return ut.fast_copy(self, new, keys_to_deepcopy=["team"])
 
     def choose_selection_commands(self, battle: Battle) -> list[Command]:
         n = min(3, len(self.team))

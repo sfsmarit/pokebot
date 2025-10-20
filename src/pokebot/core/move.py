@@ -7,10 +7,10 @@ import pokebot.common.utils as ut
 from pokebot.common.enums import MoveCategory
 from pokebot.data.move import MoveData
 
-from .base import Effect
+from .effect import BaseEffect
 
 
-class Move(Effect):
+class Move(BaseEffect):
     def __init__(self, data: MoveData, pp: int | None = None):
         self.data: MoveData
         super().__init__(data)
@@ -26,8 +26,7 @@ class Move(Effect):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new)
-        return new
+        return ut.fast_copy(self, new)
 
     def modify_pp(self, v: int):
         self.pp = max(0, min(self.data.pp, self.pp + v))

@@ -8,21 +8,12 @@ from pokebot.core.events import EventContext
 
 
 def ありじごく(battle: Battle, value: Any, ctx: EventContext):
-    ctx.source.field_status._trapped |= (
-        ctx.source.ability == "ありじごく" and
-        not battle.foe(ctx.source).floating(battle.events)
-    )
+    ctx.source.field_status._trapped |= not battle.foe(ctx.source).floating(battle.events)
 
 
 def かげふみ(battle: Battle, value: Any, ctx: EventContext):
-    ctx.source.field_status._trapped |= (
-        ctx.source.ability == "かげふみ" and
-        battle.foe(ctx.source).ability != "かげふみ"
-    )
+    ctx.source.field_status._trapped |= battle.foe(ctx.source).ability != "かげふみ"
 
 
 def じりょく(battle: Battle, value: Any, ctx: EventContext):
-    ctx.source.field_status._trapped |= (
-        ctx.source.ability == "かげふみ" and
-        "はがね" in battle.foe(ctx.source).types
-    )
+    ctx.source.field_status._trapped |= "はがね" in battle.foe(ctx.source).types

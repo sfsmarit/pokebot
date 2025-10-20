@@ -9,6 +9,8 @@ from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
 
+from pokebot.common import utils as ut
+
 
 class Event(Enum):
     ON_BEFORE_ACTION = auto()
@@ -39,7 +41,33 @@ class Event(Enum):
     ON_CHECK_DEF_ABILITY = auto()
 
 
-@dataclass
+class Interrupt(Enum):
+    NONE = auto()
+    EJECTBUTTON = auto()
+    PIVOT = auto()
+    FAINTED = auto()
+    REQUESTED = auto()
+    EJECTPACK_ON_AFTER_SWITCH = auto()
+    EJECTPACK_ON_START = auto()
+    EJECTPACK_ON_SWITCH_0 = auto()
+    EJECTPACK_ON_SWITCH_1 = auto()
+    EJECTPACK_ON_AFTER_MOVE_0 = auto()
+    EJECTPACK_ON_AFTER_MOVE_1 = auto()
+    EJECTPACK_ON_TURN_END = auto()
+
+    def by_consumable_item(self) -> bool:
+        return "EJECT" in self.name
+
+    @classmethod
+    def ejectpack_on_switch(cls, idx: int):
+        return cls[f"EJECTPACK_ON_SWITCH_{idx}"]
+
+    @classmethod
+    def ejectpack_on_after_move(cls, idx: int):
+        return cls[f"EJECTPACK_ON_AFTER_MOVE_{idx}"]
+
+
+@dataclass(frozen=True)
 class Handler:
     func: Callable
     priority: int = 0
@@ -59,41 +87,63 @@ class EventContext:
 class EventManager:
     def __init__(self, battle: Battle) -> None:
         self.battle = battle
-        self.handlers = {}
+        self.handlers: dict[Event, dict[Handler, list[int]]] = {}
 
-    def on(self, event: Event, handler: Handler):
-        """イベントにハンドラを登録"""
-        self.handlers.setdefault(event, []).append(handler)
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        return ut.fast_copy(self, new)
 
-    def off(self, event: Event, handler: Handler):
-        if event in self.handlers:
-            self.handlers[event] = [
-                h for h in self.handlers[event] if h != handler
-            ]
+    def on(self, event: Event, handler: Handler, source: Pokemon | None = None):
+        """イベントを指定してハンドラを登録"""
+        self.handlers.setdefault(event, {})
+        sources = self.handlers[event].setdefault(handler, [])
+        if source not in sources and None not in sources:
+            self.handlers[event][handler].append(source)  # type: ignore
+
+    def off(self, event: Event, handler: Handler, source: Pokemon | None = None):
+        if event in self.handlers and handler in self.handlers[event]:
+            # source を削除
+            self.handlers[event][handler] = \
+                [p for p in self.handlers[event][handler] if p != source]
+            # source が不在ならハンドラを解除
+            if not self.handlers[event][handler]:
+                del self.handlers[event][handler]
 
     def emit(self,
              event: Event,
              value: Any = 0,
              ctx: EventContext | None = None) -> Any:
         """イベントを発火"""
-        for h in sorted(self.handlers.get(event, [])):
-            if ctx is None:
-                ctxs = [EventContext(self.battle.states[pl].active)
-                        for pl in self.battle.get_action_order()]
-            else:
+        for handler, sources in sorted(self.handlers.get(event, {}).items()):
+            if not sources:
+                raise Exception(f"No source for handler {handler}")
+
+            # sources を None を、すべての場のポケモンに置き換える
+            if sources == [None]:
+                sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
+                self.handlers[event][handler] = sources
+
+            # コンテキストは引数を優先し、指定がなければ登録されているsourceを参照する
+            if ctx:
                 ctxs = [ctx]
+            else:
+                ctxs = [EventContext(poke) for poke in sources]  # type: ignore
 
+            # すべての source に対してハンドラを実行する
             for c in ctxs:
-                result = h.func(self.battle, value, c)
+                result = handler.func(self.battle, value, c)
 
-                # 単発ハンドラを削除
-                if h.once:
-                    self.off(event, h)
+                # 単発ハンドラなら削除
+                if handler.once:
+                    self.off(event, handler, c.source)
 
                 # ハンドラの返り値が False なら処理を中断
                 if result == False:
                     return value
 
+                # ハンドラに渡す value を更新
                 value = result
 
         return value

@@ -55,7 +55,7 @@ def _real_game(self: Bot):
                 t0 = time.time()  # 計測開始
 
                 # 試合をリセット
-                self.battle.init_game()
+                self.battle.reset()
 
                 # OCR履歴を削除
                 if os.path.isdir(type(self).ocr_log_dir):

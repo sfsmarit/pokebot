@@ -44,7 +44,7 @@ def _replay(cls: type[Player], filepath: str, display_log: bool = True) -> Battl
 
         # Battleを生成
         battle = Battle(players[0], players[1], n_selection=n_selection, seed=seed)
-        battle.init_game()
+        battle.reset()
 
         # 選出
         battle.selection_indexes = log[f"selection_indexes"]

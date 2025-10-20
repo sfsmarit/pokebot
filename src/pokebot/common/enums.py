@@ -19,28 +19,6 @@ class BaseEnum(Enum):
         return [x.name for x in cls]
 
 
-class Interrupt(Enum):
-    NONE = auto()
-    EJECTBUTTON = auto()
-    PIVOT = auto()
-    FAINTED = auto()
-    EJECTPACK_REQUESTED = auto()
-    EJECTPACK_ON_START = auto()
-    EJECTPACK_ON_SWITCH_0 = auto()
-    EJECTPACK_ON_SWITCH_1 = auto()
-    EJECTPACK_ON_AFTER_MOVE_0 = auto()
-    EJECTPACK_ON_AFTER_MOVE_1 = auto()
-    EJECTPACK_ON_TURN_END = auto()
-
-    @classmethod
-    def ejectpack_on_switch(cls, idx: int):
-        return cls[f"EJECTPACK_ON_SWITCH_{idx}"]
-
-    @classmethod
-    def ejectpack_on_after_move(cls, idx: int):
-        return cls[f"EJECTPACK_ON_AFTER_MOVE_{idx}"]
-
-
 class Stat(BaseEnum):
     H = ("H", 0, "HP", "HP")
     A = ("A", 1, "こうげき", "攻撃")

@@ -1,10 +1,10 @@
 import pokebot.common.utils as ut
 from pokebot.data.registry import AbilityData
 
-from .base import Effect
+from .effect import BaseEffect
 
 
-class Ability(Effect):
+class Ability(BaseEffect):
     def __init__(self, data: AbilityData) -> None:
         self.data: AbilityData
         super().__init__(data)
@@ -18,5 +18,4 @@ class Ability(Effect):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new)
-        return new
+        return ut.fast_copy(self, new)

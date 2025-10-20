@@ -31,7 +31,7 @@ class Player:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=["team"])
+        ut.fast_copy(self, new, keys_to_deepcopy=["team"])
         return new
 
     def init_game(self):

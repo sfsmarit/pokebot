@@ -48,7 +48,7 @@ class Pokemon:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=['_ability', '_item', 'moves'])
+        ut.fast_copy(self, new, keys_to_deepcopy=['_ability', '_item', 'moves'])
         return new
 
     def __str__(self):

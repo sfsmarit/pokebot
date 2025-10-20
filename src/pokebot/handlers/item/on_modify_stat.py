@@ -3,13 +3,11 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.common.enums import Interrupt
-from pokebot.core.events import EventContext
+from pokebot.core.events import EventContext, Interrupt
 from .common import write_log_and_consume
 
 
 def だっしゅつパック(battle: Battle, value: Any, ctx: EventContext):
-    if ctx.source.item == "だっしゅつパック":
-        player = battle.find_player(ctx.source)
-        battle.states[player].interrupt = Interrupt.EJECTPACK_REQUESTED
-        write_log_and_consume(battle, ctx.source)
+    player = battle.find_player(ctx.source)
+    if battle.get_available_switch_commands(player):
+        battle.states[player].interrupt = Interrupt.REQUESTED

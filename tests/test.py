@@ -14,27 +14,31 @@ class CustomPlayer(Player):
 
 player = CustomPlayer("Player 1")
 player.team.append(PokeDB.create_pokemon("リザードン"))
-player.team[-1].ability = PokeDB.create_ability("いかく")
-player.team[-1].item = PokeDB.create_item("だっしゅつパック")
-player.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# player.team[-1].ability = PokeDB.create_ability("いかく")
+# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
+player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 player.team.append(PokeDB.create_pokemon("ピカチュウ"))
-player.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# player.team[-1].ability = PokeDB.create_ability("いかく")
+# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
+player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 # ---------------------------------------------------------------------
 
 rival = CustomPlayer("Player 2")
 rival.team.append(PokeDB.create_pokemon("カメックス"))
-rival.team[-1].ability = PokeDB.create_ability("いかく")
-rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
-rival.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# rival.team[-1].ability = PokeDB.create_ability("いかく")
+# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
+rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 rival.team.append(PokeDB.create_pokemon("フシギバナ"))
-rival.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# rival.team[-1].ability = PokeDB.create_ability("いかく")
+# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
+rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 # ---------------------------------------------------------------------
 
-max_turn = 1
+max_turn = 10
 
 # ---------------------------------------------------------------------
 
