@@ -3,11 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.player.player import Player
 
-from copy import deepcopy
-
 import pokebot.common.utils as ut
-from .command_log import CommandLog
 from .turn_log import TurnLog
+from .command_log import CommandLog
 
 
 class Logger:
@@ -25,13 +23,13 @@ class Logger:
         memo[id(self)] = new
         return ut.fast_copy(self, new)
 
-    def get_turn_logs(self, turn: int) -> dict[Player, list[str]]:
-        logs = {}
+    def get_turn_logs(self, turn: int) -> list[list[str]]:
+        logs = [[], []]
         for log in self.turn_logs:
             if log.turn != turn:
                 continue
-            for player in log.players:
-                logs.setdefault(player, []).append(log.text)
+            for idx in log.player_idxes:
+                logs[idx].append(log.text)
         return logs
 
     def append(self, log: TurnLog | CommandLog):

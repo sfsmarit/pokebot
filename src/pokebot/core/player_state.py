@@ -12,8 +12,7 @@ class PlayerState:
     active_idx: int = None  # type: ignore
     interrupt: Interrupt = Interrupt.NONE
     already_switched: bool = False
-    command: Command = Command.NONE
-    scheduled_switch_commands: list[Command] = field(default_factory=list)
+    reserved_commands: list[Command] = field(default_factory=list)
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -22,5 +21,4 @@ class PlayerState:
         return ut.fast_copy(self, new)
 
     def turn_reset(self):
-        self.command = Command.NONE
         self.already_switched = False

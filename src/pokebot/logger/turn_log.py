@@ -1,15 +1,10 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from pokebot.player.player import Player
-
 from copy import deepcopy
 
 
 class TurnLog:
-    def __init__(self, turn: int, players: list[Player], text: str) -> None:
+    def __init__(self, turn: int, player_idxes: list[int], text: str) -> None:
         self.turn: int = turn
-        self.players: list[Player] = players
+        self.player_idxes: list[int] = player_idxes
         self.text: str = text
 
     def dump(self):

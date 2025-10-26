@@ -1,5 +1,7 @@
 import time
 from random import Random
+from typing import Self
+from copy import deepcopy
 
 from pokebot.common import utils as ut
 from pokebot.common.enums import Command, Stat
@@ -65,6 +67,12 @@ class Battle:
         new.random.seed(int(time.time()))
 
         return new
+
+    def masked(self, perspective: Player) -> tuple[Self, Player]:
+        # TODO mask
+        new = deepcopy(self)
+        new_player = new.players[self.players.index(perspective)]
+        return new, new_player
 
     @property
     def players(self):
@@ -134,21 +142,24 @@ class Battle:
     def get_turn_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
         if turn is None:
             turn = self.turn
-        return self.logger.get_turn_logs(turn)
+        logs = self.logger.get_turn_logs(turn)
+        return {self.players[i]: log for i, log in enumerate(logs)}
 
     def add_turn_log(self, obj: Player | list[Player] | Pokemon, text: str):
         if isinstance(obj, Player):
-            obj = [obj]
+            idxes = [self.players.index(obj)]
+        elif isinstance(obj, list):
+            idxes = [self.players.index(pl) for pl in obj]
         elif isinstance(obj, Pokemon):
-            obj = [self.find_player(obj)]
-        self.logger.append(TurnLog(self.turn, obj, text))
+            idxes = [self.players.index(self.find_player(obj))]
+        self.logger.append(TurnLog(self.turn, idxes, text))
 
     def get_speed_order(self) -> list[Player]:
-        # TODO
+        # TODO get_speed_order
         return self.players
 
     def get_action_order(self) -> list[Player]:
-        # TODO
+        # TODO get_action_order
         return self.players
 
     def TOD_score(self, player: Player, alpha: float = 1):
@@ -211,10 +222,10 @@ class Battle:
         move.unregister_handlers(self.events, source)
 
     def query_switch(self, player: Player) -> Pokemon:
-        if (x := self.states[player].scheduled_switch_commands):
-            command = x.pop(0)
-        else:
-            command = player.choose_switch_command(self)
+        reserved_commands = self.states[player].reserved_commands
+        if not reserved_commands:
+            reserved_commands.append(player.choose_switch_command(self))
+        command = reserved_commands.pop(0)
         return player.team[command.idx]
 
     def get_move_from_command(self, player: Player, command: Command) -> Move:
@@ -311,8 +322,8 @@ class Battle:
         self.override_interrupt(Interrupt.EJECTPACK_ON_START)
 
     def run_interrupt_switch(self, flag: Interrupt, emit_on_each_switch=True):
-        # 交代
         target_players = []
+
         for player in self.players:
             if self.states[player].interrupt != flag:
                 continue
@@ -374,7 +385,12 @@ class Battle:
         # すべての死に出しが完了するまで再帰的に実行
         self.run_faint_switch()
 
-    def advance_turn(self, commands: dict[Player, Command] = {}):
+    def advance_turn(self, commands: dict[Player, Command] | None = None):
+        # 引数に指定されたコマンドを優先させる
+        if commands:
+            for player, command in commands.items():
+                self.states[player].reserved_commands.append(command)
+
         if not self.has_interrupt():
             self.init_turn()
 
@@ -386,20 +402,16 @@ class Battle:
                 # ポケモンを場に出す
                 self.run_initial_switch()
 
-            # 割り込み
+            # だっしゅつパックによる交代
             self.run_interrupt_switch(Interrupt.EJECTPACK_ON_START)
 
             return
 
         if not self.has_interrupt():
-            # 行動選択
+            # コマンドが未定なら方策関数に従う
             for player, state in self.states.items():
-                if player in commands:
-                    # 引数のコマンドを優先
-                    state.command = commands[player]
-                else:
-                    # プレイヤーの方策関数に従う
-                    state.command = player.choose_action_command(self)
+                if not state.reserved_commands:
+                    state.reserved_commands.append(player.choose_action_command(self))
 
             # 行動前の処理
             self.events.emit(Event.ON_BEFORE_ACTION)
@@ -411,8 +423,9 @@ class Battle:
             interrupt = Interrupt.ejectpack_on_switch(idx)
 
             if not self.has_interrupt():
-                if (cmd := self.states[player].command).is_switch():
-                    new = player.team[cmd.idx]
+                if self.states[player].reserved_commands[0].is_switch():
+                    command = self.states[player].reserved_commands.pop(0)
+                    new = player.team[command.idx]
                     self.run_switch(player, new)
                 else:
                     self.add_turn_log(player, self.active(player).name)
@@ -429,9 +442,11 @@ class Battle:
             if self.states[player].already_switched:
                 continue
 
-            # 技の発動
-            move = self.get_move_from_command(player, self.states[player].command)
-            self.run_move(player, move)
+            if not self.has_interrupt():
+                # 技の発動
+                move = self.get_move_from_command(
+                    player, self.states[player].reserved_commands.pop(0))
+                self.run_move(player, move)
 
             # だっしゅつボタンによる交代
             self.run_interrupt_switch(Interrupt.EJECTBUTTON)
@@ -439,9 +454,8 @@ class Battle:
             # 交代技による交代
             self.run_interrupt_switch(Interrupt.PIVOT)
 
-            # 交代フラグ
-            idx = self.players.index(player)
-            interrupt = Interrupt.ejectpack_on_after_move(idx)
+            interrupt = Interrupt.ejectpack_on_after_move(
+                self.players.index(player))
 
             if not self.has_interrupt():
                 # 交代技の後の処理
