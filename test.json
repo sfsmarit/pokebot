@@ -1,0 +1,149 @@
+{
+    "seed": null,
+    "players": [
+        {
+            "name": "Player 1",
+            "selection_indexes": [
+                0,
+                1,
+                2
+            ],
+            "commands": {
+                "1": [
+                    "MOVE_0",
+                    "SWITCH_1"
+                ],
+                "2": [
+                    "STRUGGLE",
+                    "SWITCH_0"
+                ]
+            },
+            "team": [
+                {
+                    "name": "リザードン",
+                    "gender": "NONE",
+                    "level": 50,
+                    "nature": "まじめ",
+                    "ability": "",
+                    "item": "",
+                    "moves": [
+                        "とんぼがえり"
+                    ],
+                    "indiv": [
+                        31,
+                        31,
+                        31,
+                        31,
+                        31,
+                        31
+                    ],
+                    "effort": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "terastal": ""
+                },
+                {
+                    "name": "ピカチュウ",
+                    "gender": "NONE",
+                    "level": 50,
+                    "nature": "まじめ",
+                    "ability": "",
+                    "item": "",
+                    "moves": [],
+                    "indiv": [
+                        31,
+                        31,
+                        31,
+                        31,
+                        31,
+                        31
+                    ],
+                    "effort": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "terastal": ""
+                },
+                {
+                    "name": "カビゴン",
+                    "gender": "NONE",
+                    "level": 50,
+                    "nature": "まじめ",
+                    "ability": "",
+                    "item": "",
+                    "moves": [],
+                    "indiv": [
+                        31,
+                        31,
+                        31,
+                        31,
+                        31,
+                        31
+                    ],
+                    "effort": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "terastal": ""
+                }
+            ]
+        },
+        {
+            "name": "Player 2",
+            "selection_indexes": [
+                0
+            ],
+            "commands": {
+                "1": [
+                    "MOVE_0"
+                ],
+                "2": [
+                    "TERASTAL_0"
+                ]
+            },
+            "team": [
+                {
+                    "name": "カメックス",
+                    "gender": "NONE",
+                    "level": 50,
+                    "nature": "まじめ",
+                    "ability": "",
+                    "item": "",
+                    "moves": [
+                        "アームハンマー"
+                    ],
+                    "indiv": [
+                        31,
+                        31,
+                        31,
+                        31,
+                        31,
+                        31
+                    ],
+                    "effort": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "terastal": ""
+                }
+            ]
+        }
+    ]
+}

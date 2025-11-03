@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
 
+from copy import deepcopy
+
 import pokebot.common.utils as ut
 from pokebot.common.enums import MoveCategory
 from pokebot.data.move import MoveData
@@ -27,6 +29,9 @@ class Move(BaseEffect):
         new = cls.__new__(cls)
         memo[id(self)] = new
         return ut.fast_copy(self, new)
+
+    def dump(self):
+        return {"name": self.name, "pp": self.pp}
 
     def modify_pp(self, v: int):
         self.pp = max(0, min(self.data.pp, self.pp + v))

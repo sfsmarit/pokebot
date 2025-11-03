@@ -11,8 +11,8 @@ class PlayerState:
     selected_idxes: list[int] = field(default_factory=list)
     active_idx: int = None  # type: ignore
     interrupt: Interrupt = Interrupt.NONE
-    already_switched: bool = False
     reserved_commands: list[Command] = field(default_factory=list)
+    already_switched: bool = False
 
     def __deepcopy__(self, memo):
         cls = self.__class__

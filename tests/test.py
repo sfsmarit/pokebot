@@ -20,13 +20,13 @@ class CustomPlayer(Player):
 
     def choose_switch_command(self, battle: Battle) -> Command:
         commands = battle.get_available_switch_commands(self)
-        # '''
+        '''
         copied, copied_player = battle.masked(self)
         copied.advance_turn(commands={copied_player: commands[-1]})
         print(f"(Copied) Turn {copied.turn}")
         for player, log in copied.get_turn_logs().items():
             print(f"\t{player.name}\t{log}")
-        # '''
+        '''
         return commands[0]
 
 
@@ -60,7 +60,7 @@ rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
 # ---------------------------------------------------------------------
 
-max_turn = 1
+max_turn = 2
 
 # ---------------------------------------------------------------------
 
@@ -72,6 +72,23 @@ for pl in [player, rival]:
 # ---------------------------------------------------------------------
 
 battle = Battle([player, rival])
+
+while 1:
+    battle.advance_turn()
+
+    print(f"Turn {battle.turn}")
+    for player, log in battle.get_turn_logs().items():
+        print(f"\t{player.name}\t{log}")
+
+    if battle.winner() or battle.turn == max_turn:
+        break
+
+battle.export_log("test.json")
+
+
+# Replay
+print("\n----- Replay -----\n")
+battle = Battle.reconstruct_from_log("test.json")
 
 while 1:
     battle.advance_turn()

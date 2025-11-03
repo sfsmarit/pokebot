@@ -2,7 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
-    from pokebot.logger import TurnLog
+
+from copy import deepcopy
 
 from pokebot.common.enums import Gender, Ailment, Stat, MoveCategory
 from pokebot.common.constants import NATURE_MODIFIER
@@ -74,8 +75,22 @@ class Pokemon:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves'])
+        ut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status'])
         return new
+
+    def dump(self) -> dict:
+        return {
+            "name": self.data.name,
+            "gender": self.gender.name,
+            "level": self._level,
+            "nature": self._nature,
+            "ability": self.ability.data.name,
+            "item": self.item.data.name,
+            "moves": [move.data.name for move in self.moves],
+            "indiv": self._indiv,
+            "effort": self._effort,
+            "terastal": self._terastal,
+        }
 
     def switch_in(self, events: EventManager):
         self.observed = True
