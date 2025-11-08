@@ -520,6 +520,9 @@ class Battle:
             # だっしゅつボタンによる交代
             self.run_interrupt_switch(Interrupt.EJECTBUTTON)
 
+            # ききかいひによる交代
+            self.run_interrupt_switch(Interrupt.EMERGENCY)
+
             # 交代技による交代
             self.run_interrupt_switch(Interrupt.PIVOT)
 
@@ -541,13 +544,22 @@ class Battle:
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_1)
 
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
+
         # ターン終了時の処理 (2)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_2)
 
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
+
         # ターン終了時の処理 (3)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_3)
+
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
 
         # ターン終了時の処理 (4)
         if not self.has_interrupt():

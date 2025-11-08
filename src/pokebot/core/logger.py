@@ -1,10 +1,3 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from pokebot.core.battle import Battle
-
-import json
-
 from dataclasses import dataclass
 
 from pokebot.common.enums import Command
