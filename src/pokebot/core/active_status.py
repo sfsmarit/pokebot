@@ -1,15 +1,10 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from pokebot.core.battle import Battle
-    from pokebot.core.pokemon import Pokemon
-
+import pokebot.common.utils as ut
 from pokebot.common.enums import Stat, BoostSource
 from .move import Move
 
 
-class ActiveStatus:
-    def __init__(self, owner: Pokemon) -> None:
+class FieldStatus:
+    def __init__(self) -> None:
         self.choice_locked: bool = False
         self.nervous: bool = False
         self.hidden: bool = False
@@ -26,4 +21,12 @@ class ActiveStatus:
         self.lost_types: list[str] = []
         self.executed_move: Move | None = None
         self.expended_moves: list[Move] = []
-        self.count: dict = {}
+
+        self._trapped: bool = False
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        ut.fast_copy(self, new, keys_to_deepcopy=['executed_move', 'expended_moves'])
+        return new

@@ -1,6 +1,7 @@
 import json
 
 from pokebot.common import utils as ut
+from pokebot.common.enums import Gender
 
 from pokebot.data.registry import PokemonData
 from pokebot.data.ability import ABILITIES
@@ -38,11 +39,6 @@ class PokeDB:
         return poke
 
     @classmethod
-    def init_kata(cls, poke: Pokemon):
-        poke.ability = cls.create_ability("")
-        poke.item = cls.create_item("")
-
-    @classmethod
     def create_ability(cls, name: str) -> Ability:
         name = name if name in ABILITIES else ""
         return Ability(ABILITIES[name])
@@ -56,3 +52,22 @@ class PokeDB:
     def create_move(cls, name: str, pp: int | None = None) -> Move:
         name = name if name in MOVES else "はねる"
         return Move(MOVES[name], pp)
+
+    @classmethod
+    def init_kata(cls, poke: Pokemon):
+        poke.ability = cls.create_ability("")
+        poke.item = cls.create_item("")
+
+    @classmethod
+    def reconstruct_pokemon_from_log(cls, data: dict) -> Pokemon:
+        poke = cls.create_pokemon(data["name"])
+        poke.gender = Gender[data["gender"]]
+        poke.level = data["level"]
+        poke.nature = data["nature"]
+        poke.ability = cls.create_ability(data["ability"])
+        poke.item = cls.create_item(data["item"])
+        poke.moves = [cls.create_move(s) for s in data["moves"]]
+        poke.indiv = data["indiv"]
+        poke.effort = data["effort"]
+        poke.terastal = data["terastal"]
+        return poke

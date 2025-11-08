@@ -1,35 +1,110 @@
+from copy import deepcopy
 from pokebot import Battle, Player, PokeDB
+from pokebot.common.enums import Command
 
-player = Player()
+
+class CustomPlayer(Player):
+    def choose_selection_commands(self, battle: Battle) -> list[Command]:
+        return battle.get_available_selection_commands(self)
+
+    def choose_action_command(self, battle: Battle) -> Command:
+        commands = battle.get_available_action_commands(self)
+        '''
+        copied, copied_player = battle.masked(self)
+        copied.advance_turn(commands={copied_player: commands[-1]})
+        print(f"(Copied) Turn {copied.turn}")
+        for player, log in copied.get_turn_logs().items():
+            print(f"\t{player.name}\t{log}")
+        '''
+        return commands[0]
+
+    def choose_switch_command(self, battle: Battle) -> Command:
+        commands = battle.get_available_switch_commands(self)
+        '''
+        copied, copied_player = battle.masked(self)
+        copied.advance_turn(commands={copied_player: commands[-1]})
+        print(f"(Copied) Turn {copied.turn}")
+        for player, log in copied.get_turn_logs().items():
+            print(f"\t{player.name}\t{log}")
+        '''
+        return commands[0]
+
+
+# ---------------------------------------------------------------------
+
+player = CustomPlayer("Player 1")
 player.team.append(PokeDB.create_pokemon("リザードン"))
-player.team[-1].ability = PokeDB.create_ability("いかく")
-player.team[-1].item = PokeDB.create_item("いのちのたま")
-player.team[-1].moves = [PokeDB.create_move("たいあたり")]
+# player.team[-1].ability = PokeDB.create_ability("かちき")
+# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
+player.team[-1].moves = [PokeDB.create_move("とんぼがえり")]
 
 player.team.append(PokeDB.create_pokemon("ピカチュウ"))
+# player.team[-1].ability = PokeDB.create_ability("いかく")
+# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
+# player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
-for poke in player.team:
-    poke.show()
+player.team.append(PokeDB.create_pokemon("カビゴン"))
 
-print("-"*50)
+# ---------------------------------------------------------------------
 
-opponent = Player()
-opponent.team.append(PokeDB.create_pokemon("カメックス"))
-opponent.team[-1].ability = PokeDB.create_ability("きんちょうかん")
-opponent.team[-1].item = PokeDB.create_item("たべのこし")
-opponent.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+rival = Player("Player 2")
+rival.team.append(PokeDB.create_pokemon("カメックス"))
+# rival.team[-1].ability = PokeDB.create_ability("いかく")
+# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
+rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
-opponent.team.append(PokeDB.create_pokemon("フシギバナ"))
+# rival.team.append(PokeDB.create_pokemon("フシギバナ"))
+# rival.team[-1].ability = PokeDB.create_ability("いかく")
+# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
+# rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
-for poke in opponent.team:
-    poke.show()
+battle = Battle([player, rival])
 
-print("-"*50)
+# ---------------------------------------------------------------------
 
-battle = Battle(player, opponent)
+max_turn = 2
 
-for _ in range(4):
+# ---------------------------------------------------------------------
+
+for pl in battle.players:
+    for poke in pl.team:
+        print(poke)
+    print("-"*50)
+
+# ---------------------------------------------------------------------
+
+
+while 1:
     battle.advance_turn()
-    print(f"{battle.turn=} {[str(cmd) for cmd in battle.commands]}")
-    for log in battle.get_turn_logs():
-        print(f"\t{log}")
+
+    print(f"Turn {battle.turn}")
+    for player, log in battle.get_turn_logs().items():
+        print(f"\t{player.name}\t{log}")
+
+    if battle.winner() or battle.turn == max_turn:
+        break
+
+battle.export_log("test.json")
+
+
+exit()
+
+# Replay
+print(f"{'='*50}\nReplay\n{'='*50}")
+
+battle = Battle.reconstruct_from_log("test.json")
+
+for pl in battle.players:
+    for poke in pl.team:
+        print(poke)
+    print("-"*50)
+
+while 1:
+    battle.advance_turn()
+
+    print(f"Turn {battle.turn}")
+    for player, log in battle.get_turn_logs().items():
+        print(f"\t{player.name}\t{log}")
+
+    if battle.winner() or battle.turn == max_turn:
+        break

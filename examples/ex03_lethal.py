@@ -7,7 +7,7 @@ from pokebot import Pokemon, Battle, Player, enums
 
 
 battle = Battle(Player(), Player())
-battle.init_game()
+battle.reset()
 
 # ------------------------------ プレイヤー0 ------------------------------
 poke = Pokemon('カイリュー')
@@ -25,8 +25,8 @@ poke.effort = [0, 252, 0, 0, 0, 0]  # 努力値 [H, A, B, C, D, S]
 # battle.poke_mgrs[0].boosted_idx = 1  # 能力ブースト
 
 
-battle.players[0].team.append(poke)
-battle.players[0].team[0].active = True  # 場に出す
+battle.player[0].team.append(poke)
+battle.player[0].team[0].active = True  # 場に出す
 
 # ------------------------------ プレイヤー1 ------------------------------
 poke = Pokemon('ガチグマ(アカツキ)')
@@ -42,8 +42,8 @@ poke.effort = [252, 0, 0, 0, 0, 0]
 # battle.poke_mgrs[1].rank[2] = +2  # 能力ランク [H, A, B, C, D, S]
 # battle.poke_mgrs[1].boosted_idx = 2  # 能力ブースト [H, A, B, C, D, S]
 
-battle.players[1].team.append(poke)
-battle.players[1].team[0].active = True  # 場に出す
+battle.player[1].team.append(poke)
+battle.player[1].team[0].active = True  # 場に出す
 
 # ------------------------------ その他 ------------------------------
 

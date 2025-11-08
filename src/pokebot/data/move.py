@@ -63,14 +63,13 @@ MOVES: dict[str, MoveData] = {
         ]
     },
     "アームハンマー": MoveData(
-        name="アームハンマー",
         type="かくとう",
         category=MoveCategory("物理"),
         pp=10,
         power=100,
         accuracy=90,
         flags=["contact", "punch"],
-        handlers={Event.ON_HIT: Handler(on_hit.アームハンマー, 0)}
+        handlers={Event.ON_HIT: Handler(on_hit.アームハンマー)}
     ),
     "アイアンテール": {
         "type": "はがね",
@@ -1751,7 +1750,6 @@ MOVES: dict[str, MoveData] = {
         ]
     },
     "たいあたり": MoveData(
-        name="たいあたり",
         type="ノーマル",
         category=MoveCategory.PHY,
         pp=35,
@@ -2557,18 +2555,15 @@ MOVES: dict[str, MoveData] = {
             "contact"
         ]
     },
-    "とんぼがえり": {
-        "type": "むし",
-        "category": "物理",
-        "pp": 20,
-        "power": 70,
-        "accuracy": 100,
-        "priority": 0,
-        "flags": [
-            "contact",
-            "switch"
-        ]
-    },
+    "とんぼがえり": MoveData(
+        type="むし",
+        category=MoveCategory.PHY,
+        pp=20,
+        power=70,
+        accuracy=100,
+        flags=["contact"],
+        handlers={Event.ON_HIT: Handler(on_hit.とんぼがえり)}
+    ),
     "なげつける": {
         "type": "あく",
         "category": "物理",
@@ -3836,8 +3831,8 @@ MOVES: dict[str, MoveData] = {
     "わるあがき": MoveData(
         type="ステラ",
         category=MoveCategory.PHY,
+        pp=1e10,
         power=40,
-        priority=0,
         flags=["contact", "non_encore"],
         handlers={Event.ON_HIT: Handler(on_hit.わるあがき)}
     ),
@@ -8618,21 +8613,20 @@ MOVES: dict[str, MoveData] = {
             "reflectable"
         ]
     },
-    "ふきとばし": {
-        "type": "ノーマル",
-        "category": "変化",
-        "pp": 20,
-        "power": 0,
-        "accuracy": 0,
-        "priority": -6,
-        "flags": [
+    "ふきとばし": MoveData(
+        type="ノーマル",
+        category=MoveCategory.SPE,
+        pp=20,
+        priority=-6,
+        flags=[
             "unprotectable",
             "ignore_substitute",
             "blocked_by_gold",
             "reflectable",
-            "wind"
-        ]
-    },
+            "wind",
+        ],
+        handlers={Event.ON_HIT: Handler(on_hit.ふきとばし)}
+    ),
     "フラフラダンス": {
         "type": "ノーマル",
         "category": "変化",

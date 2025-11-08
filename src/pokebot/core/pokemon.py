@@ -1,9 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pokebot.core.battle import Battle
+    from pokebot.core.events import EventManager
 
-from pokebot.common.enums import Gender, Ailment, Stat
+from copy import deepcopy
+
+from pokebot.common.enums import Gender, Ailment, Stat, MoveCategory
 from pokebot.common.constants import NATURE_MODIFIER
 import pokebot.common.utils as ut
 
@@ -13,7 +15,7 @@ from pokebot.data.registry import PokemonData
 from .ability import Ability
 from .item import Item
 from .move import Move
-from .active_status import ActiveStatus
+from .active_status import FieldStatus
 
 
 def calc_hp(level, base, indiv, effort):
@@ -41,39 +43,84 @@ class Pokemon:
         self._terastal: str = ""
         self.is_terastallized: bool = False
 
-        self.is_selected: bool = False
         self.sleep_count: int
         self.ailment: Ailment
 
-        self.active_status: ActiveStatus = ActiveStatus(self)
+        self.field_status: FieldStatus = FieldStatus()
 
         self.update_stats()
         self.hp: int = self.max_hp
+
+        self.added_types: list[str] = []
+        self.lost_types: list[str] = []
+
+    def __str__(self):
+        sep = '\n\t'
+        s = f"{self.name}{sep}"
+        s += f"HP {self.hp}/{self.max_hp} ({self.hp_ratio*100:.0f}%){sep}"
+        s += f"{self._nature}{sep}"
+        s += f"{self.ability.name}{sep}"
+        s += f"{self.item.name or 'No item'}{sep}"
+        if self._terastal:
+            s += f"{self._terastal}T{sep}"
+        else:
+            s += f"No terastal{sep}"
+        for st, ef in zip(self._stats, self._effort):
+            s += f"{st}({ef})-" if ef else f"{st}-"
+        s = s[:-1] + sep
+        s += "/".join(move.name for move in self.moves)
+        return s
 
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.selective_deepcopy(self, new, keys_to_deepcopy=['ability', 'item', 'moves'])
+        ut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status'])
         return new
 
-    def __str__(self):
-        return self.name
+    def dump(self) -> dict:
+        return {
+            "name": self.data.name,
+            "gender": self.gender.name,
+            "level": self._level,
+            "nature": self._nature,
+            "ability": self.ability.data.name,
+            "item": self.item.data.name,
+            "moves": [move.data.name for move in self.moves],
+            "indiv": self._indiv,
+            "effort": self._effort,
+            "terastal": self._terastal,
+        }
 
-    def switch_in(self, battle: Battle):
+    def switch_in(self, events: EventManager):
         self.observed = True
-        self.ability.register_handlers(battle)
-        self.item.register_handlers(battle)
-        battle.add_turn_log(self, f"{self.name} 入場")
+        if self.ability.active:
+            self.ability.register_handlers(events, self)
+        if self.item.active:
+            self.item.register_handlers(events, self)
 
-    def switch_out(self, battle: Battle):
-        self.ability.unregister_handlers(battle)
-        self.item.unregister_handlers(battle)
-        battle.add_turn_log(self, f"{self.name} {'退場' if self.hp else '瀕死'}")
+    def switch_out(self, events: EventManager):
+        self.ability.unregister_handlers(events, self)
+        self.item.unregister_handlers(events, self)
 
     @property
     def name(self):
         return self.data.name
+
+    @property
+    def types(self) -> list[str]:
+        if self.terastal:
+            if self.terastal == 'ステラ':
+                return self.data.types.copy()
+            else:
+                return [self.terastal]
+        else:
+            if self.name == 'アルセウス':
+                # TODO アルセウスのタイプ変化
+                return ["ノーマル"]
+            else:
+                return [t for t in self.data.types if t not in
+                        self.lost_types + self.added_types] + self.added_types
 
     @property
     def max_hp(self) -> int:
@@ -175,22 +222,6 @@ class Pokemon:
         self._effort = effort
         self.update_stats()
 
-    def show(self, sep: str = '\n\t'):
-        s = f"{self.name}{sep}"
-        s += f"HP {self.hp}/{self.stats[0]} ({self.hp_ratio*100:.0f}%){sep}"
-        s += f"{self._nature}{sep}"
-        s += f"{self.ability}{sep}"
-        s += f"{self.item.name or 'No item'}{sep}"
-        if self._terastal:
-            s += f"{self._terastal}T{sep}"
-        else:
-            s += f"No terastal{sep}"
-        for st, ef in zip(self._stats, self._effort):
-            s += f"{st}({ef})-" if ef else f"{st}-"
-        s = s[:-1] + sep
-        s += "/".join(move.name for move in self.moves)
-        print(s)
-
     def update_stats(self, keep_damage: bool = False):
         if keep_damage:
             damage = self._stats[0] - self.hp
@@ -222,23 +253,15 @@ class Pokemon:
         self._effort[idx] = value
         self.update_stats()
 
-    def modify_hp(self, battle: Battle, v: int) -> bool:
+    def modify_hp(self, v: int) -> int:
         old = self.hp
         self.hp = max(0, min(self.max_hp, old + v))
-        diff = self.hp - old
-        if diff:
-            battle.add_turn_log(self, f"HP {'+' if diff >= 0 else ''}{diff}")
-        return diff != 0
+        return self.hp - old
 
-    def modify_rank(self, battle: Battle, stat: Stat, v: int, by_self: bool = True) -> bool:
-        old = self.active_status.rank[stat.idx]
-        self.active_status.rank[stat.idx] = max(-6, min(6, old + v))
-        delta = self.active_status.rank[stat.idx] - old
-        if delta:
-            battle.add_turn_log(self, f"{stat}{'+' if delta >= 0 else ''}{delta}")
-            battle.events.emit(Event.ON_MODIFY_RANK,
-                               EventContext(self, value={"value": delta, "by_self": by_self}))
-        return delta != 0
+    def modify_stat(self, stat: Stat, v: int) -> int:
+        old = self.field_status.rank[stat.idx]
+        self.field_status.rank[stat.idx] = max(-6, min(6, old + v))
+        return self.field_status.rank[stat.idx] - old
 
     def find_move(self, move: Move | str) -> Move | None:
         for mv in self.moves:
@@ -248,5 +271,23 @@ class Pokemon:
     def knows(self, move: Move | str) -> bool:
         return self.find_move(move) is not None
 
-    def is_sleeping(self) -> bool:
-        return self.ailment == Ailment.SLP or self.ability.name == "ぜったいねむり"
+    def floating(self, events: EventManager) -> bool:
+        return False
+
+    def trapped(self, events: EventManager) -> bool:
+        self.field_status._trapped = False
+        # self.field_status._trapped |= self.field_status.count[Condition.SWITCH_BLOCK] > 0
+        # self.field_status._trapped |= self.field_status.count[Condition.BIND] > 0
+        events.emit(Event.ON_CHECK_TRAP)
+        self.field_status._trapped &= "ゴースト" not in self.types
+        return self.field_status._trapped
+
+    def effective_move_type(self, move: Move, events: EventManager) -> str:
+        events.emit(Event.ON_CHECK_MOVE_TYPE,
+                    ctx=EventContext(self, move))
+        return move._type
+
+    def effective_move_category(self, move: Move, events: EventManager) -> MoveCategory:
+        events.emit(Event.ON_CHECK_MOVE_CATEGORY,
+                    ctx=EventContext(self, move))
+        return move._category
