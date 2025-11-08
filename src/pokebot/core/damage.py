@@ -48,6 +48,7 @@ class DamageCalculator:
                            defender: Pokemon,
                            move: Move,
                            dmg_ctx: DamageContext | None = None) -> list[int]:
+
         # ダメージを与えない技なら中断
         if not move.data.power:
             return [0]

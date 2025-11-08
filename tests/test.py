@@ -58,20 +58,21 @@ rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 # rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
 # rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
 
+battle = Battle([player, rival])
+
 # ---------------------------------------------------------------------
 
 max_turn = 2
 
 # ---------------------------------------------------------------------
 
-for pl in [player, rival]:
+for pl in battle.players:
     for poke in pl.team:
         print(poke)
     print("-"*50)
 
 # ---------------------------------------------------------------------
 
-battle = Battle([player, rival])
 
 while 1:
     battle.advance_turn()
@@ -86,9 +87,17 @@ while 1:
 battle.export_log("test.json")
 
 
+exit()
+
 # Replay
-print("\n----- Replay -----\n")
+print(f"{'='*50}\nReplay\n{'='*50}")
+
 battle = Battle.reconstruct_from_log("test.json")
+
+for pl in battle.players:
+    for poke in pl.team:
+        print(poke)
+    print("-"*50)
 
 while 1:
     battle.advance_turn()

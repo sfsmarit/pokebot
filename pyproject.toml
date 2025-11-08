@@ -1,6 +1,6 @@
 [project]
-name = "your_project_name"
-version = "0.1.0"
+name = "pokebot"
+version = "0.0.1"
 description = "A Japansese python package for Pokemon battle simulation / bot developent"
 authors = [
     { name = "Tomoo Mari", email = "tmtm.holmes@email.com" }

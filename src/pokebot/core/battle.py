@@ -24,7 +24,10 @@ class Battle:
                  players: list[Player],
                  seed: int | None = None) -> None:
 
-        self.seed: int | None = seed
+        if seed is None:
+            seed = int(time.time())
+
+        self.seed: int = seed
         self.turn: int = -1
         self._winner: Player | None = None
 
@@ -82,9 +85,11 @@ class Battle:
             player_data = data["players"][i]
             player.name = player_data["name"]
             state.selected_idxes = player_data["selection_indexes"]
+
             for p in player_data["team"]:
                 poke = PokeDB.reconstruct_pokemon_from_log(p)
                 player.team.append(poke)
+
             for t, command_names in player_data["commands"].items():
                 for s in command_names:
                     command = Command[s]
@@ -246,9 +251,10 @@ class Battle:
         return self._winner
 
     def run_selection(self):
-        for player in self.players:
-            commands = player.choose_selection_commands(self)
-            self.states[player].selected_idxes = [c.idx for c in commands]
+        for player, state in self.states.items():
+            if not state.selected_idxes:
+                commands = player.choose_selection_commands(self)
+                state.selected_idxes = [c.idx for c in commands]
 
     def run_move(self, player: Player, move: Move):
         source = self.active(player)
@@ -311,21 +317,23 @@ class Battle:
                     attacker: Pokemon,
                     move: Move | str,
                     critical: bool = False,
-                    self_harm: bool = False) -> int:
-        return self.random.choice(
-            self.calc_damages(attacker, move, critical, self_harm))
+                    self_harm: bool = False,
+                    ) -> int:
+        damages = self.calc_damages(attacker, move, critical, self_harm)
+        return self.random.choice(damages)
 
     def calc_damages(self,
                      attacker: Pokemon,
                      move: Move | str,
                      critical: bool = False,
-                     self_harm: bool = False) -> list[int]:
+                     self_harm: bool = False,
+                     ) -> list[int]:
         if isinstance(move, str):
             move = PokeDB.create_move(move)
         defender = attacker if self_harm else self.foe(attacker)
-        dmg_ctx = DamageContext(critical, self_harm)
+        ctx = DamageContext(critical, self_harm)
         return self.damage_calculator.single_hit_damages(
-            attacker, defender, move, dmg_ctx)
+            attacker, defender, move, ctx)
 
     def has_interrupt(self) -> bool:
         return any(x.interrupt != Interrupt.NONE for x in self.states.values())
