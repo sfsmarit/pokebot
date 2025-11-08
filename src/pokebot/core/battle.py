@@ -263,31 +263,43 @@ class Battle:
         # 技のハンドラを登録
         move.register_handlers(self.events, source)
 
-        # 技判定より前の処理
-        self.events.emit(Event.ON_BEFORE_MOVE, ctx=EventContext(source))
-
         self.add_turn_log(player, f"{move.name}")
+
+        # 行動成功判定
+        self.events.emit(Event.ON_TRY_ACTION, ctx=EventContext(source))
 
         # 発動成功判定
         self.events.emit(Event.ON_TRY_MOVE, ctx=EventContext(source))
 
-        # 命中判定
+        source.field_status.executed_move = move
+
+        # TODO 命中判定
         pass
 
-        source.field_status.executed_move = move
+        # 無効判定
+        self.events.emit(Event.ON_TRY_IMMUNE, ctx=EventContext(source))
 
         # ダメージ計算
         damage = self.calc_damage(source, move)
 
-        # ダメージ付与
-        self.modify_hp(foe, -damage)
+        if False:
+            # TODO みがわり被弾処理
+            self.events.emit(Event.ON_HIT, ctx=EventContext(source))
 
-        # 技が命中したときの処理
-        self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+        else:
+            # HPコストの支払い
+            self.events.emit(Event.ON_PAY_HP, ctx=EventContext(source))
 
-        # 技によってダメージを与えたときの処理
-        if damage:
-            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
+            # ダメージ修正
+            damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(source))
+
+            if damage:
+                # ダメージ付与
+                self.modify_hp(foe, -damage)
+
+                # ダメージを与えたときの処理
+                self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+                self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
 
         move.unregister_handlers(self.events, source)
 
@@ -505,16 +517,23 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(interrupt)
 
+        # 行動前の処理
+        self.events.emit(Event.ON_BEFORE_MOVE)
+
+        # 行動順の決定
+        action_order = self.get_action_order()
+
         # 行動: 技
-        for player in self.get_action_order():
+        for player in action_order:
             # このターンに交代済みなら行動不可
             if self.states[player].already_switched:
                 continue
 
             if not self.has_interrupt():
-                # 技の発動
                 command = self.states[player].reserved_commands.pop(0)
                 move = self.get_move_from_command(player, command)
+
+                # 技の発動
                 self.run_move(player, move)
 
             # だっしゅつボタンによる交代
