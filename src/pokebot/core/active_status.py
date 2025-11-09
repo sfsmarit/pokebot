@@ -1,4 +1,4 @@
-import pokebot.utils.copy_utils as ut
+import pokebot.utils.copy_utils as copyut
 from pokebot.utils.enums import Stat, BoostSource
 from .move import Move
 
@@ -28,5 +28,5 @@ class FieldStatus:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.fast_copy(self, new, keys_to_deepcopy=['executed_move', 'expended_moves'])
+        copyut.fast_copy(self, new, keys_to_deepcopy=['executed_move', 'expended_moves'])
         return new

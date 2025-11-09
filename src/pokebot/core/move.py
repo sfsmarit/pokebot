@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 from copy import deepcopy
 
-import pokebot.utils.copy_utils as ut
+import pokebot.utils.copy_utils as copyut
 from pokebot.utils.enums import MoveCategory
 from pokebot.data.move import MoveData
 
@@ -28,7 +28,7 @@ class Move(BaseEffect):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)
 
     def dump(self):
         return {"name": self.name, "pp": self.pp}

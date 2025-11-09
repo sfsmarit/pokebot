@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import random
 
 from pokebot.utils.enums import Command
-import pokebot.utils.copy_utils as ut
+import pokebot.utils.copy_utils as copyut
 
 
 class Player:
@@ -23,7 +23,7 @@ class Player:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new, keys_to_deepcopy=["team"])
+        return copyut.fast_copy(self, new, keys_to_deepcopy=["team"])
 
     def choose_selection_commands(self, battle: Battle) -> list[Command]:
         n = min(3, len(self.team))

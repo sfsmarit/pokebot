@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from pokebot.utils.enums import Gender, Ailment, Stat, MoveCategory
 from pokebot.utils.constants import NATURE_MODIFIER
-import pokebot.utils.copy_utils as ut
+import pokebot.utils.copy_utils as copyut
 
 from pokebot.core.events import Event, EventContext
 from pokebot.data.registry import PokemonData
@@ -75,7 +75,7 @@ class Pokemon:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status'])
+        copyut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status'])
         return new
 
     def dump(self) -> dict:

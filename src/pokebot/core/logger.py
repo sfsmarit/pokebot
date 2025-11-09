@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from pokebot.utils.enums import Command
-import pokebot.utils.copy_utils as ut
+import pokebot.utils.copy_utils as copyut
 
 
 @dataclass
@@ -37,7 +37,7 @@ class Logger:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)
 
     def get_turn_logs(self, turn: int, player_idx: int) -> list[str]:
         return [log.text for log in self.turn_logs if

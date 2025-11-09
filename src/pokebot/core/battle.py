@@ -69,7 +69,7 @@ class Battle:
                 str(log.turn), []).append(log.command.name)
 
         with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(data, ensure_ascii=False, indent=2))
+            f.write(json.dumps(data, ensure_ascii=False, indent=4))
 
     @classmethod
     def reconstruct_from_log(cls, filepath) -> Self:
