@@ -1,4 +1,4 @@
-import pokebot.common.utils as ut
+import pokebot.utils.copy_utils as ut
 from pokebot.data.registry import ItemData
 
 from .effect import BaseEffect

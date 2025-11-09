@@ -5,8 +5,8 @@ if TYPE_CHECKING:
 
 from copy import deepcopy
 
-import pokebot.common.utils as ut
-from pokebot.common.enums import MoveCategory
+import pokebot.utils.copy_utils as ut
+from pokebot.utils.enums import MoveCategory
 from pokebot.data.move import MoveData
 
 from .effect import BaseEffect

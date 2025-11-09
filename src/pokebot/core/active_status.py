@@ -1,5 +1,5 @@
-import pokebot.common.utils as ut
-from pokebot.common.enums import Stat, BoostSource
+import pokebot.utils.copy_utils as ut
+from pokebot.utils.enums import Stat, BoostSource
 from .move import Move
 
 

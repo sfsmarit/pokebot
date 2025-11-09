@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, PokeDB
-from pokebot.common.enums import Command, SideField
+from pokebot.utils.enums import Command, SideField
 from pokebot.core.battle import Battle
 
 

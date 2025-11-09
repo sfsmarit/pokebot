@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, PokeDB, Battle, Move
-from pokebot.common.enums import Command
+from pokebot.utils.enums import Command
 from pokebot.core.move_utils import critical_probability
 
 

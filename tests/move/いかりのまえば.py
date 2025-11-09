@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, Battle, PokeDB
-from pokebot.common.enums import Command
+from pokebot.utils.enums import Command
 
 
 class CustomPlayer(Player):

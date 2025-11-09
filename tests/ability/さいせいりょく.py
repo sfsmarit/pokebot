@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player, PokeDB, Move
-from pokebot.common.enums import Command
+from pokebot.utils.enums import Command
 from pokebot.core.battle import Battle
 
 

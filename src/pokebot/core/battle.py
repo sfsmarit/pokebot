@@ -4,8 +4,8 @@ from typing import Self
 from copy import deepcopy
 import json
 
-from pokebot.common import utils as ut
-from pokebot.common.enums import Command, Stat
+from pokebot.utils import copy_utils as ut
+from pokebot.utils.enums import Command, Stat
 
 from pokebot.player.player import Player
 
@@ -69,7 +69,7 @@ class Battle:
                 str(log.turn), []).append(log.command.name)
 
         with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(data, ensure_ascii=False, indent=4))
+            f.write(json.dumps(data, ensure_ascii=False, indent=2))
 
     @classmethod
     def reconstruct_from_log(cls, filepath) -> Self:

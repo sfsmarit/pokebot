@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player
-from pokebot.common.enums import Gender
+from pokebot.utils.enums import Gender
 
 
 def メロメロボディ(display_log: bool = False) -> bool:

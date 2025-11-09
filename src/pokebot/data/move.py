@@ -1,4 +1,4 @@
-from pokebot.common.enums import MoveCategory
+from pokebot.utils.enums import MoveCategory
 from pokebot.core.events import Event, Handler
 from .registry import MoveData
 from pokebot.handlers.move import on_hit

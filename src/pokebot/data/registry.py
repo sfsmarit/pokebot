@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from pokebot.common.enums import Stat, MoveCategory
+from pokebot.utils.enums import Stat, MoveCategory
 from pokebot.core.events import Event, Handler
 
 

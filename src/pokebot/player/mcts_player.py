@@ -1,4 +1,4 @@
-from pokebot.common.enums import Command
+from pokebot.utils.enums import Command
 from pokebot.core.battle import Battle
 from pokebot.player.player import Player
 

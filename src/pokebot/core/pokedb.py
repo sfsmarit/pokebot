@@ -1,7 +1,9 @@
 import json
+from datetime import datetime, timedelta, timezone
 
-from pokebot.common import utils as ut
-from pokebot.common.enums import Gender
+from pokebot import config
+from pokebot.utils.enums import Gender
+from pokebot.utils import file_utils as fileut
 
 from pokebot.data.registry import PokemonData
 from pokebot.data.ability import ABILITIES
@@ -14,6 +16,13 @@ from .item import Item
 from .move import Move
 
 
+def current_season(start_year=2022, start_month=12) -> int:
+    dt_now = datetime.now(timezone(timedelta(hours=+9), 'JST'))
+    y, m, d = dt_now.year, dt_now.month, dt_now.day
+    season = 12*(y-start_year) + m - start_month + 1 - (d == 1)
+    return max(season, 1)
+
+
 class PokeDB:
     zukan: dict[str, PokemonData] = {}
     abilities = ABILITIES
@@ -22,13 +31,20 @@ class PokeDB:
 
     @classmethod
     def init(cls, season: int | None = None):
-        cls.season = season or ut.current_season()
+        cls.season = season or current_season()
         cls.load_zukan()
 
     @classmethod
     def load_zukan(cls):
-        with open(ut.path_str('data', 'zukan.json'), encoding='utf-8') as f:
-            for data in json.load(f).values():
+        file = str(fileut.resource_path('data', "zukan.json"))
+
+        if fileut.needs_update(file):
+            fileut.download(config.URL_ZUKAN, file)
+            fileut.save_last_update(file)
+
+        with open(file, encoding='utf-8') as f:
+            zukan = json.load(f)
+            for data in zukan.values():
                 cls.zukan[data["name"]] = PokemonData(data)
 
     @classmethod

@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 from dataclasses import dataclass
 
 from .events import EventManager, Event, EventContext
-import pokebot.common.utils as ut
-from pokebot.common.enums import MoveCategory, Stat
+import pokebot.utils.copy_utils as ut
+from pokebot.utils.enums import MoveCategory, Stat
 
 
 @dataclass

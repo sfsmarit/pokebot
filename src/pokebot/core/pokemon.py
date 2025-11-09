@@ -5,9 +5,9 @@ if TYPE_CHECKING:
 
 from copy import deepcopy
 
-from pokebot.common.enums import Gender, Ailment, Stat, MoveCategory
-from pokebot.common.constants import NATURE_MODIFIER
-import pokebot.common.utils as ut
+from pokebot.utils.enums import Gender, Ailment, Stat, MoveCategory
+from pokebot.utils.constants import NATURE_MODIFIER
+import pokebot.utils.copy_utils as ut
 
 from pokebot.core.events import Event, EventContext
 from pokebot.data.registry import PokemonData

@@ -9,7 +9,7 @@ from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from pokebot.common import utils as ut
+from pokebot.utils import copy_utils as ut
 
 
 class Event(Enum):

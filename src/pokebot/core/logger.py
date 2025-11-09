@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from pokebot.common.enums import Command
-import pokebot.common.utils as ut
+from pokebot.utils.enums import Command
+import pokebot.utils.copy_utils as ut
 
 
 @dataclass

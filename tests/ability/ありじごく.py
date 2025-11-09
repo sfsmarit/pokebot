@@ -1,5 +1,5 @@
 from pokebot import Pokemon, Player
-from pokebot.common.enums import Phase
+from pokebot.utils.enums import Phase
 
 
 def ありじごく(display_log: bool = False) -> bool:
