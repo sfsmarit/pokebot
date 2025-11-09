@@ -42,15 +42,7 @@ class Battle:
         if seed is not None:
             self.seed = seed
 
-    def export_log(self, filepath):
-        """
-        試合のログを書き出す
-
-        Parameters
-        ----------
-        filepath :
-            json 形式のファイルパス
-        """
+    def export_log(self, file):
         data = {
             "seed": self.seed,
             "players": [],
@@ -68,12 +60,12 @@ class Battle:
             data["players"][log.player_idx]["commands"].setdefault(
                 str(log.turn), []).append(log.command.name)
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(file, 'w', encoding='utf-8') as f:
             f.write(json.dumps(data, ensure_ascii=False, indent=4))
 
     @classmethod
-    def reconstruct_from_log(cls, filepath) -> Self:
-        with open(filepath, encoding="utf-8") as f:
+    def reconstruct_from_log(cls, file) -> Self:
+        with open(file, encoding="utf-8") as f:
             data = json.load(f)
 
         new = cls(
