@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from pokebot.core.events import EventManager
     from pokebot.core.pokemon import Pokemon
 
-from pokebot.common import utils as ut
+from pokebot.utils import copy_utils as ut
 
 
 class BaseEffect:

@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
-from pokebot.common import utils as ut
-from pokebot.common.enums import Command
+from pokebot.utils import copy_utils as ut
+from pokebot.utils.enums import Command
 
 from .events import Interrupt
 

@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 from dataclasses import dataclass
 
 from .events import EventManager, Event, EventContext
-import pokebot.common.utils as ut
-from pokebot.common.enums import MoveCategory, Stat
+from pokebot.utils import math_utils as mathut
+from pokebot.utils.enums import MoveCategory, Stat
 
 
 @dataclass
@@ -66,7 +66,7 @@ class DamageCalculator:
         r_pow = self.events.emit(Event.ON_CALC_POWER_MODIFIER,
                                  value=4096,
                                  ctx=EventContext(attacker, move))
-        final_pow = ut.round_half_down(final_pow * r_pow/4096)
+        final_pow = mathut.round_half_down(final_pow * r_pow/4096)
         final_pow = max(1, final_pow)
 
         # ---------------- 最終攻撃 ----------------
@@ -107,7 +107,7 @@ class DamageCalculator:
         r_atk = self.events.emit(Event.ON_CALC_ATK_MODIFIER,
                                  value=4096,
                                  ctx=EventContext(attacker, move))
-        final_atk = ut.round_half_down(final_atk * r_atk/4096)
+        final_atk = mathut.round_half_down(final_atk * r_atk/4096)
         final_atk = max(1, final_atk)
 
         # ---------------- 最終防御 ----------------
@@ -143,7 +143,7 @@ class DamageCalculator:
         r_def = self.events.emit(Event.ON_CALC_DEF_MODIFIER,
                                  value=4096,
                                  ctx=EventContext(defender, move))
-        final_def = ut.round_half_down(final_def * r_def/4096)
+        final_def = mathut.round_half_down(final_def * r_def/4096)
         final_def = max(1, final_def)
 
         # ---------------- ダメージ計算 ----------------
@@ -152,7 +152,7 @@ class DamageCalculator:
 
         # 急所
         if dmg_ctx.critical:
-            max_dmg = ut.round_half_down(max_dmg * 1.5)
+            max_dmg = mathut.round_half_down(max_dmg * 1.5)
             self.logs.append("急所 x1.5")
 
         # その他の補正
@@ -172,9 +172,9 @@ class DamageCalculator:
             dmgs[i] = int(max_dmg * (0.85+0.01*i))
 
             # 補正
-            dmgs[i] = ut.round_half_down(dmgs[i] * r_atk_type)
+            dmgs[i] = mathut.round_half_down(dmgs[i] * r_atk_type)
             dmgs[i] = int(dmgs[i] * r_def_type)
-            dmgs[i] = ut.round_half_down(dmgs[i] * r_dmg/4096)
+            dmgs[i] = mathut.round_half_down(dmgs[i] * r_dmg/4096)
 
             # 最低ダメージ補償
             if dmgs[i] == 0 and r_def_type * r_dmg > 0:

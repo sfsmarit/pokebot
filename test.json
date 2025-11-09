@@ -1,5 +1,5 @@
 {
-    "seed": 1762566606,
+    "seed": 1762699379,
     "players": [
         {
             "name": "Player 1",
@@ -111,7 +111,7 @@
                     "MOVE_0"
                 ],
                 "2": [
-                    "MOVE_0"
+                    "TERASTAL_0"
                 ]
             },
             "team": [

@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pokebot import Battle, Player, PokeDB
-from pokebot.common.enums import Command
+from pokebot.utils.enums import Command
 
 
 class CustomPlayer(Player):

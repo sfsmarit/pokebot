@@ -9,7 +9,7 @@ from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from pokebot.common import utils as ut
+from pokebot.utils import copy_utils as ut
 
 
 class Event(Enum):
@@ -17,8 +17,13 @@ class Event(Enum):
     ON_SWITCH_IN = auto()
     ON_SWITCH_OUT = auto()
     ON_BEFORE_MOVE = auto()
+    ON_TRY_ACTION = auto()
     ON_TRY_MOVE = auto()
+    ON_TRY_IMMUNE = auto()
     ON_HIT = auto()
+    ON_PAY_HP = auto()
+    ON_MODIFY_DAMAGE = auto()
+    ON_MOVE_SECONDARY = auto()
     ON_DAMAGE = auto()
     ON_AFTER_PIVOT = auto()
     ON_TURN_END_1 = auto()
@@ -45,6 +50,7 @@ class Interrupt(Enum):
     NONE = auto()
     EJECTBUTTON = auto()
     PIVOT = auto()
+    EMERGENCY = auto()
     FAINTED = auto()
     REQUESTED = auto()
     EJECTPACK_ON_AFTER_SWITCH = auto()

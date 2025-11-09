@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.common.enums import Stat
+from pokebot.utils.enums import Stat
 from pokebot.core.events import EventContext, Interrupt
 
 

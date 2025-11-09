@@ -1,4 +1,4 @@
-import pokebot.common.utils as ut
+import pokebot.utils.copy_utils as copyut
 from pokebot.data.registry import AbilityData
 
 from .effect import BaseEffect
@@ -18,4 +18,4 @@ class Ability(BaseEffect):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)

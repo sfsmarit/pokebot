@@ -4,8 +4,8 @@ from typing import Self
 from copy import deepcopy
 import json
 
-from pokebot.common import utils as ut
-from pokebot.common.enums import Command, Stat
+from pokebot.utils import copy_utils as ut
+from pokebot.utils.enums import Command, Stat
 
 from pokebot.player.player import Player
 
@@ -42,15 +42,7 @@ class Battle:
         if seed is not None:
             self.seed = seed
 
-    def export_log(self, filepath):
-        """
-        試合のログを書き出す
-
-        Parameters
-        ----------
-        filepath :
-            json 形式のファイルパス
-        """
+    def export_log(self, file):
         data = {
             "seed": self.seed,
             "players": [],
@@ -68,12 +60,12 @@ class Battle:
             data["players"][log.player_idx]["commands"].setdefault(
                 str(log.turn), []).append(log.command.name)
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(file, 'w', encoding='utf-8') as f:
             f.write(json.dumps(data, ensure_ascii=False, indent=4))
 
     @classmethod
-    def reconstruct_from_log(cls, filepath) -> Self:
-        with open(filepath, encoding="utf-8") as f:
+    def reconstruct_from_log(cls, file) -> Self:
+        with open(file, encoding="utf-8") as f:
             data = json.load(f)
 
         new = cls(
@@ -263,31 +255,43 @@ class Battle:
         # 技のハンドラを登録
         move.register_handlers(self.events, source)
 
-        # 技判定より前の処理
-        self.events.emit(Event.ON_BEFORE_MOVE, ctx=EventContext(source))
-
         self.add_turn_log(player, f"{move.name}")
+
+        # 行動成功判定
+        self.events.emit(Event.ON_TRY_ACTION, ctx=EventContext(source))
 
         # 発動成功判定
         self.events.emit(Event.ON_TRY_MOVE, ctx=EventContext(source))
 
-        # 命中判定
+        source.field_status.executed_move = move
+
+        # TODO 命中判定
         pass
 
-        source.field_status.executed_move = move
+        # 無効判定
+        self.events.emit(Event.ON_TRY_IMMUNE, ctx=EventContext(source))
 
         # ダメージ計算
         damage = self.calc_damage(source, move)
 
-        # ダメージ付与
-        self.modify_hp(foe, -damage)
+        if False:
+            # TODO みがわり被弾処理
+            self.events.emit(Event.ON_HIT, ctx=EventContext(source))
 
-        # 技が命中したときの処理
-        self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+        else:
+            # HPコストの支払い
+            self.events.emit(Event.ON_PAY_HP, ctx=EventContext(source))
 
-        # 技によってダメージを与えたときの処理
-        if damage:
-            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
+            # ダメージ修正
+            damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(source))
+
+            if damage:
+                # ダメージ付与
+                self.modify_hp(foe, -damage)
+
+                # ダメージを与えたときの処理
+                self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+                self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
 
         move.unregister_handlers(self.events, source)
 
@@ -505,20 +509,30 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(interrupt)
 
+        # 行動前の処理
+        self.events.emit(Event.ON_BEFORE_MOVE)
+
+        # 行動順の決定
+        action_order = self.get_action_order()
+
         # 行動: 技
-        for player in self.get_action_order():
+        for player in action_order:
             # このターンに交代済みなら行動不可
             if self.states[player].already_switched:
                 continue
 
             if not self.has_interrupt():
-                # 技の発動
                 command = self.states[player].reserved_commands.pop(0)
                 move = self.get_move_from_command(player, command)
+
+                # 技の発動
                 self.run_move(player, move)
 
             # だっしゅつボタンによる交代
             self.run_interrupt_switch(Interrupt.EJECTBUTTON)
+
+            # ききかいひによる交代
+            self.run_interrupt_switch(Interrupt.EMERGENCY)
 
             # 交代技による交代
             self.run_interrupt_switch(Interrupt.PIVOT)
@@ -541,13 +555,22 @@ class Battle:
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_1)
 
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
+
         # ターン終了時の処理 (2)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_2)
 
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
+
         # ターン終了時の処理 (3)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_3)
+
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
 
         # ターン終了時の処理 (4)
         if not self.has_interrupt():

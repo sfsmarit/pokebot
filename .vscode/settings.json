@@ -13,12 +13,4 @@
     "autopep8.args": [
         "--max-line-length=150"
     ],
-    "python.testing.pytestArgs": [
-        ".",
-        "--capture=no"
-    ],
-    "python.analysis.extraPaths": [
-        "./examples/ex011_connect_",
-        "./examples/ex11_connect_"
-    ],
 }
