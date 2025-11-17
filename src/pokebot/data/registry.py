@@ -1,6 +1,7 @@
+from typing import Literal
 from dataclasses import dataclass, field
 
-from pokebot.utils.enums import Stat, MoveCategory
+from pokebot.utils.enums import Stat
 from pokebot.core.events import Event, Handler
 
 
@@ -34,11 +35,24 @@ class ItemData:
 @dataclass
 class MoveData:
     type: str
-    category: MoveCategory
+    category: Literal["物理", "特殊", "変化"]
     pp: int
     power: int | None = None
     accuracy: int | None = None
     priority: int = 0
     flags: list[str] = field(default_factory=list)
+    handlers: dict[Event, Handler] = field(default_factory=dict)
+    name: str = ""
+
+
+@dataclass
+class FieldData:
+    turn_extension_item: str | None = None
+    handlers: dict[Event, Handler] = field(default_factory=dict)
+    name: str = ""
+
+
+@dataclass
+class AilmentData:
     handlers: dict[Event, Handler] = field(default_factory=dict)
     name: str = ""

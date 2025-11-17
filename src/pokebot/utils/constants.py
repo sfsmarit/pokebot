@@ -1,32 +1,4 @@
-from .enums import Weather, Terrain
-
-
 HEAL_BERRIES = ('オレンのみ', 'オボンのみ', 'フィラのみ', 'ウイのみ', 'マゴのみ', 'バンジのみ', 'イアのみ')
-
-# TODO Enumに統合
-WEATHER_STONE = {
-    Weather.NONE: "",
-    Weather.SUNNY: "あついいわ",
-    Weather.RAINY: "しめったいわ",
-    Weather.SNOW: "つめたいいわ",
-    Weather.SAND: "さらさらいわ",
-}
-
-# TODO Enumに統合
-FIELD_SEED = {
-    Terrain.NONE: "",
-    Terrain.ELEC: "エレキシード",
-    Terrain.GRASS: "グラスシード",
-    Terrain.PSYCO: "サイコシード",
-    Terrain.MIST: "ミストシード"
-}
-
-# TODO Enumに統合
-WEATHER_BALL_TYPE = {Weather.NONE: "ノーマル",
-                     Weather.SUNNY: "ほのお",
-                     Weather.RAINY: "みず",
-                     Weather.SNOW: "こおり",
-                     Weather.SAND: "いわ"}
 
 # TODO ハンドラに移管
 PLATE_TYPE = {

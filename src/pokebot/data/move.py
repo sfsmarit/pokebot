@@ -1,7 +1,6 @@
-from pokebot.utils.enums import MoveCategory
 from pokebot.core.events import Event, Handler
 from .registry import MoveData
-from pokebot.handlers.move import on_hit
+from pokebot.handlers.move import on_hit, on_damage
 
 
 MOVES: dict[str, MoveData] = {
@@ -64,7 +63,7 @@ MOVES: dict[str, MoveData] = {
     },
     "アームハンマー": MoveData(
         type="かくとう",
-        category=MoveCategory("物理"),
+        category="物理",
         pp=10,
         power=100,
         accuracy=90,
@@ -1751,7 +1750,7 @@ MOVES: dict[str, MoveData] = {
     },
     "たいあたり": MoveData(
         type="ノーマル",
-        category=MoveCategory.PHY,
+        category="物理",
         pp=35,
         power=40,
         accuracy=100,
@@ -2557,7 +2556,7 @@ MOVES: dict[str, MoveData] = {
     },
     "とんぼがえり": MoveData(
         type="むし",
-        category=MoveCategory.PHY,
+        category="物理",
         pp=20,
         power=70,
         accuracy=100,
@@ -3830,7 +3829,7 @@ MOVES: dict[str, MoveData] = {
     },
     "わるあがき": MoveData(
         type="ステラ",
-        category=MoveCategory.PHY,
+        category="物理",
         pp=1e10,
         power=40,
         flags=["contact", "non_encore"],
@@ -7597,19 +7596,17 @@ MOVES: dict[str, MoveData] = {
             "heal"
         ]
     },
-    "すなあらし": {
-        "type": "いわ",
-        "category": "変化",
-        "pp": 10,
-        "power": 0,
-        "accuracy": 0,
-        "priority": 0,
-        "flags": [
+    "すなあらし": MoveData(
+        type="いわ",
+        category="変化",
+        pp=10,
+        flags=[
             "unprotectable",
             "ignore_substitute",
             "wind"
-        ]
-    },
+        ],
+        handlers={Event.ON_HIT: Handler(on_hit.すなあらし)},
+    ),
     "すなかけ": {
         "type": "じめん",
         "category": "変化",
@@ -8457,18 +8454,15 @@ MOVES: dict[str, MoveData] = {
             "heal"
         ]
     },
-    "はねる": {
-        "type": "ノーマル",
-        "category": "変化",
-        "pp": 40,
-        "power": 0,
-        "accuracy": 0,
-        "priority": 0,
-        "flags": [
+    "はねる": MoveData(
+        type="ノーマル",
+        category="変化",
+        pp=40,
+        flags=[
             "unprotectable",
             "ignore_substitute"
         ]
-    },
+    ),
     "ハバネロエキス": {
         "type": "くさ",
         "category": "変化",
@@ -8615,7 +8609,7 @@ MOVES: dict[str, MoveData] = {
     },
     "ふきとばし": MoveData(
         type="ノーマル",
-        category=MoveCategory.SPE,
+        category="特殊",
         pp=20,
         priority=-6,
         flags=[
@@ -9067,18 +9061,16 @@ MOVES: dict[str, MoveData] = {
             "ignore_substitute"
         ]
     },
-    "リフレクター": {
-        "type": "エスパー",
-        "category": "変化",
-        "pp": 20,
-        "power": 0,
-        "accuracy": 0,
-        "priority": 0,
-        "flags": [
+    "リフレクター": MoveData(
+        type= "エスパー",
+        category= "変化",
+        pp= 20,
+        flags= [
             "unprotectable",
             "ignore_substitute"
-        ]
-    },
+        ],
+        handlers={Event.ON_HIT: Handler(on_hit.リフレクター)}
+    ),
     "リフレッシュ": {
         "type": "ノーマル",
         "category": "変化",

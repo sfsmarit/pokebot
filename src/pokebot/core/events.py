@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
-    from pokebot.core.pokemon import Pokemon
-    from pokebot.core.move import Move
+    from pokebot.model.pokemon import Pokemon
+    from pokebot.model.move import Move
 
 from typing import Callable, Any
 from dataclasses import dataclass
@@ -31,6 +31,7 @@ class Event(Enum):
     ON_TURN_END_3 = auto()
     ON_TURN_END_4 = auto()
     ON_TURN_END_5 = auto()
+    ON_TURN_END_6 = auto()
     ON_MODIFY_STAT = auto()
     ON_END = auto()
     ON_CHECK_TRAP = auto()
@@ -44,6 +45,11 @@ class Event(Enum):
     ON_CALC_DEF_TYPE_MODIFIER = auto()
     ON_CALC_DAMAGE_MODIFIER = auto()
     ON_CHECK_DEF_ABILITY = auto()
+
+
+class HandlerResult(Enum):
+    STOP_HANDLER = auto()
+    STOP_EVENT = auto()
 
 
 class Interrupt(Enum):
@@ -105,37 +111,37 @@ class EventManager:
         """イベントを指定してハンドラを登録"""
         self.handlers.setdefault(event, {})
         sources = self.handlers[event].setdefault(handler, [])
-        if all(x not in sources for x in [source, None]):
-            self.handlers[event][handler].append(source)  # type: ignore
+        if source not in sources:
+            sources.append(source)  # type: ignore
 
     def off(self, event: Event, handler: Handler, source: Pokemon | None = None):
         if event in self.handlers and handler in self.handlers[event]:
             # source を削除
             self.handlers[event][handler] = \
                 [p for p in self.handlers[event][handler] if p != source]
-            # source が不在ならハンドラを解除
+            # 空のハンドラを解除
             if not self.handlers[event][handler]:
                 del self.handlers[event][handler]
 
     def emit(self,
              event: Event,
              value: Any = 0,
-             ctx: EventContext | None = None) -> Any:
+             ctx: EventContext | None = None,
+             ) -> Any:
         """イベントを発火"""
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
-            if not sources:
-                raise Exception(f"No source for handler {handler}")
-
-            # sources を None を、すべての場のポケモンに置き換える
-            if sources == [None]:
-                sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
-                self.handlers[event][handler] = sources
-
-            # コンテキストは引数を優先し、指定がなければ登録されているsourceを参照する
+            # 引数のコンテキストを優先し、指定がなければ登録されているsourceを参照する
             if ctx:
                 ctxs = [ctx]
             else:
-                ctxs = [EventContext(poke) for poke in sources]  # type: ignore
+                if None in sources:
+                    # 素早さ順に、場の全てのポケモンを対象とする
+                    sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
+                elif len(sources) > 1:
+                    # 対象を素早さ順に並び変える
+                    sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()
+                               if self.battle.active(pl) in sources]
+                ctxs = [EventContext(poke) for poke in sources]
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:
@@ -145,9 +151,11 @@ class EventManager:
                 if handler.once:
                     self.off(event, handler, c.source)
 
-                # ハンドラの返り値が False なら処理を中断
-                if result == False:
-                    return value
+                match result:
+                    case HandlerResult.STOP_HANDLER:
+                        break
+                    case HandlerResult.STOP_EVENT:
+                        return value
 
                 # ハンドラに渡す value を更新
                 value = result

@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
 from pokebot.utils.enums import Stat, Ailment
 from pokebot.core.events import EventContext
+from pokebot.handlers import common
 
 
 def いかく(battle: Battle, value: Any, ctx: EventContext):
@@ -15,6 +16,10 @@ def いかく(battle: Battle, value: Any, ctx: EventContext):
 def きんちょうかん(battle: Battle, value: Any, ctx: EventContext):
     battle.foe(ctx.source).field_status.nervous = True
     battle.add_turn_log(ctx.source, ctx.source.ability.name)
+
+
+def グラスメイカー(battle: Battle, value: Any, ctx: EventContext):
+    common.change_terrain("グラスフィールド", battle, ctx)
 
 
 def ぜったいねむり(battle: Battle, value: Any, ctx: EventContext):

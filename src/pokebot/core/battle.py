@@ -1,22 +1,22 @@
+from typing import Self
+
 import time
 from random import Random
-from typing import Self
 from copy import deepcopy
 import json
 
 from pokebot.utils import copy_utils as ut
 from pokebot.utils.enums import Command, Stat
 
-from pokebot.player.player import Player
+from pokebot.model import Pokemon, Move
+
+from pokebot.player import Player
 
 from .events import Event, Interrupt, EventManager, EventContext
-from .player_state import PlayerState
+from .states import PlayerState, GlobalState, SideState
 from .logger import Logger
-from .pokedb import PokeDB
-from .pokemon import Pokemon
-from .move import Move
-
 from .damage import DamageCalculator, DamageContext
+from .pokedb import PokeDB
 
 
 class Battle:
@@ -26,21 +26,19 @@ class Battle:
 
         if seed is None:
             seed = int(time.time())
-
         self.seed: int = seed
+
         self.turn: int = -1
         self._winner: Player | None = None
-
-        self.states: dict[Player, PlayerState] = \
-            {player: PlayerState() for player in players}
 
         self.random = Random(self.seed)
         self.events = EventManager(self)
         self.logger = Logger()
-        self.damage_calculator: DamageCalculator = DamageCalculator(self.events)
+        self.damage_calculator: DamageCalculator = DamageCalculator()
 
-        if seed is not None:
-            self.seed = seed
+        self.states: dict[Player, PlayerState] = {pl: PlayerState() for pl in players}
+        self.global_state: GlobalState = GlobalState(self.events)
+        self.side_states: dict[Player, SideState] = {pl: SideState(self.events) for pl in players}
 
     def export_log(self, file):
         data = {
@@ -97,12 +95,12 @@ class Battle:
             "states", "random", "events", "logger", "damage_calculator",
         ])
 
-        # 参照を複製したインスタンスに置き換える
+        # 複製したインスタンスが複製後を参照するように再代入する
         new.events.battle = new
-        new.damage_calculator.events = new.events
+        new.global_state.events = new.events
+        for pl in new.side_states:
+            new.side_states[pl].events = new.events
 
-        # 複製した EventManager.handlers[event][handler]: list[Pokemon | None] の
-        # 参照先を複製した後のポケモンに置き換える
         for event, data in new.events.handlers.items():
             for handler, pokes in data.items():
                 new_pokes = []
@@ -137,12 +135,16 @@ class Battle:
         else:
             return None  # type: ignore
 
+    @property
+    def actives(self) -> list[Pokemon]:
+        return [self.active(pl) for pl in self.states]
+
     def selected(self, player: Player) -> list[Pokemon]:
         return [player.team[i] for i in self.states[player].selected_idxes]
 
     def init_turn(self):
         for state in self.states.values():
-            state.turn_reset()
+            state.reset_turn()
         self.turn += 1
 
     def find_player(self, poke: Pokemon) -> Player:
@@ -204,13 +206,15 @@ class Battle:
             turn = self.turn
         return {pl: self.logger.get_turn_logs(turn, i) for i, pl in enumerate(self.players)}
 
-    def add_turn_log(self, source: Player | list[Player] | Pokemon, text: str):
+    def add_turn_log(self, source: Player | list[Player] | Pokemon | None, text: str):
         if isinstance(source, Player):
             idxes = [self.players.index(source)]
         elif isinstance(source, list):
             idxes = [self.players.index(pl) for pl in source]
         elif isinstance(source, Pokemon):
             idxes = [self.players.index(self.find_player(source))]
+        elif source is None:
+            idxes = list(range(len(self.players)))
 
         for idx in idxes:
             self.logger.add_turn_log(self.turn, idx, text)
@@ -274,24 +278,21 @@ class Battle:
         # ダメージ計算
         damage = self.calc_damage(source, move)
 
-        if False:
-            # TODO みがわり被弾処理
-            self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+        # HPコストの支払い
+        self.events.emit(Event.ON_PAY_HP, ctx=EventContext(source))
 
-        else:
-            # HPコストの支払い
-            self.events.emit(Event.ON_PAY_HP, ctx=EventContext(source))
+        # ダメージ修正
+        damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(source))
 
-            # ダメージ修正
-            damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(source))
+        if damage:
+            # ダメージ付与
+            self.modify_hp(foe, -damage)
 
-            if damage:
-                # ダメージ付与
-                self.modify_hp(foe, -damage)
+        self.events.emit(Event.ON_HIT, ctx=EventContext(source))
 
-                # ダメージを与えたときの処理
-                self.events.emit(Event.ON_HIT, ctx=EventContext(source))
-                self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
+        # ダメージを与えたときの処理
+        if damage:
+            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
 
         move.unregister_handlers(self.events, source)
 
@@ -303,7 +304,9 @@ class Battle:
         else:
             return self.active(player).moves[command.idx]
 
-    def modify_hp(self, target: Pokemon, v: int) -> bool:
+    def modify_hp(self, target: Pokemon, v: int = 0, r: float = 0) -> bool:
+        if r:
+            v = int(target.max_hp * r)
         if v and (v := target.modify_hp(v)):
             self.add_turn_log(self.find_player(target),
                               f"HP {'+' if v >= 0 else ''}{v} >> {target.hp}")
@@ -336,8 +339,7 @@ class Battle:
             move = PokeDB.create_move(move)
         defender = attacker if self_harm else self.foe(attacker)
         ctx = DamageContext(critical, self_harm)
-        return self.damage_calculator.single_hit_damages(
-            attacker, defender, move, ctx)
+        return self.damage_calculator.single_hit_damages(self.events, attacker, defender, move, ctx)
 
     def has_interrupt(self) -> bool:
         return any(x.interrupt != Interrupt.NONE for x in self.states.values())
@@ -551,30 +553,34 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(interrupt)
 
-        # ターン終了時の処理 (1)
+        # ターン終了時の処理 ()
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_1)
 
-        # ききかいひによる交代
-        self.run_interrupt_switch(Interrupt.EMERGENCY)
-
-        # ターン終了時の処理 (2)
+        # ターン終了時の処理 ()
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_2)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 (3)
+        # ターン終了時の処理 ()
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_3)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 (4)
+        # ターン終了時の処理 ()
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_4)
+
+        # ききかいひによる交代
+        self.run_interrupt_switch(Interrupt.EMERGENCY)
+
+        # ターン終了時の処理 (4)
+        if not self.has_interrupt():
+            self.events.emit(Event.ON_TURN_END_5)
 
             # だっしゅつパックによる割り込みフラグを更新
             self.override_interrupt(Interrupt.EJECTPACK_ON_TURN_END)
@@ -584,7 +590,7 @@ class Battle:
 
         # ターン終了時の処理 (5)
         if not self.has_interrupt():
-            self.events.emit(Event.ON_TURN_END_5)
+            self.events.emit(Event.ON_TURN_END_6)
 
         self.run_interrupt_switch(Interrupt.EJECTPACK_ON_TURN_END)
 

@@ -6,6 +6,9 @@ if TYPE_CHECKING:
 from pokebot.utils.enums import Stat
 from pokebot.core.events import EventContext, Interrupt
 
+from pokebot.handlers import common
+from pokebot.data.field import FIELDS
+
 
 def modify_stat(battle: Battle, ctx: EventContext, stat: Stat, value: int):
     if battle.modify_stat(ctx.source, stat, value):
@@ -16,6 +19,10 @@ def pivot(battle: Battle, ctx: EventContext):
     player = battle.find_player(ctx.source)
     if battle.get_available_switch_commands(player):
         battle.states[player].interrupt = Interrupt.PIVOT
+
+
+def すなあらし(battle: Battle, value: Any, ctx: EventContext):
+    common.change_weather("すなあらし", battle, ctx)
 
 
 def アームハンマー(battle: Battle, value: Any, ctx: EventContext):
@@ -41,6 +48,14 @@ def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
     if commands:
         command = battle.random.choice(commands)
         battle.run_switch(rival, rival.team[command.idx])
+
+
+def リフレクター(battle: Battle, value: Any, ctx: EventContext):
+    name = "リフレクター"
+    player = battle.find_player(ctx.source)
+    count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
+    if battle.side_states[player].set_reflector(count):
+        battle.add_turn_log(player, f"{name} {count}")
 
 
 def わるあがき(battle: Battle, value: Any, ctx: EventContext):

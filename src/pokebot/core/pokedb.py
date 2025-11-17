@@ -5,18 +5,13 @@ from pokebot import config
 from pokebot.utils.enums import Gender
 from pokebot.utils import file_utils as fileut
 
+from pokebot.data import ABILITIES, ITEMS, MOVES
 from pokebot.data.registry import PokemonData
-from pokebot.data.ability import ABILITIES
-from pokebot.data.item import ITEMS
-from pokebot.data.move import MOVES
 
-from .pokemon import Pokemon
-from .ability import Ability
-from .item import Item
-from .move import Move
+from pokebot.model import Pokemon, Ability, Item, Move
 
 
-def current_season(start_year=2022, start_month=12) -> int:
+def get_season(start_year=2022, start_month=12) -> int:
     dt_now = datetime.now(timezone(timedelta(hours=+9), 'JST'))
     y, m, d = dt_now.year, dt_now.month, dt_now.day
     season = 12*(y-start_year) + m - start_month + 1 - (d == 1)
@@ -31,7 +26,7 @@ class PokeDB:
 
     @classmethod
     def init(cls, season: int | None = None):
-        cls.season = season or current_season()
+        cls.season = season or get_season()
         cls.load_zukan()
 
     @classmethod
