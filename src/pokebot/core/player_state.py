@@ -1,4 +1,4 @@
-from pokebot.utils import copy_utils as ut
+from pokebot.utils import copy_utils as copyut
 from pokebot.utils.enums import Command
 
 from .events import Interrupt
@@ -20,4 +20,4 @@ class PlayerState:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)

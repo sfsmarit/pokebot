@@ -10,7 +10,7 @@ from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from pokebot.utils import copy_utils as ut
+from pokebot.utils import copy_utils as copyut
 
 
 class Event(Enum):
@@ -106,7 +106,31 @@ class EventManager:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)
+
+    def update_reference(self, new: Battle):
+        old = self.battle
+
+        # ハンドラの対象に指定されているポケモンまたはプレイヤーへの参照を更新する
+        for event, data in self.handlers.items():
+            for handler, sources in data.items():
+                new_sources = []
+                for old_source in sources:
+                    # プレイヤーまたはポケモンのインデックスから複製後のオブジェクトを見つける
+                    if isinstance(old_source, Player):
+                        player_idx = old.players.index(old_source)
+                        new_source = new.players[player_idx]
+                    else:
+                        old_player = old.find_player(old_source)
+                        player_idx = old.players.index(old_player)
+                        team_idx = old_player.team.index(old_source)
+                        new_source = new.players[player_idx].team[team_idx]
+                    new_sources.append(new_source)
+
+                self.handlers[event][handler] = new_sources
+
+        # Battle への参照を更新する
+        self.battle = new
 
     def on(self, event: Event, handler: Handler, source: Pokemon | Player):
         """イベントを指定してハンドラを登録"""

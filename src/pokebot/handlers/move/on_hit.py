@@ -57,9 +57,8 @@ def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
 def リフレクター(battle: Battle, value: Any, ctx: EventContext):
     field = "リフレクター"
     player = battle.find_player(ctx.source)
-    player_idx = battle.players.index(player)
     count = 5 + 3*(ctx.source.item == FIELDS[field].turn_extension_item)
-    if battle.reflector[player_idx].set_count(battle.events, count):
+    if battle.side(player).reflector.set_count(battle.events, count):
         battle.add_turn_log(player, f"{field} {count}")
 
 

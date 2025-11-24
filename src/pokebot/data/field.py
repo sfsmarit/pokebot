@@ -40,4 +40,40 @@ FIELDS: dict[str, FieldData] = {
             Event.ON_CALC_DAMAGE_MODIFIER: Handler(on_calc_damage_modifier.リフレクター)
         },
     ),
+    "ひかりのかべ": FieldData(
+        handlers={
+        },
+    ),
+    "しんぴのまもり": FieldData(
+        handlers={
+        },
+    ),
+    "しろいきり": FieldData(
+        handlers={
+        },
+    ),
+    "おいかぜ": FieldData(
+        handlers={
+        },
+    ),
+    "ねがいごと": FieldData(
+        handlers={
+        },
+    ),
+    "まきびし": FieldData(
+        handlers={
+        },
+    ),
+    "どくびし": FieldData(
+        handlers={
+        },
+    ),
+    "ステルスロック": FieldData(
+        handlers={
+        },
+    ),
+    "ねばねばネット": FieldData(
+        handlers={
+        },
+    ),
 }

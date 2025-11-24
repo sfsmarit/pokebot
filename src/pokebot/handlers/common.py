@@ -20,11 +20,11 @@ def apply_ailment(
 
 def change_weather(name, battle: Battle, ctx: EventContext):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
-    if battle.set_weather(name, count):
-        battle.add_turn_log(ctx.source, f"{battle.weather.name} {battle.weather.count}ターン")
+    if battle.field.set_weather(name, count):
+        battle.add_turn_log(ctx.source, f"{battle.field.weather.name} {battle.field.weather.count}ターン")
 
 
 def change_terrain(name, battle: Battle, ctx: EventContext):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
-    if battle.set_terrain(name, count):
-        battle.add_turn_log(ctx.source, f"{battle.terrain.name} {battle.terrain.count}ターン")
+    if battle.field.set_terrain(name, count):
+        battle.add_turn_log(ctx.source, f"{battle.field.terrain.name} {battle.field.terrain.count}ターン")

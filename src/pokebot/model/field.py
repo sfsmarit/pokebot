@@ -19,15 +19,18 @@ class Field(BaseEffect):
         self.count = count
         self.observed = True
 
-    @property
-    def name(self) -> str:
-        return self.data.name if self.active and self.count else ""
-
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return copyut.fast_copy(self, new)
+        return copyut.fast_copy(self, new, keys_to_deepcopy=[])
+
+    def update_reference(self, owners: list[Player]):
+        self.owners = owners
+
+    @property
+    def name(self) -> str:
+        return self.data.name if self.active and self.count else ""
 
     def set(self, events: EventManager, name: str, count: int) -> bool:
         # 現在のフィールドと異なるフィールド名を指定されたら、フィールドを上書きして終了する

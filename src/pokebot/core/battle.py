@@ -1,14 +1,14 @@
-from typing import Self, Literal
+from typing import Self, Literal, TypedDict
 
 import time
 from random import Random
 from copy import deepcopy
 import json
 
-from pokebot.utils import copy_utils as ut
+from pokebot.utils import copy_utils as copyut
 from pokebot.utils.enums import Command, Stat
 
-from pokebot.model import Pokemon, Move, Field
+from pokebot.model import Pokemon, Move
 
 from pokebot.player import Player
 
@@ -16,6 +16,7 @@ from .events import Event, Interrupt, EventManager, EventContext
 from .player_state import PlayerState
 from .logger import Logger
 from .damage import DamageCalculator, DamageContext
+from .field import GlobalFieldManager, SideFieldManager
 from .pokedb import PokeDB
 
 
@@ -38,88 +39,39 @@ class Battle:
         self.random = Random(self.seed)
         self.damage_calculator: DamageCalculator = DamageCalculator()
 
-        # プレイヤーの状態
         self.states: list[PlayerState] = [PlayerState() for _ in players]
-
-        # 共通の場の効果
-        self.weather: Field = Field(players)  # 天候
-        self.terrain: Field = Field(players)  # フィールド
-        self.gravity: Field = Field(players, "じゅうりょく")
-        self.trickroom: Field = Field(players, "トリックルーム")
-
-        # プレイヤーごとの場の効果
-        self.reflector: list[Field] = [Field([pl], "リフレクター") for pl in self.players]
-        # self.lightwall: list[Field] = [Field([pl], "ひかりのかべ") for pl in self.players]
-        # self.safeguard: list[Field] = [Field([pl], "しんぴのまもり") for pl in self.players]
-        # self.whitemist: list[Field] = [Field([pl], "しろいきり") for pl in self.players]
-        # self.tailwind: list[Field] = [Field([pl], "おいかぜ") for pl in self.players]
-        # self.wish: list[Field] = [Field([pl], "ねがいごと") for pl in self.players]
-        # self.makibishi: list[Field] = [Field([pl], "まきびし") for pl in self.players]
-        # self.dokubishi: list[Field] = [Field([pl], "どくびし") for pl in self.players]
-        # self.stealthrock: list[Field] = [Field([pl], "ステルスロック") for pl in self.players]
-        # self.nebanet: list[Field] = [Field([pl], "ねばねばネット") for pl in self.players]
+        self.field: GlobalFieldManager = GlobalFieldManager(self.events)
+        self.sides: list[SideFieldManager] = [SideFieldManager(self.events) for pl in self.players]
 
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        ut.fast_copy(self, new, keys_to_deepcopy=[
+        copyut.fast_copy(self, new, keys_to_deepcopy=[
             "players", "events", "logger", "random", "damage_calculator",
-            "states",
-            "weather", "terrain", "gravity", "trickroom",
-            "reflector",
-            # "lightwall", "safeguard", "whitemist", "tailwind",
-            # "wish", "makibishi", "dokubishi", "stealthrock", "nebanet"
+            "states", "field", "sides"
         ])
 
         # 複製したインスタンスが複製後を参照するように再代入する
-        new.events.battle = new
-
-        for event, data in new.events.handlers.items():
-            for handler, sources in data.items():
-                new_sources = []
-                for obj in sources:
-                    if isinstance(obj, Player):
-                        player_idx = self.players.index(obj)
-                        new_sources.append(new.players[player_idx])
-                    else:
-                        player = self.find_player(obj)
-                        player_idx = self.players.index(player)
-                        team_idx = player.team.index(obj)
-                        new_sources.append(new.players[player_idx].team[team_idx])
-                new.events.handlers[event][handler] = new_sources
+        new.events.update_reference(new)
+        new.field.update_reference(new.events, new.players)
+        for i, side in enumerate(new.sides):
+            side.update_reference(new.events, new.players[i])
 
         # 乱数の隠蔽
         new.random.seed(int(time.time()))
 
         return new
 
-    def state(self, player: Player):
+    def state(self, player: Player) -> PlayerState:
         return self.states[self.players.index(player)]
 
-    def set_weather(self,
-                    name: Literal["", "はれ", "あめ", "ゆき", "すなあらし"] = "",
-                    count: int = 0,
-                    ) -> bool:
-        if not name or count == 0:
-            # 天候の終了
-            return self.weather.set_count(self.events, 0)
-        elif name != self.weather.name:
-            # 天候の変更
-            return self.weather.set(self.events, name, count)
-        return False
+    def side(self, player: Player) -> SideFieldManager:
+        return self.sides[self.players.index(player)]
 
-    def set_terrain(self,
-                    name: Literal["", "エレキフィールド", "グラスフィールド", "サイコフィールド", "ミストフィールド"] = "",
-                    count: int = 0,
-                    ) -> bool:
-        if not name or count == 0:
-            # フィールドの終了
-            return self.terrain.set_count(self.events, 0)
-        elif name != self.terrain.name:
-            # フィールドの変更
-            return self.terrain.set(self.events, name, count)
-        return False
+    @property
+    def actives(self) -> list[Pokemon]:
+        return [self.active(pl) for pl in self.players]
 
     def export_log(self, file):
         data = {
@@ -179,10 +131,6 @@ class Battle:
             return player.team[i]
         else:
             return None  # type: ignore
-
-    @property
-    def actives(self) -> list[Pokemon]:
-        return [self.active(pl) for pl in self.players]
 
     def selected(self, player: Player) -> list[Pokemon]:
         return [player.team[i] for i in self.state(player).selected_idxes]
