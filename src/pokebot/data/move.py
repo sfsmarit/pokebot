@@ -1,5 +1,5 @@
 from pokebot.core.events import Event, Handler
-from .registry import MoveData
+from .models import MoveData
 from pokebot.handlers.move import on_hit, on_damage
 
 
@@ -8024,18 +8024,17 @@ MOVES: dict[str, MoveData] = {
             "reflectable"
         ]
     },
-    "どくどく": {
-        "type": "どく",
-        "category": "変化",
-        "pp": 10,
-        "power": 0,
-        "accuracy": 90,
-        "priority": 0,
-        "flags": [
+    "どくどく": MoveData(
+        type="どく",
+        category="変化",
+        pp=10,
+        accuracy=90,
+        flags=[
             "blocked_by_gold",
             "reflectable"
-        ]
-    },
+        ],
+        handlers={Event.ON_HIT: Handler(on_hit.どくどく)}
+    ),
     "どくのいと": {
         "type": "どく",
         "category": "変化",
@@ -9062,10 +9061,10 @@ MOVES: dict[str, MoveData] = {
         ]
     },
     "リフレクター": MoveData(
-        type= "エスパー",
-        category= "変化",
-        pp= 20,
-        flags= [
+        type="エスパー",
+        category="変化",
+        pp=20,
+        flags=[
             "unprotectable",
             "ignore_substitute"
         ],

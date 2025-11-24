@@ -1,5 +1,5 @@
 {
-    "seed": 1763389792,
+    "seed": 1763979075,
     "players": [
         {
             "name": "Player1",
@@ -9,21 +9,6 @@
             "commands": {
                 "1": [
                     "MOVE_0"
-                ],
-                "2": [
-                    "TERASTAL_1"
-                ],
-                "3": [
-                    "TERASTAL_1"
-                ],
-                "4": [
-                    "TERASTAL_1"
-                ],
-                "5": [
-                    "TERASTAL_1"
-                ],
-                "6": [
-                    "TERASTAL_1"
                 ]
             },
             "team": [
@@ -35,8 +20,7 @@
                     "ability": "",
                     "item": "",
                     "moves": [
-                        "すなあらし",
-                        "たいあたり"
+                        "リフレクター"
                     ],
                     "indiv": [
                         31,
@@ -66,21 +50,6 @@
             "commands": {
                 "1": [
                     "MOVE_0"
-                ],
-                "2": [
-                    "TERASTAL_0"
-                ],
-                "3": [
-                    "TERASTAL_0"
-                ],
-                "4": [
-                    "TERASTAL_0"
-                ],
-                "5": [
-                    "TERASTAL_0"
-                ],
-                "6": [
-                    "TERASTAL_0"
                 ]
             },
             "team": [

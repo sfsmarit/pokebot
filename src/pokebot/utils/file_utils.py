@@ -19,10 +19,11 @@ def resource_path(*path_parts: str):
 
 def download(url: str, dst) -> bool:
     try:
+        print(f"Downloading {url} ... ", end="")
         res = requests.get(url)
         with open(dst, 'w', encoding='utf-8') as fout:
             fout.write(res.text)
-        print(f"Downloaded {url} >>> {dst}")
+        print("Done")
         return True
     except Exception:
         print(f"Failed to download {url}")

@@ -1,6 +1,6 @@
 from pokebot.core.events import Event, Handler
-from .registry import FieldData
-from pokebot.handlers.global_field import on_turn_end
+from .models import FieldData
+from pokebot.handlers.field import on_calc_damage_modifier, on_turn_end
 
 
 FIELDS: dict[str, FieldData] = {
@@ -37,6 +37,7 @@ FIELDS: dict[str, FieldData] = {
     # Side fields
     "リフレクター": FieldData(
         handlers={
+            Event.ON_CALC_DAMAGE_MODIFIER: Handler(on_calc_damage_modifier.リフレクター)
         },
     ),
 }

@@ -7,14 +7,14 @@ from pokebot.core.events import EventContext, HandlerResult
 
 
 def reduce_weather_count(battle: Battle, value: Any, ctx: EventContext):
-    obj = battle.global_state.weather
+    obj = battle.weather
     if (s := obj.name) and obj.reduce_count(battle.events):
         battle.add_turn_log(None, f"{s} 残り{obj.count}ターン")
     return HandlerResult.STOP_HANDLER
 
 
 def reduce_terrain_count(battle: Battle, value: Any, ctx: EventContext):
-    obj = battle.global_state.terrain
+    obj = battle.terrain
     if (s := obj.name) and obj.reduce_count(battle.events):
         battle.add_turn_log(None, f"{s} 残り{obj.count}ターン")
     return HandlerResult.STOP_HANDLER

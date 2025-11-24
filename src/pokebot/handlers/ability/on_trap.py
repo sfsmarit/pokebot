@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.utils.enums import Stat, Ailment
 from pokebot.core.events import EventContext
 
 

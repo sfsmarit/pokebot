@@ -4,6 +4,7 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
     from pokebot.model.pokemon import Pokemon
     from pokebot.model.move import Move
+    from pokebot.player import Player
 
 from typing import Callable, Any
 from dataclasses import dataclass
@@ -99,7 +100,7 @@ class EventContext:
 class EventManager:
     def __init__(self, battle: Battle) -> None:
         self.battle = battle
-        self.handlers: dict[Event, dict[Handler, list[Pokemon]]] = {}
+        self.handlers: dict[Event, dict[Handler, list[Pokemon | Player]]] = {}
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -107,14 +108,14 @@ class EventManager:
         memo[id(self)] = new
         return ut.fast_copy(self, new)
 
-    def on(self, event: Event, handler: Handler, source: Pokemon | None = None):
+    def on(self, event: Event, handler: Handler, source: Pokemon | Player):
         """イベントを指定してハンドラを登録"""
         self.handlers.setdefault(event, {})
         sources = self.handlers[event].setdefault(handler, [])
         if source not in sources:
-            sources.append(source)  # type: ignore
+            sources.append(source)
 
-    def off(self, event: Event, handler: Handler, source: Pokemon | None = None):
+    def off(self, event: Event, handler: Handler, source: Pokemon | Player):
         if event in self.handlers and handler in self.handlers[event]:
             # source を削除
             self.handlers[event][handler] = \
@@ -134,14 +135,20 @@ class EventManager:
             if ctx:
                 ctxs = [ctx]
             else:
-                if None in sources:
-                    # 素早さ順に、場の全てのポケモンを対象とする
-                    sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
-                elif len(sources) > 1:
-                    # 対象を素早さ順に並び変える
-                    sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()
-                               if self.battle.active(pl) in sources]
-                ctxs = [EventContext(poke) for poke in sources]
+                # sources: list[Pokemon | Player] の全要素を場のポケモンに置き換える
+                new_sources = []
+                for source in sources:
+                    if isinstance(source, Player):
+                        poke = self.battle.active(source)
+                    if poke not in new_sources:
+                        new_sources.append(source)
+
+                # 素早さ順に並び変える
+                if len(new_sources) > 1:
+                    speed_order = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
+                    new_sources = [poke for poke in speed_order if speed_order in new_sources]
+
+                ctxs = [EventContext(poke) for poke in new_sources]
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:

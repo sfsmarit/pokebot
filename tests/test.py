@@ -35,7 +35,7 @@ class CustomPlayer(Player):
 names = ["リザードン"]
 abilities = [""]
 items = [""]
-move_list = [["すなあらし", "たいあたり"]]
+move_list = [["リフレクター"]]
 
 player = CustomPlayer("Player1")
 for name, ability, item, moves in zip(names, abilities, items, move_list):
@@ -64,7 +64,7 @@ battle = Battle([player, rival])
 
 # ---------------------------------------------------------------------
 
-max_turn = 6
+max_turn = 1
 
 # ---------------------------------------------------------------------
 
@@ -78,10 +78,12 @@ for pl in battle.players:
 
 while 1:
     battle.advance_turn()
+    turn_logs = battle.get_turn_logs()
+    damage_logs = battle.get_damage_logs()
 
     print(f"Turn {battle.turn}")
-    for player, log in battle.get_turn_logs().items():
-        print(f"\t{player.name}\t{log}")
+    for player in battle.players:
+        print(f"\t{player.name}\t{turn_logs[player]} {damage_logs[player]}")
 
     if battle.winner() or battle.turn == max_turn:
         break

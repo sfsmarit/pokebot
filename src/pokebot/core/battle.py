@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Self, Literal
 
 import time
 from random import Random
@@ -8,12 +8,12 @@ import json
 from pokebot.utils import copy_utils as ut
 from pokebot.utils.enums import Command, Stat
 
-from pokebot.model import Pokemon, Move
+from pokebot.model import Pokemon, Move, Field
 
 from pokebot.player import Player
 
 from .events import Event, Interrupt, EventManager, EventContext
-from .states import PlayerState, GlobalState, SideState
+from .player_state import PlayerState
 from .logger import Logger
 from .damage import DamageCalculator, DamageContext
 from .pokedb import PokeDB
@@ -26,19 +26,100 @@ class Battle:
 
         if seed is None:
             seed = int(time.time())
+
+        self.players: list[Player] = players
         self.seed: int = seed
 
         self.turn: int = -1
-        self._winner: Player | None = None
+        self.winner_idx: int | None = None
 
-        self.random = Random(self.seed)
         self.events = EventManager(self)
         self.logger = Logger()
+        self.random = Random(self.seed)
         self.damage_calculator: DamageCalculator = DamageCalculator()
 
-        self.states: dict[Player, PlayerState] = {pl: PlayerState() for pl in players}
-        self.global_state: GlobalState = GlobalState(self.events)
-        self.side_states: dict[Player, SideState] = {pl: SideState(self.events) for pl in players}
+        # プレイヤーの状態
+        self.states: list[PlayerState] = [PlayerState() for _ in players]
+
+        # 共通の場の効果
+        self.weather: Field = Field(players)  # 天候
+        self.terrain: Field = Field(players)  # フィールド
+        self.gravity: Field = Field(players, "じゅうりょく")
+        self.trickroom: Field = Field(players, "トリックルーム")
+
+        # プレイヤーごとの場の効果
+        self.reflector: list[Field] = [Field([pl], "リフレクター") for pl in self.players]
+        # self.lightwall: list[Field] = [Field([pl], "ひかりのかべ") for pl in self.players]
+        # self.safeguard: list[Field] = [Field([pl], "しんぴのまもり") for pl in self.players]
+        # self.whitemist: list[Field] = [Field([pl], "しろいきり") for pl in self.players]
+        # self.tailwind: list[Field] = [Field([pl], "おいかぜ") for pl in self.players]
+        # self.wish: list[Field] = [Field([pl], "ねがいごと") for pl in self.players]
+        # self.makibishi: list[Field] = [Field([pl], "まきびし") for pl in self.players]
+        # self.dokubishi: list[Field] = [Field([pl], "どくびし") for pl in self.players]
+        # self.stealthrock: list[Field] = [Field([pl], "ステルスロック") for pl in self.players]
+        # self.nebanet: list[Field] = [Field([pl], "ねばねばネット") for pl in self.players]
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        new = cls.__new__(cls)
+        memo[id(self)] = new
+        ut.fast_copy(self, new, keys_to_deepcopy=[
+            "players", "events", "logger", "random", "damage_calculator",
+            "states",
+            "weather", "terrain", "gravity", "trickroom",
+            "reflector",
+            # "lightwall", "safeguard", "whitemist", "tailwind",
+            # "wish", "makibishi", "dokubishi", "stealthrock", "nebanet"
+        ])
+
+        # 複製したインスタンスが複製後を参照するように再代入する
+        new.events.battle = new
+
+        for event, data in new.events.handlers.items():
+            for handler, sources in data.items():
+                new_sources = []
+                for obj in sources:
+                    if isinstance(obj, Player):
+                        player_idx = self.players.index(obj)
+                        new_sources.append(new.players[player_idx])
+                    else:
+                        player = self.find_player(obj)
+                        player_idx = self.players.index(player)
+                        team_idx = player.team.index(obj)
+                        new_sources.append(new.players[player_idx].team[team_idx])
+                new.events.handlers[event][handler] = new_sources
+
+        # 乱数の隠蔽
+        new.random.seed(int(time.time()))
+
+        return new
+
+    def state(self, player: Player):
+        return self.states[self.players.index(player)]
+
+    def set_weather(self,
+                    name: Literal["", "はれ", "あめ", "ゆき", "すなあらし"] = "",
+                    count: int = 0,
+                    ) -> bool:
+        if not name or count == 0:
+            # 天候の終了
+            return self.weather.set_count(self.events, 0)
+        elif name != self.weather.name:
+            # 天候の変更
+            return self.weather.set(self.events, name, count)
+        return False
+
+    def set_terrain(self,
+                    name: Literal["", "エレキフィールド", "グラスフィールド", "サイコフィールド", "ミストフィールド"] = "",
+                    count: int = 0,
+                    ) -> bool:
+        if not name or count == 0:
+            # フィールドの終了
+            return self.terrain.set_count(self.events, 0)
+        elif name != self.terrain.name:
+            # フィールドの変更
+            return self.terrain.set(self.events, name, count)
+        return False
 
     def export_log(self, file):
         data = {
@@ -46,7 +127,7 @@ class Battle:
             "players": [],
         }
 
-        for player, state in self.states.items():
+        for player, state in zip(self.players, self.states):
             data["players"].append({
                 "name": player.name,
                 "selection_indexes": state.selected_idxes,
@@ -71,7 +152,7 @@ class Battle:
             seed=data["seed"],
         )
 
-        for i, (player, state) in enumerate(new.states.items()):
+        for i, (player, state) in enumerate(zip(new.players, new.states)):
             player_data = data["players"][i]
             player.name = player_data["name"]
             state.selected_idxes = player_data["selection_indexes"]
@@ -87,63 +168,27 @@ class Battle:
 
         return new
 
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        new = cls.__new__(cls)
-        memo[id(self)] = new
-        ut.fast_copy(self, new, keys_to_deepcopy=[
-            "states", "random", "events", "logger", "damage_calculator",
-        ])
-
-        # 複製したインスタンスが複製後を参照するように再代入する
-        new.events.battle = new
-        new.global_state.events = new.events
-        for pl in new.side_states:
-            new.side_states[pl].events = new.events
-
-        for event, data in new.events.handlers.items():
-            for handler, pokes in data.items():
-                new_pokes = []
-                for p in pokes:
-                    if isinstance(p, Pokemon):
-                        player = self.find_player(p)
-                        player_idx = self.players.index(player)
-                        team_idx = player.team.index(p)
-                        new_pokes.append(new.players[player_idx].team[team_idx])
-                    else:
-                        new_pokes.append(p)
-                new.events.handlers[event][handler] = new_pokes
-
-        # 乱数の隠蔽
-        new.random.seed(int(time.time()))
-
-        return new
-
     def masked(self, perspective: Player) -> tuple[Self, Player]:
         # TODO mask
         new = deepcopy(self)
         new_player = new.players[self.players.index(perspective)]
         return new, new_player
 
-    @property
-    def players(self):
-        return list(self.states.keys())
-
     def active(self, player: Player) -> Pokemon:
-        if (i := self.states[player].active_idx) is not None:
+        if (i := self.state(player).active_idx) is not None:
             return player.team[i]
         else:
             return None  # type: ignore
 
     @property
     def actives(self) -> list[Pokemon]:
-        return [self.active(pl) for pl in self.states]
+        return [self.active(pl) for pl in self.players]
 
     def selected(self, player: Player) -> list[Pokemon]:
-        return [player.team[i] for i in self.states[player].selected_idxes]
+        return [player.team[i] for i in self.state(player).selected_idxes]
 
     def init_turn(self):
-        for state in self.states.values():
+        for state in self.states:
             state.reset_turn()
         self.turn += 1
 
@@ -151,6 +196,12 @@ class Battle:
         for player in self.players:
             if poke in player.team:
                 return player
+        raise Exception("Player not found.")
+
+    def find_player_index(self, poke: Pokemon) -> int:
+        for i, player in enumerate(self.players):
+            if poke in player.team:
+                return i
         raise Exception("Player not found.")
 
     def team_idx(self, poke: Pokemon) -> int:
@@ -197,7 +248,7 @@ class Battle:
     def reserve_command(self, player: Player, command: Command, turn: int | None = None):
         if turn is None:
             turn = self.turn
-        self.states[player].reserved_commands.append(command)
+        self.state(player).reserved_commands.append(command)
         idx = self.players.index(player)
         self.logger.add_command_log(self.turn, idx, command)
 
@@ -206,18 +257,29 @@ class Battle:
             turn = self.turn
         return {pl: self.logger.get_turn_logs(turn, i) for i, pl in enumerate(self.players)}
 
-    def add_turn_log(self, source: Player | list[Player] | Pokemon | None, text: str):
-        if isinstance(source, Player):
-            idxes = [self.players.index(source)]
-        elif isinstance(source, list):
-            idxes = [self.players.index(pl) for pl in source]
-        elif isinstance(source, Pokemon):
-            idxes = [self.players.index(self.find_player(source))]
-        elif source is None:
-            idxes = list(range(len(self.players)))
+    def get_damage_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
+        if turn is None:
+            turn = self.turn
+        return {pl: self.logger.get_damage_logs(turn, i) for i, pl in enumerate(self.players)}
 
-        for idx in idxes:
+    def to_player_idxes(self, source: Player | list[Player] | Pokemon | None) -> list[int]:
+        if isinstance(source, Player):
+            return [self.players.index(source)]
+        if isinstance(source, list):
+            return [self.players.index(pl) for pl in source]
+        if isinstance(source, Pokemon):
+            return [self.players.index(self.find_player(source))]
+        if source is None:
+            return list(range(len(self.players)))
+        return []
+
+    def add_turn_log(self, source: Player | list[Player] | Pokemon | None, text: str):
+        for idx in self.to_player_idxes(source):
             self.logger.add_turn_log(self.turn, idx, text)
+
+    def add_damage_log(self, source: Player | list[Player] | Pokemon | None, text: str):
+        for idx in self.to_player_idxes(source):
+            self.logger.add_damage_log(self.turn, idx, text)
 
     def get_speed_order(self) -> list[Player]:
         # TODO get_speed_order
@@ -237,17 +299,21 @@ class Battle:
         return n_alive + alpha * total_hp / total_max_hp
 
     def winner(self) -> Player | None:
-        if not self._winner:
-            TOD_scores = [self.TOD_score(pl) for pl in self.players]
-            if 0 in TOD_scores:
-                idx = TOD_scores.index(0)
-                self._winner = self.players[not idx]
-                self.add_turn_log(self._winner, "勝ち")
-                self.add_turn_log(self.players[idx], "負け")
-        return self._winner
+        if self.winner_idx is not None:
+            return self.players[self.winner_idx]
+
+        TOD_scores = [self.TOD_score(pl) for pl in self.players]
+        if 0 in TOD_scores:
+            loser_idx = TOD_scores.index(0)
+            self.winner_idx = int(not loser_idx)
+            self.add_turn_log(self.players[self.winner_idx], "勝ち")
+            self.add_turn_log(self.players[loser_idx], "負け")
+            return self.players[self.winner_idx]
+
+        return None
 
     def run_selection(self):
-        for player, state in self.states.items():
+        for player, state in zip(self.players, self.states):
             if not state.selected_idxes:
                 commands = player.choose_selection_commands(self)
                 state.selected_idxes = [c.idx for c in commands]
@@ -342,18 +408,18 @@ class Battle:
         return self.damage_calculator.single_hit_damages(self.events, attacker, defender, move, ctx)
 
     def has_interrupt(self) -> bool:
-        return any(x.interrupt != Interrupt.NONE for x in self.states.values())
+        return any(state.interrupt != Interrupt.NONE for state in self.states)
 
     def override_interrupt(self, flag: Interrupt, only_first: bool = True):
         for player in self.get_speed_order():
-            if self.states[player].interrupt == Interrupt.REQUESTED:
-                self.states[player].interrupt = flag
+            if self.state(player).interrupt == Interrupt.REQUESTED:
+                self.state(player).interrupt = flag
                 if only_first:
                     return
 
     def run_switch(self, player: Player, new: Pokemon, emit: bool = True):
         # 割り込みフラグを破棄
-        self.states[player].interrupt = Interrupt.NONE
+        self.state(player).interrupt = Interrupt.NONE
 
         # 退場
         old = self.active(player)
@@ -363,7 +429,7 @@ class Battle:
             self.add_turn_log(player, f"{old.name} {'交代' if old.hp else '瀕死'}")
 
         # 入場
-        self.states[player].active_idx = player.team.index(new)
+        self.state(player).active_idx = player.team.index(new)
         new.switch_in(self.events)
         self.add_turn_log(player, f"{new.name} 着地")
 
@@ -378,7 +444,7 @@ class Battle:
                 self.run_interrupt_switch(flag)
 
         # その他の処理
-        self.states[player].already_switched = True
+        self.state(player).already_switched = True
 
     def run_initial_switch(self):
         # ポケモンを場に出す
@@ -396,7 +462,7 @@ class Battle:
         switched_players = []
 
         for player in self.players:
-            if self.states[player].interrupt != flag:
+            if self.state(player).interrupt != flag:
                 continue
 
             # 交代を引き起こしたアイテムを消費させる
@@ -405,11 +471,11 @@ class Battle:
                 self.active(player).item.consume()
 
             # コマンドが予約されていなければ、プレイヤーの方策関数に従う
-            if not self.states[player].reserved_commands:
+            if not self.state(player).reserved_commands:
                 self.reserve_command(player, player.choose_switch_command(self))
 
             # 交代コマンドを取得
-            command = self.states[player].reserved_commands.pop(0)
+            command = self.state(player).reserved_commands.pop(0)
 
             self.run_switch(player, player.team[command.idx], emit=emit_on_each_switch)
             switched_players.append(player)
@@ -428,7 +494,7 @@ class Battle:
             if not self.has_interrupt():
                 for player in self.players:
                     if self.active(player).hp == 0:
-                        self.states[player].interrupt = Interrupt.FAINTED
+                        self.state(player).interrupt = Interrupt.FAINTED
                         target_players.append(player)
 
             # 交代を行うプレイヤーがいなければ終了
@@ -444,10 +510,10 @@ class Battle:
         if not self.has_interrupt():
             for player in self.players:
                 if self.active(player).hp == 0:
-                    self.states[player].interrupt = Interrupt.FAINTED
+                    self.state(player).interrupt = Interrupt.FAINTED
 
         # 交代を行うプレイヤー
-        switch_players = [pl for pl, st in self.states.items()
+        switch_players = [pl for pl, st in zip(self.players, self.states)
                           if st.interrupt == Interrupt.FAINTED]
 
         # 対象プレイヤーがいなければ終了
@@ -484,7 +550,7 @@ class Battle:
 
         if not self.has_interrupt():
             # コマンドが予約されていなければ、プレイヤーの方策関数に従う
-            for player, state in self.states.items():
+            for player, state in zip(self.players, self.states):
                 if not state.reserved_commands:
                     self.reserve_command(player, player.choose_action_command(self))
 
@@ -498,8 +564,8 @@ class Battle:
             interrupt = Interrupt.ejectpack_on_switch(idx)
 
             if not self.has_interrupt():
-                if self.states[player].reserved_commands[0].is_switch():
-                    command = self.states[player].reserved_commands.pop(0)
+                if self.state(player).reserved_commands[0].is_switch():
+                    command = self.state(player).reserved_commands.pop(0)
                     new = player.team[command.idx]
                     self.run_switch(player, new)
                 else:
@@ -520,11 +586,11 @@ class Battle:
         # 行動: 技
         for player in action_order:
             # このターンに交代済みなら行動不可
-            if self.states[player].already_switched:
+            if self.state(player).already_switched:
                 continue
 
             if not self.has_interrupt():
-                command = self.states[player].reserved_commands.pop(0)
+                command = self.state(player).reserved_commands.pop(0)
                 move = self.get_move_from_command(player, command)
 
                 # 技の発動

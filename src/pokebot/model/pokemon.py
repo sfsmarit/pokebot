@@ -5,12 +5,12 @@ if TYPE_CHECKING:
 
 from typing import Literal
 
-from pokebot.utils.enums import Gender, Ailment, Stat
+from pokebot.utils.enums import Gender, Stat
 from pokebot.utils.constants import NATURE_MODIFIER
 import pokebot.utils.copy_utils as copyut
 
 from pokebot.core.events import Event, EventContext
-from pokebot.data.registry import PokemonData
+from pokebot.data.models import PokemonData
 
 from .ability import Ability
 from .item import Item
@@ -45,7 +45,7 @@ class Pokemon:
         self.is_terastallized: bool = False
 
         self.sleep_count: int
-        self.ailment: Ailment = Ailment()
+        self.ailment: Ailment = Ailment(self)
 
         self.field_status: FieldStatus = FieldStatus()
 

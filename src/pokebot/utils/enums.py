@@ -40,15 +40,6 @@ class Gender(BaseEnum):
     FEMALE = "メス"
 
 
-class Ailment(BaseEnum):
-    NONE = None
-    PSN = "どく"
-    PAR = "まひ"
-    BRN = "やけど"
-    SLP = "ねむり"
-    FLZ = "こおり"
-
-
 class Condition(BaseEnum):
     AQUA_RING = ("アクアリング", 1, True, False)
     AME_MAMIRE = ("あめまみれ", 3, False, True)

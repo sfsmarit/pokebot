@@ -1,5 +1,5 @@
 import pokebot.utils.copy_utils as copyut
-from pokebot.data.registry import ItemData
+from pokebot.data.models import ItemData
 
 from .effect import BaseEffect
 

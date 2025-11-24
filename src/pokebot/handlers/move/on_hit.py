@@ -18,7 +18,7 @@ def modify_stat(battle: Battle, ctx: EventContext, stat: Stat, value: int):
 def pivot(battle: Battle, ctx: EventContext):
     player = battle.find_player(ctx.source)
     if battle.get_available_switch_commands(player):
-        battle.states[player].interrupt = Interrupt.PIVOT
+        battle.state(player).interrupt = Interrupt.PIVOT
 
 
 def すなあらし(battle: Battle, value: Any, ctx: EventContext):
@@ -30,15 +30,19 @@ def アームハンマー(battle: Battle, value: Any, ctx: EventContext):
 
 
 def クイックターン(battle: Battle, value: Any, ctx: EventContext):
-    return pivot(battle, ctx)
+    pivot(battle, ctx)
+
+
+def どくどく(battle: Battle, value: Any, ctx: EventContext):
+    common.apply_ailment(battle, "もうどく", battle.foe(ctx.source), ctx.source)
 
 
 def とんぼがえり(battle: Battle, value: Any, ctx: EventContext):
-    return pivot(battle, ctx)
+    pivot(battle, ctx)
 
 
 def ボルトチェンジ(battle: Battle, value: Any, ctx: EventContext):
-    return pivot(battle, ctx)
+    pivot(battle, ctx)
 
 
 def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
@@ -51,11 +55,12 @@ def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
 
 
 def リフレクター(battle: Battle, value: Any, ctx: EventContext):
-    name = "リフレクター"
+    field = "リフレクター"
     player = battle.find_player(ctx.source)
-    count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
-    if battle.side_states[player].set_reflector(count):
-        battle.add_turn_log(player, f"{name} {count}")
+    player_idx = battle.players.index(player)
+    count = 5 + 3*(ctx.source.item == FIELDS[field].turn_extension_item)
+    if battle.reflector[player_idx].set_count(battle.events, count):
+        battle.add_turn_log(player, f"{field} {count}")
 
 
 def わるあがき(battle: Battle, value: Any, ctx: EventContext):

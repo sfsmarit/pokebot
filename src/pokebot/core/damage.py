@@ -157,13 +157,13 @@ class DamageCalculator:
         # その他の補正
         r_atk_type = events.emit(Event.ON_CALC_ATK_TYPE_MODIFIER,
                                  value=4096,
-                                 ctx=EventContext(defender, move))
+                                 ctx=EventContext(attacker, move))
         r_def_type = events.emit(Event.ON_CALC_DEF_TYPE_MODIFIER,
                                  value=1,
                                  ctx=EventContext(defender, move))
         r_dmg = events.emit(Event.ON_CALC_DAMAGE_MODIFIER,
                             value=1,
-                            ctx=EventContext(defender, move))
+                            ctx=EventContext(attacker, move))
 
         dmgs = [0]*16
         for i in range(16):

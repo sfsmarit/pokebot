@@ -6,7 +6,7 @@ from pokebot.utils.enums import Gender
 from pokebot.utils import file_utils as fileut
 
 from pokebot.data import ABILITIES, ITEMS, MOVES
-from pokebot.data.registry import PokemonData
+from pokebot.data.models import PokemonData
 
 from pokebot.model import Pokemon, Ability, Item, Move
 

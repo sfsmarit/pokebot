@@ -1,14 +1,17 @@
-from typing import Literal
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pokebot.core.events import EventManager
+    from pokebot.player import Player
+
 from pokebot.utils import copy_utils as copyut
-
-from pokebot.core.events import EventManager
 from pokebot.data.field import FIELDS
-
 from .effect import BaseEffect
 
 
 class Field(BaseEffect):
-    def __init__(self, name: str = "", count: int = 0) -> None:
+    def __init__(self, owners: list[Player], name: str = "", count: int = 0) -> None:
+        self.owners: list[Player] = owners
         self.init(name, count)
 
     def init(self, name: str, count: int):
@@ -27,11 +30,13 @@ class Field(BaseEffect):
         return copyut.fast_copy(self, new)
 
     def set(self, events: EventManager, name: str, count: int) -> bool:
-        # フィールド名に指定があれば必ず変更する
+        # 現在のフィールドと異なるフィールド名を指定されたら、フィールドを上書きして終了する
         if name != self.name:
-            self.unregister_handlers(events)
+            for player in self.owners:
+                self.unregister_handlers(events, player)
             self.init(name, count)
-            self.register_handlers(events)
+            for player in self.owners:
+                self.register_handlers(events, player)
             return True
 
         if count == self.count:
@@ -40,15 +45,17 @@ class Field(BaseEffect):
         elif count == 0:
             # フィールド解除
             self.count = count
-            self.unregister_handlers(events)
+            for player in self.owners:
+                self.unregister_handlers(events, player)
             return True
         elif self.count:
-            # 重ねがけ不可
+            # カウントが残っている状態での重ねがけを禁止
             return False
         else:
             # フィールド発動
             self.count = count
-            self.register_handlers(events)
+            for player in self.owners:
+                self.register_handlers(events, player)
             return True
 
     def set_count(self, events: EventManager, count: int) -> bool:
@@ -63,5 +70,6 @@ class Field(BaseEffect):
 
         self.count = count
         if self.count == 0:
-            self.unregister_handlers(events)  # フィールド解除
+            for player in self.owners:
+                self.unregister_handlers(events, player)  # フィールド解除
         return True
