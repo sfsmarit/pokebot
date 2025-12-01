@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
 
-from copy import deepcopy
+from typing import Literal
 
 import pokebot.utils.copy_utils as copyut
-from pokebot.utils.enums import MoveCategory
 from pokebot.data.move import MoveData
 
 from .effect import BaseEffect
@@ -22,7 +21,6 @@ class Move(BaseEffect):
 
     def bench_reset(self):
         self._type: str = self.data.type
-        self._category: MoveCategory = self.data.category
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -41,5 +39,5 @@ class Move(BaseEffect):
         return self._type
 
     @property
-    def category(self) -> MoveCategory:
-        return self._category
+    def category(self) -> Literal["物理", "特殊", "変化"]:
+        return self.data.category

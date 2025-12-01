@@ -2,14 +2,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
-    from pokebot.core.pokemon import Pokemon
-    from pokebot.core.move import Move
+    from pokebot.model.pokemon import Pokemon
+    from pokebot.model.move import Move
+    from pokebot.player import Player
 
 from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from pokebot.utils import copy_utils as ut
+from pokebot.utils import copy_utils as copyut
 
 
 class Event(Enum):
@@ -31,6 +32,7 @@ class Event(Enum):
     ON_TURN_END_3 = auto()
     ON_TURN_END_4 = auto()
     ON_TURN_END_5 = auto()
+    ON_TURN_END_6 = auto()
     ON_MODIFY_STAT = auto()
     ON_END = auto()
     ON_CHECK_TRAP = auto()
@@ -44,6 +46,11 @@ class Event(Enum):
     ON_CALC_DEF_TYPE_MODIFIER = auto()
     ON_CALC_DAMAGE_MODIFIER = auto()
     ON_CHECK_DEF_ABILITY = auto()
+
+
+class HandlerResult(Enum):
+    STOP_HANDLER = auto()
+    STOP_EVENT = auto()
 
 
 class Interrupt(Enum):
@@ -93,49 +100,79 @@ class EventContext:
 class EventManager:
     def __init__(self, battle: Battle) -> None:
         self.battle = battle
-        self.handlers: dict[Event, dict[Handler, list[Pokemon]]] = {}
+        self.handlers: dict[Event, dict[Handler, list[Pokemon | Player]]] = {}
 
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return ut.fast_copy(self, new)
+        return copyut.fast_copy(self, new)
 
-    def on(self, event: Event, handler: Handler, source: Pokemon | None = None):
+    def update_reference(self, new: Battle):
+        old = self.battle
+
+        # ハンドラの対象に指定されているポケモンまたはプレイヤーへの参照を更新する
+        for event, data in self.handlers.items():
+            for handler, sources in data.items():
+                new_sources = []
+                for old_source in sources:
+                    # プレイヤーまたはポケモンのインデックスから複製後のオブジェクトを見つける
+                    if isinstance(old_source, Player):
+                        player_idx = old.players.index(old_source)
+                        new_source = new.players[player_idx]
+                    else:
+                        old_player = old.find_player(old_source)
+                        player_idx = old.players.index(old_player)
+                        team_idx = old_player.team.index(old_source)
+                        new_source = new.players[player_idx].team[team_idx]
+                    new_sources.append(new_source)
+
+                self.handlers[event][handler] = new_sources
+
+        # Battle への参照を更新する
+        self.battle = new
+
+    def on(self, event: Event, handler: Handler, source: Pokemon | Player):
         """イベントを指定してハンドラを登録"""
         self.handlers.setdefault(event, {})
         sources = self.handlers[event].setdefault(handler, [])
-        if all(x not in sources for x in [source, None]):
-            self.handlers[event][handler].append(source)  # type: ignore
+        if source not in sources:
+            sources.append(source)
 
-    def off(self, event: Event, handler: Handler, source: Pokemon | None = None):
+    def off(self, event: Event, handler: Handler, source: Pokemon | Player):
         if event in self.handlers and handler in self.handlers[event]:
             # source を削除
             self.handlers[event][handler] = \
                 [p for p in self.handlers[event][handler] if p != source]
-            # source が不在ならハンドラを解除
+            # 空のハンドラを解除
             if not self.handlers[event][handler]:
                 del self.handlers[event][handler]
 
     def emit(self,
              event: Event,
              value: Any = 0,
-             ctx: EventContext | None = None) -> Any:
+             ctx: EventContext | None = None,
+             ) -> Any:
         """イベントを発火"""
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
-            if not sources:
-                raise Exception(f"No source for handler {handler}")
-
-            # sources を None を、すべての場のポケモンに置き換える
-            if sources == [None]:
-                sources = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
-                self.handlers[event][handler] = sources
-
-            # コンテキストは引数を優先し、指定がなければ登録されているsourceを参照する
+            # 引数のコンテキストを優先し、指定がなければ登録されているsourceを参照する
             if ctx:
                 ctxs = [ctx]
             else:
-                ctxs = [EventContext(poke) for poke in sources]  # type: ignore
+                # sources: list[Pokemon | Player] の全要素を場のポケモンに置き換える
+                new_sources = []
+                for source in sources:
+                    if isinstance(source, Player):
+                        poke = self.battle.active(source)
+                    if poke not in new_sources:
+                        new_sources.append(source)
+
+                # 素早さ順に並び変える
+                if len(new_sources) > 1:
+                    speed_order = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
+                    new_sources = [poke for poke in speed_order if speed_order in new_sources]
+
+                ctxs = [EventContext(poke) for poke in new_sources]
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:
@@ -145,9 +182,11 @@ class EventManager:
                 if handler.once:
                     self.off(event, handler, c.source)
 
-                # ハンドラの返り値が False なら処理を中断
-                if result == False:
-                    return value
+                match result:
+                    case HandlerResult.STOP_HANDLER:
+                        break
+                    case HandlerResult.STOP_EVENT:
+                        return value
 
                 # ハンドラに渡す value を更新
                 value = result

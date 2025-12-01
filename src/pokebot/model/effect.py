@@ -2,9 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Self
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
-    from pokebot.core.pokemon import Pokemon
-
-from pokebot.utils import copy_utils as ut
+    from pokebot.model.pokemon import Pokemon
+    from pokebot.player import Player
 
 
 class BaseEffect:
@@ -17,11 +16,11 @@ class BaseEffect:
     def name(self) -> str:
         return self.data.name if self.active else ""
 
-    def register_handlers(self, events: EventManager, source: Pokemon | None = None):
+    def register_handlers(self, events: EventManager, source: Pokemon | Player):
         for event, handler in self.data.handlers.items():
             events.on(event, handler, source)
 
-    def unregister_handlers(self, events: EventManager, source: Pokemon | None = None):
+    def unregister_handlers(self, events: EventManager, source: Pokemon | Player):
         for event, handler in self.data.handlers.items():
             events.off(event, handler, source)
 

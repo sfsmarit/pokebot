@@ -1,5 +1,5 @@
 from pokebot.core.events import Event, Handler
-from .registry import AbilityData
+from .models import AbilityData
 from pokebot.handlers.ability import after_stat_change, on_switch_in, on_trap
 
 ABILITIES: dict[str, AbilityData] = {
@@ -498,7 +498,11 @@ ABILITIES: dict[str, AbilityData] = {
         ]
     },
     "クリアボディ": {},
-    "グラスメイカー": {},
+    "グラスメイカー": AbilityData(
+        handlers={
+            Event.ON_SWITCH_IN: Handler(on_switch_in.グラスメイカー),
+        }
+    ),
     "サイコメイカー": {},
     "サンパワー": {},
     "サーフテール": {},

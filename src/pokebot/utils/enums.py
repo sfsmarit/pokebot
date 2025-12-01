@@ -40,15 +40,6 @@ class Gender(BaseEnum):
     FEMALE = "メス"
 
 
-class Ailment(BaseEnum):
-    NONE = None
-    PSN = "どく"
-    PAR = "まひ"
-    BRN = "やけど"
-    SLP = "ねむり"
-    FLZ = "こおり"
-
-
 class Condition(BaseEnum):
     AQUA_RING = ("アクアリング", 1, True, False)
     AME_MAMIRE = ("あめまみれ", 3, False, True)
@@ -86,74 +77,6 @@ class Condition(BaseEnum):
     @property
     def expirable(self) -> bool:
         return self.value[3]
-
-
-class GlobalField(BaseEnum):
-    WEATHER = ("天候", 8, False)
-    TERRAIN = ("フィールド", 8, False)
-    TRICKROOM = ("トリックルーム", 5, True)
-    GRAVITY = ("じゅうりょく", 5, True)
-
-    @property
-    def max_count(self) -> int:
-        return self.value[1]
-
-    @property
-    def expirable(self) -> bool:
-        return self.value[2]
-
-
-class Weather(BaseEnum):
-    NONE = (None, False)
-    SUNNY = ("はれ", True)
-    RAINY = ("あめ", True)
-    SNOW = ("ゆき", True)
-    SAND = ("すなあらし", True)
-
-    @property
-    def expirable(self) -> bool:
-        return self.value[1]
-
-
-class Terrain(BaseEnum):
-    NONE = (None, False)
-    ELEC = ("エレキフィールド", True)
-    GRASS = ("グラスフィールド", True)
-    PSYCO = ("サイコフィールド", True)
-    MIST = ("ミストフィールド", True)
-
-    @property
-    def expirable(self) -> bool:
-        return self.value[1]
-
-
-class SideField(BaseEnum):
-    REFLECTOR = ("リフレクター", 8, True)
-    LIGHT_WALL = ("ひかりのかべ", 8, True)
-    AURORA_VEIL = ("オーロラベール", 8, True)
-    SHINPI = ("しんぴのまもり", 5, True)
-    WHITE_MIST = ("しろいきり", 5, True)
-    OIKAZE = ("おいかぜ", 3, True)
-    WISH = ("ねがいごと", 2, True)
-    MAKIBISHI = ("まきびし", 3, False)
-    DOKUBISHI = ("どくびし", 2, False)
-    STEALTH_ROCK = ("ステルスロック", 1, False)
-    NEBA_NET = ("ねばねばネット", 1, False)
-
-    @property
-    def max_count(self) -> int:
-        return self.value[1]
-
-    @property
-    def expirable(self) -> bool:
-        return self.value[2]
-
-
-class MoveCategory(BaseEnum):
-    NONE = None
-    PHY = "物理"
-    SPE = "特殊"
-    STA = "変化"
 
 
 class BoostSource(BaseEnum):

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.core.pokemon import Pokemon
+from pokebot.model.pokemon import Pokemon
 
 
 def write_log_and_consume(battle: Battle, target: Pokemon):

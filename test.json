@@ -1,21 +1,14 @@
 {
-    "seed": 1762699379,
+    "seed": 1763989405,
     "players": [
         {
-            "name": "Player 1",
+            "name": "Player1",
             "selection_indexes": [
-                0,
-                1,
-                2
+                0
             ],
             "commands": {
                 "1": [
-                    "MOVE_0",
-                    "SWITCH_1"
-                ],
-                "2": [
-                    "STRUGGLE",
-                    "SWITCH_0"
+                    "MOVE_0"
                 ]
             },
             "team": [
@@ -27,60 +20,8 @@
                     "ability": "",
                     "item": "",
                     "moves": [
-                        "とんぼがえり"
+                        "リフレクター"
                     ],
-                    "indiv": [
-                        31,
-                        31,
-                        31,
-                        31,
-                        31,
-                        31
-                    ],
-                    "effort": [
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    ],
-                    "terastal": ""
-                },
-                {
-                    "name": "ピカチュウ",
-                    "gender": "NONE",
-                    "level": 50,
-                    "nature": "まじめ",
-                    "ability": "",
-                    "item": "",
-                    "moves": [],
-                    "indiv": [
-                        31,
-                        31,
-                        31,
-                        31,
-                        31,
-                        31
-                    ],
-                    "effort": [
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    ],
-                    "terastal": ""
-                },
-                {
-                    "name": "カビゴン",
-                    "gender": "NONE",
-                    "level": 50,
-                    "nature": "まじめ",
-                    "ability": "",
-                    "item": "",
-                    "moves": [],
                     "indiv": [
                         31,
                         31,
@@ -102,28 +43,25 @@
             ]
         },
         {
-            "name": "Player 2",
+            "name": "Player2",
             "selection_indexes": [
                 0
             ],
             "commands": {
                 "1": [
                     "MOVE_0"
-                ],
-                "2": [
-                    "TERASTAL_0"
                 ]
             },
             "team": [
                 {
-                    "name": "カメックス",
+                    "name": "フシギバナ",
                     "gender": "NONE",
                     "level": 50,
                     "nature": "まじめ",
                     "ability": "",
                     "item": "",
                     "moves": [
-                        "アームハンマー"
+                        "たいあたり"
                     ],
                     "indiv": [
                         31,

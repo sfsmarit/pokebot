@@ -3,18 +3,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
 
-from copy import deepcopy
+from typing import Literal
 
-from pokebot.utils.enums import Gender, Ailment, Stat, MoveCategory
+from pokebot.utils.enums import Gender, Stat
 from pokebot.utils.constants import NATURE_MODIFIER
 import pokebot.utils.copy_utils as copyut
 
 from pokebot.core.events import Event, EventContext
-from pokebot.data.registry import PokemonData
+from pokebot.data.models import PokemonData
 
 from .ability import Ability
 from .item import Item
 from .move import Move
+from .ailment import Ailment
 from .active_status import FieldStatus
 
 
@@ -44,7 +45,7 @@ class Pokemon:
         self.is_terastallized: bool = False
 
         self.sleep_count: int
-        self.ailment: Ailment
+        self.ailment: Ailment = Ailment(self)
 
         self.field_status: FieldStatus = FieldStatus()
 
@@ -287,7 +288,7 @@ class Pokemon:
                     ctx=EventContext(self, move))
         return move._type
 
-    def effective_move_category(self, move: Move, events: EventManager) -> MoveCategory:
+    def effective_move_category(self, move: Move, events: EventManager) -> Literal["物理", "特殊", "変化"]:
         events.emit(Event.ON_CHECK_MOVE_CATEGORY,
                     ctx=EventContext(self, move))
-        return move._category
+        return move.category

@@ -16,7 +16,7 @@ class CustomPlayer(Player):
         for player, log in copied.get_turn_logs().items():
             print(f"\t{player.name}\t{log}")
         '''
-        return commands[0]
+        return commands[0] if battle.turn == 1 else commands[-1]
 
     def choose_switch_command(self, battle: Battle) -> Command:
         commands = battle.get_available_switch_commands(self)
@@ -32,37 +32,39 @@ class CustomPlayer(Player):
 
 # ---------------------------------------------------------------------
 
-player = CustomPlayer("Player 1")
-player.team.append(PokeDB.create_pokemon("リザードン"))
-# player.team[-1].ability = PokeDB.create_ability("かちき")
-# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
-player.team[-1].moves = [PokeDB.create_move("とんぼがえり")]
+names = ["リザードン"]
+abilities = [""]
+items = [""]
+move_list = [["リフレクター"]]
 
-player.team.append(PokeDB.create_pokemon("ピカチュウ"))
-# player.team[-1].ability = PokeDB.create_ability("いかく")
-# player.team[-1].item = PokeDB.create_item("だっしゅつパック")
-# player.team[-1].moves = [PokeDB.create_move("アームハンマー")]
-
-player.team.append(PokeDB.create_pokemon("カビゴン"))
+player = CustomPlayer("Player1")
+for name, ability, item, moves in zip(names, abilities, items, move_list):
+    player.team.append(PokeDB.create_pokemon(name))
+    player.team[-1].ability = PokeDB.create_ability(ability)
+    player.team[-1].item = PokeDB.create_item(item)
+    player.team[-1].moves = [PokeDB.create_move(s) for s in moves]
 
 # ---------------------------------------------------------------------
 
-rival = Player("Player 2")
-rival.team.append(PokeDB.create_pokemon("カメックス"))
-# rival.team[-1].ability = PokeDB.create_ability("いかく")
-# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
-rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+names = ["フシギバナ"]
+abilities = [""]
+items = [""]
+move_list = [["たいあたり"]]
 
-# rival.team.append(PokeDB.create_pokemon("フシギバナ"))
-# rival.team[-1].ability = PokeDB.create_ability("いかく")
-# rival.team[-1].item = PokeDB.create_item("だっしゅつパック")
-# rival.team[-1].moves = [PokeDB.create_move("アームハンマー")]
+rival = CustomPlayer("Player2")
+for name, ability, item, moves in zip(names, abilities, items, move_list):
+    rival.team.append(PokeDB.create_pokemon(name))
+    rival.team[-1].ability = PokeDB.create_ability(ability)
+    rival.team[-1].item = PokeDB.create_item(item)
+    rival.team[-1].moves = [PokeDB.create_move(s) for s in moves]
+
+# ---------------------------------------------------------------------
 
 battle = Battle([player, rival])
 
 # ---------------------------------------------------------------------
 
-max_turn = 2
+max_turn = 1
 
 # ---------------------------------------------------------------------
 
@@ -76,10 +78,12 @@ for pl in battle.players:
 
 while 1:
     battle.advance_turn()
+    turn_logs = battle.get_turn_logs()
+    damage_logs = battle.get_damage_logs()
 
     print(f"Turn {battle.turn}")
-    for player, log in battle.get_turn_logs().items():
-        print(f"\t{player.name}\t{log}")
+    for player in battle.players:
+        print(f"\t{player.name}\t{turn_logs[player]} {damage_logs[player]}")
 
     if battle.winner() or battle.turn == max_turn:
         break
