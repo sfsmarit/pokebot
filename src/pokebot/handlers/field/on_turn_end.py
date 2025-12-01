@@ -3,21 +3,25 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
+from pokebot.utils.types import GLOBAL_FIELDS, SIDE_FIELDS
 from pokebot.core.events import EventContext, HandlerResult
 
 
-def reduce_weather_count(battle: Battle, value: Any, ctx: EventContext):
-    obj = battle.weather
-    if (s := obj.name) and obj.reduce_count(battle.events):
-        battle.add_turn_log(None, f"{s} 残り{obj.count}ターン")
+def reduce_global_field_count(battle: Battle, value: Any,
+                              ctx: EventContext, name: GLOBAL_FIELDS):
+    if battle.field.reduce_count(battle.events, name):
+        field = battle.field.fields[name]
+        battle.add_turn_log(None, f"{field.name} 残り{field.count}ターン")
     return HandlerResult.STOP_HANDLER
 
 
-def reduce_terrain_count(battle: Battle, value: Any, ctx: EventContext):
-    obj = battle.terrain
-    if (s := obj.name) and obj.reduce_count(battle.events):
-        battle.add_turn_log(None, f"{s} 残り{obj.count}ターン")
-    return HandlerResult.STOP_HANDLER
+def reduce_side_field_count(battle: Battle, value: Any,
+                            ctx: EventContext, name: SIDE_FIELDS):
+    player = battle.find_player(ctx.source)
+    side = battle.side(player)
+    if side.reduce_count(battle.events, name):
+        field = side.fields[name]
+        battle.add_turn_log(None, f"{field.name} 残り{field.count}ターン")
 
 
 def すなあらし(battle: Battle, value: Any, ctx: EventContext):

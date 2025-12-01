@@ -19,9 +19,9 @@ def きんちょうかん(battle: Battle, value: Any, ctx: EventContext):
 
 
 def グラスメイカー(battle: Battle, value: Any, ctx: EventContext):
-    common.change_terrain("グラスフィールド", battle, ctx)
+    common.activate_terrain(battle, ctx, "グラスフィールド")
 
 
 def ぜったいねむり(battle: Battle, value: Any, ctx: EventContext):
-    ctx.source.ailment = Ailment.SLP
-    battle.add_turn_log(ctx.source, ctx.source.ability.name)
+    if ctx.source.ailment.overwrite(battle.events, "ねむり"):
+        battle.add_turn_log(ctx.source, ctx.source.ability.name)

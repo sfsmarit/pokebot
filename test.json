@@ -1,5 +1,5 @@
 {
-    "seed": 1763989405,
+    "seed": 1764600011,
     "players": [
         {
             "name": "Player1",
@@ -17,10 +17,10 @@
                     "gender": "NONE",
                     "level": 50,
                     "nature": "まじめ",
-                    "ability": "",
+                    "ability": "グラスメイカー",
                     "item": "",
                     "moves": [
-                        "リフレクター"
+                        "たいあたり"
                     ],
                     "indiv": [
                         31,

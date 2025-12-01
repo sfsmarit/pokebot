@@ -164,10 +164,10 @@ ITEMS: dict[str, ItemData] = {
         "consumable": True,
         "throw_power": 10
     },
-    "さらさらいわ": {
-        "consumable": False,
-        "throw_power": 10
-    },
+    "さらさらいわ": ItemData(
+        consumable=False,
+        throw_power=10,
+    ),
     "じしゃく": {
         "consumable": False,
         "throw_power": 30

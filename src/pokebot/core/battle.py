@@ -1,4 +1,4 @@
-from typing import Self, Literal, TypedDict
+from typing import Self
 
 import time
 from random import Random
@@ -8,7 +8,7 @@ import json
 from pokebot.utils import copy_utils as copyut
 from pokebot.utils.enums import Command, Stat
 
-from pokebot.model import Pokemon, Move
+from pokebot.model import Pokemon, Move, Field
 
 from pokebot.player import Player
 
@@ -16,7 +16,8 @@ from .events import Event, Interrupt, EventManager, EventContext
 from .player_state import PlayerState
 from .logger import Logger
 from .damage import DamageCalculator, DamageContext
-from .field import GlobalFieldManager, SideFieldManager
+from .global_field import GlobalFieldManager
+from .side_field import SideFieldManager
 from .pokedb import PokeDB
 
 
@@ -40,8 +41,8 @@ class Battle:
         self.damage_calculator: DamageCalculator = DamageCalculator()
 
         self.states: list[PlayerState] = [PlayerState() for _ in players]
-        self.field: GlobalFieldManager = GlobalFieldManager(self.events)
-        self.sides: list[SideFieldManager] = [SideFieldManager(self.events) for pl in self.players]
+        self.field: GlobalFieldManager = GlobalFieldManager(self.events, self.players)
+        self.sides: list[SideFieldManager] = [SideFieldManager(self.events, pl) for pl in self.players]
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -72,6 +73,14 @@ class Battle:
     @property
     def actives(self) -> list[Pokemon]:
         return [self.active(pl) for pl in self.players]
+
+    @property
+    def weather(self) -> Field:
+        return self.field.fields["weather"]
+
+    @property
+    def terrain(self) -> Field:
+        return self.field.fields["terrain"]
 
     def export_log(self, file):
         data = {
@@ -567,32 +576,32 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(interrupt)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (1)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_1)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (2)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_2)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (3)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_3)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (4)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_4)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 (4)
+        # ターン終了時の処理 (5)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_5)
 

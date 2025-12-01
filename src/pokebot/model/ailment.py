@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pokebot.core.events import EventManager
     from pokebot.model.pokemon import Pokemon
@@ -29,16 +29,32 @@ class Ailment(BaseEffect):
         memo[id(self)] = new
         return copyut.fast_copy(self, new)
 
-    def change(self, events: EventManager, name: str = "", forced: bool = False) -> bool:
-        # 状態異常の上書きを禁止
-        if not forced and self.name:
+    def overwrite(self,
+                  events: EventManager,
+                  name: Literal["どく", "もうどく", "まひ", "やけど", "こおり", "ねむり"],
+                  force: bool = False
+                  ) -> bool:
+        # force=True でない限り上書き不可
+        if not force and self.name:
             return False
 
-        # 変化がなければ中断
+        # 重ねがけ不可
         if name == self.name:
             return False
 
+        # 現在のハンドラを解除
         self.unregister_handlers(events, self.owner)
+        # 初期化
         self.init(name)
+        # 新しいハンドラを登録
         self.register_handlers(events, self.owner)
+
+        return True
+
+    def cure(self, events: EventManager) -> bool:
+        """状態異常を解除する"""
+        if not self.name:
+            return False
+        self.unregister_handlers(events, self.owner)
+        self.init("")
         return True

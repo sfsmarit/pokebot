@@ -4,8 +4,8 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
     from pokebot.model.pokemon import Pokemon
     from pokebot.model.move import Move
-    from pokebot.player import Player
 
+from pokebot.player import Player
 from typing import Callable, Any
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -163,16 +163,16 @@ class EventManager:
                 new_sources = []
                 for source in sources:
                     if isinstance(source, Player):
-                        poke = self.battle.active(source)
-                    if poke not in new_sources:
+                        source = self.battle.active(source)
+                    if source not in new_sources:
                         new_sources.append(source)
 
                 # 素早さ順に並び変える
-                if len(new_sources) > 1:
-                    speed_order = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
-                    new_sources = [poke for poke in speed_order if speed_order in new_sources]
+                # if len(new_sources) > 1:
+                #    speed_order = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
+                #    new_sources = [poke for poke in speed_order if speed_order in new_sources]
 
-                ctxs = [EventContext(poke) for poke in new_sources]
+                ctxs = [EventContext(source) for source in new_sources]
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:

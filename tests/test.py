@@ -33,9 +33,9 @@ class CustomPlayer(Player):
 # ---------------------------------------------------------------------
 
 names = ["リザードン"]
-abilities = [""]
+abilities = ["グラスメイカー"]
 items = [""]
-move_list = [["リフレクター"]]
+move_list = [["たいあたり"]]
 
 player = CustomPlayer("Player1")
 for name, ability, item, moves in zip(names, abilities, items, move_list):
