@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
 from pokebot.utils.enums import Stat
-from pokebot.core.events import EventContext, Interrupt
+from pokebot.core.event import EventContext, Interrupt
 
 from pokebot.handlers import common
 
@@ -32,6 +32,10 @@ def クイックターン(battle: Battle, value: Any, ctx: EventContext):
     pivot(battle, ctx)
 
 
+def でんじほう(battle: Battle, value: Any, ctx: EventContext):
+    common.apply_ailment(battle, "まひ", battle.foe(ctx.source))
+
+
 def どくどく(battle: Battle, value: Any, ctx: EventContext):
     common.apply_ailment(battle, "もうどく", battle.foe(ctx.source), ctx.source)
 
@@ -56,9 +60,9 @@ def ふきとばし(battle: Battle, value: Any, ctx: EventContext):
 def リフレクター(battle: Battle, value: Any, ctx: EventContext):
     player = battle.find_player(ctx.source)
     side = battle.side(player)
-    field = side.get("リフレクター")
+    field = side.fields["reflector"]
     count = 5 + 3*(ctx.source.item == field.turn_extention_item)
-    if side.activate(battle.events, "リフレクター", count):
+    if side.activate(battle.events, "reflector", count):
         battle.add_turn_log(player, f"{field.name} {count}ターン")
 
 

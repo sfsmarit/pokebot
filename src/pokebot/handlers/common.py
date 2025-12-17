@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
-    from pokebot.core.events import EventContext
+    from pokebot.core.event import EventContext
     from pokebot.model.pokemon import Pokemon
 
 from pokebot.data.field import FIELDS
@@ -12,7 +12,7 @@ def apply_ailment(
     battle: Battle,
     ailment: Literal["", "どく", "もうどく", "まひ", "やけど", "こおり"],
     target: Pokemon,
-    source: Pokemon,
+    source: Pokemon | None = None,
 ):
     if not ailment:
         if target.ailment.cure(battle.events):

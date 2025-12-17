@@ -1,4 +1,4 @@
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 from .models import AbilityData
 from pokebot.handlers.ability import after_stat_change, on_switch_in, on_trap
 

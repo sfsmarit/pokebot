@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 if TYPE_CHECKING:
-    from pokebot.core.events import EventManager
+    from pokebot.core.event import EventManager
     from pokebot.model.pokemon import Pokemon
 
 import pokebot.utils.copy_utils as copyut

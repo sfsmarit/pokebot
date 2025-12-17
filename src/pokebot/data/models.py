@@ -2,7 +2,7 @@ from typing import Literal
 from dataclasses import dataclass, field
 
 from pokebot.utils.enums import Stat
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 
 
 class PokemonData:

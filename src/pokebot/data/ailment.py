@@ -1,4 +1,4 @@
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 from .models import AilmentData
 from pokebot.handlers.ailment import on_turn_end
 

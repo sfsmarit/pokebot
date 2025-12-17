@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
 from pokebot.utils.types import GLOBAL_FIELDS, SIDE_FIELDS
-from pokebot.core.events import EventContext, HandlerResult
+from pokebot.core.event import EventContext, HandlerResultFlag
 
 
 def reduce_global_field_count(battle: Battle, value: Any,
@@ -12,7 +12,7 @@ def reduce_global_field_count(battle: Battle, value: Any,
     if battle.field.reduce_count(battle.events, name):
         field = battle.field.fields[name]
         battle.add_turn_log(None, f"{field.name} 残り{field.count}ターン")
-    return HandlerResult.STOP_HANDLER
+    return HandlerResultFlag.STOP_HANDLER
 
 
 def reduce_side_field_count(battle: Battle, value: Any,

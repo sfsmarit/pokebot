@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
 from pokebot.utils.enums import Stat
-from pokebot.core.events import EventContext
+from pokebot.core.event import EventContext
 from pokebot.handlers import common
 
 

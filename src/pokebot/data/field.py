@@ -1,4 +1,4 @@
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 from .models import FieldData
 from pokebot.handlers.field import on_calc_damage_modifier, on_turn_end
 

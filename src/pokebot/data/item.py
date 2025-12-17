@@ -1,4 +1,4 @@
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 from .models import ItemData
 
 from pokebot.handlers.item import on_hit, on_damage, on_turn_end, on_modify_stat, on_trap

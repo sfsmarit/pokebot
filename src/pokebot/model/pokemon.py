@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from pokebot.core.events import EventManager
+    from pokebot.core.event import EventManager
 
 from typing import Literal
 
@@ -9,7 +9,7 @@ from pokebot.utils.enums import Gender, Stat
 from pokebot.utils.constants import NATURE_MODIFIER
 import pokebot.utils.copy_utils as copyut
 
-from pokebot.core.events import Event, EventContext
+from pokebot.core.event import Event, EventContext
 from pokebot.data.models import PokemonData
 
 from .ability import Ability
@@ -112,7 +112,7 @@ class Pokemon:
     def types(self) -> list[str]:
         if self.terastal:
             if self.terastal == 'ステラ':
-                return self.data.types.copy()
+                return self.data.types
             else:
                 return [self.terastal]
         else:
@@ -178,7 +178,7 @@ class Pokemon:
 
     @property
     def stats(self) -> list[int]:
-        return self._stats.copy()
+        return self._stats
 
     @stats.setter
     def stats(self, stats: list[int]):
@@ -198,7 +198,7 @@ class Pokemon:
 
     @property
     def base(self) -> list[int]:
-        return self.data.base.copy()
+        return self.data.base
 
     @base.setter
     def base(self, base: list[int]):
@@ -207,7 +207,7 @@ class Pokemon:
 
     @property
     def indiv(self) -> list[int]:
-        return self._indiv.copy()
+        return self._indiv
 
     @indiv.setter
     def indiv(self, indiv: list[int]):
@@ -216,12 +216,36 @@ class Pokemon:
 
     @property
     def effort(self) -> list[int]:
-        return self._effort.copy()
+        return self._effort
 
     @effort.setter
     def effort(self, effort: list[int]):
         self._effort = effort
         self.update_stats()
+
+    @property
+    def H(self) -> int:
+        return self.stats[0]
+
+    @property
+    def A(self) -> int:
+        return self.stats[1]
+
+    @property
+    def B(self) -> int:
+        return self.stats[2]
+
+    @property
+    def C(self) -> int:
+        return self.stats[3]
+
+    @property
+    def D(self) -> int:
+        return self.stats[4]
+
+    @property
+    def S(self) -> int:
+        return self.stats[5]
 
     def update_stats(self, keep_damage: bool = False):
         if keep_damage:
