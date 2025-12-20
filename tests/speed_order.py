@@ -1,6 +1,6 @@
 from copy import deepcopy
-from pokebot import Battle, Player, PokeDB
-from pokebot.utils.enums import Command
+from jpoke import Battle, Player, PokeDB
+from jpoke.utils.enums import Command
 
 
 # ---------------------------------------------------------------------
