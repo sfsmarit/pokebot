@@ -4,13 +4,14 @@ if TYPE_CHECKING:
     from pokebot.core.battle import Battle
     from pokebot.model.pokemon import Pokemon
     from pokebot.model.move import Move
-    from pokebot.player import Player
 
-from typing import Callable, Any
+from typing import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 
 from pokebot.utils import copy_utils as copyut
+from pokebot.handlers import HandlerOutput, HandlerResultFlag
+from pokebot.player import Player
 
 
 class Event(Enum):
@@ -39,6 +40,9 @@ class Event(Enum):
     ON_CHECK_MOVE_TYPE = auto()
     ON_CHECK_MOVE_CATEGORY = auto()
 
+    ON_CALC_SPEED = auto()
+    ON_CALC_ACTION_SPEED = auto()
+    ON_CALC_ACCURACY = auto()
     ON_CALC_POWER_MODIFIER = auto()
     ON_CALC_ATK_MODIFIER = auto()
     ON_CALC_DEF_MODIFIER = auto()
@@ -46,11 +50,6 @@ class Event(Enum):
     ON_CALC_DEF_TYPE_MODIFIER = auto()
     ON_CALC_DAMAGE_MODIFIER = auto()
     ON_CHECK_DEF_ABILITY = auto()
-
-
-class HandlerResult(Enum):
-    STOP_HANDLER = auto()
-    STOP_EVENT = auto()
 
 
 class Interrupt(Enum):
@@ -80,21 +79,21 @@ class Interrupt(Enum):
         return cls[f"EJECTPACK_ON_AFTER_MOVE_{idx}"]
 
 
+@dataclass
+class EventContext:
+    source: Pokemon
+    move: Move = None  # type: ignore
+    by_foe: bool = False
+
+
 @dataclass(frozen=True)
 class Handler:
     func: Callable
     priority: int = 0
     once: bool = False
 
-    def __lt__(self, other: Handler):
+    def __lt__(self, other):
         return self.priority > other.priority
-
-
-@dataclass
-class EventContext:
-    source: Pokemon
-    move: Move = None  # type: ignore
-    by_foe: bool = False
 
 
 class EventManager:
@@ -150,9 +149,9 @@ class EventManager:
 
     def emit(self,
              event: Event,
-             value: Any = 0,
+             value=None,
              ctx: EventContext | None = None,
-             ) -> Any:
+             ):
         """イベントを発火"""
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
             # 引数のコンテキストを優先し、指定がなければ登録されているsourceを参照する
@@ -163,32 +162,33 @@ class EventManager:
                 new_sources = []
                 for source in sources:
                     if isinstance(source, Player):
-                        poke = self.battle.active(source)
-                    if poke not in new_sources:
+                        source = self.battle.active(source)
+                    if source not in new_sources:
                         new_sources.append(source)
 
                 # 素早さ順に並び変える
                 if len(new_sources) > 1:
-                    speed_order = [self.battle.active(pl) for pl in self.battle.get_speed_order()]
-                    new_sources = [poke for poke in speed_order if speed_order in new_sources]
+                    order = self.battle.get_speed_order()
+                    new_sources = [p for p in order if p in new_sources]
 
-                ctxs = [EventContext(poke) for poke in new_sources]
+                ctxs = [EventContext(source) for source in new_sources]
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:
-                result = handler.func(self.battle, value, c)
+                out: HandlerOutput | None = handler.func(self.battle, value, c)
 
                 # 単発ハンドラなら削除
                 if handler.once:
                     self.off(event, handler, c.source)
 
-                match result:
-                    case HandlerResult.STOP_HANDLER:
-                        break
-                    case HandlerResult.STOP_EVENT:
-                        return value
-
-                # ハンドラに渡す value を更新
-                value = result
+                if isinstance(out, HandlerOutput):
+                    # value を更新
+                    value = out.value
+                    # フラグにしたがって処理を分岐
+                    match out.flag:
+                        case HandlerResultFlag.STOP_HANDLER:
+                            break
+                        case HandlerResultFlag.STOP_EVENT:
+                            return value
 
         return value

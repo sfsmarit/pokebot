@@ -1,14 +1,24 @@
 {
-    "seed": 1763989405,
+    "seed": 1765608262,
     "players": [
         {
             "name": "Player1",
             "selection_indexes": [
-                0
+                0,
+                1
             ],
             "commands": {
                 "1": [
-                    "MOVE_0"
+                    "TERASTAL_0"
+                ],
+                "2": [
+                    "SWITCH_1"
+                ],
+                "3": [
+                    "SWITCH_0"
+                ],
+                "4": [
+                    "TERASTAL_0"
                 ]
             },
             "team": [
@@ -20,7 +30,35 @@
                     "ability": "",
                     "item": "",
                     "moves": [
-                        "リフレクター"
+                        "たいあたり"
+                    ],
+                    "indiv": [
+                        31,
+                        31,
+                        31,
+                        31,
+                        31,
+                        31
+                    ],
+                    "effort": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "terastal": ""
+                },
+                {
+                    "name": "ピカチュウ",
+                    "gender": "NONE",
+                    "level": 50,
+                    "nature": "まじめ",
+                    "ability": "",
+                    "item": "",
+                    "moves": [
+                        "たいあたり"
                     ],
                     "indiv": [
                         31,
@@ -50,6 +88,15 @@
             "commands": {
                 "1": [
                     "MOVE_0"
+                ],
+                "2": [
+                    "MOVE_0"
+                ],
+                "3": [
+                    "MOVE_0"
+                ],
+                "4": [
+                    "TERASTAL_0"
                 ]
             },
             "team": [

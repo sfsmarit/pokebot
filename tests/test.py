@@ -1,6 +1,6 @@
-from copy import deepcopy
 from pokebot import Battle, Player, PokeDB
 from pokebot.utils.enums import Command
+import random
 
 
 class CustomPlayer(Player):
@@ -9,6 +9,8 @@ class CustomPlayer(Player):
 
     def choose_action_command(self, battle: Battle) -> Command:
         commands = battle.get_available_action_commands(self)
+        return random.choice(commands)
+        # return commands[0]
         '''
         copied, copied_player = battle.masked(self)
         copied.advance_turn(commands={copied_player: commands[-1]})
@@ -16,10 +18,11 @@ class CustomPlayer(Player):
         for player, log in copied.get_turn_logs().items():
             print(f"\t{player.name}\t{log}")
         '''
-        return commands[0] if battle.turn == 1 else commands[-1]
 
     def choose_switch_command(self, battle: Battle) -> Command:
         commands = battle.get_available_switch_commands(self)
+        return random.choice(commands)
+        # return commands[0]
         '''
         copied, copied_player = battle.masked(self)
         copied.advance_turn(commands={copied_player: commands[-1]})
@@ -27,15 +30,14 @@ class CustomPlayer(Player):
         for player, log in copied.get_turn_logs().items():
             print(f"\t{player.name}\t{log}")
         '''
-        return commands[0]
 
 
 # ---------------------------------------------------------------------
 
-names = ["リザードン"]
-abilities = [""]
-items = [""]
-move_list = [["リフレクター"]]
+names = ["リザードン", "ピカチュウ"]
+abilities = ["", ""]
+items = ["", ""]
+move_list = [["たいあたり"], ["たいあたり"]]
 
 player = CustomPlayer("Player1")
 for name, ability, item, moves in zip(names, abilities, items, move_list):
@@ -64,13 +66,13 @@ battle = Battle([player, rival])
 
 # ---------------------------------------------------------------------
 
-max_turn = 1
+max_turn = 4
 
 # ---------------------------------------------------------------------
 
 for pl in battle.players:
-    for poke in pl.team:
-        print(poke)
+    for mon in pl.team:
+        print(mon)
     print("-"*50)
 
 # ---------------------------------------------------------------------
@@ -99,8 +101,8 @@ print(f"{'='*50}\nReplay\n{'='*50}")
 battle = Battle.reconstruct_from_log("test.json")
 
 for pl in battle.players:
-    for poke in pl.team:
-        print(poke)
+    for mon in pl.team:
+        print(mon)
     print("-"*50)
 
 while 1:

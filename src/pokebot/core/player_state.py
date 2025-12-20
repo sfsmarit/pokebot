@@ -1,7 +1,7 @@
 from pokebot.utils import copy_utils as copyut
 from pokebot.utils.enums import Command
 
-from .events import Interrupt
+from .event import Interrupt
 
 
 class PlayerState:
@@ -14,7 +14,7 @@ class PlayerState:
         self.reset_turn()
 
     def reset_turn(self):
-        self.already_switched = False
+        self.has_switched = False
 
     def __deepcopy__(self, memo):
         cls = self.__class__

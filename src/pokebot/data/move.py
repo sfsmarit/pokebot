@@ -1,4 +1,4 @@
-from pokebot.core.events import Event, Handler
+from pokebot.core.event import Event, Handler
 from .models import MoveData
 from pokebot.handlers.move import on_hit, on_damage
 
@@ -5174,25 +5174,16 @@ MOVES: dict[str, MoveData] = {
         "accuracy": 0,
         "priority": 0
     },
-    "でんじほう": {
-        "type": "でんき",
-        "category": "特殊",
-        "pp": 5,
-        "power": 120,
-        "accuracy": 50,
-        "priority": 0,
-        "flags": [
-            "bullet"
-        ],
-        "effects": [
-            {
-                "trigger": "on_accuracy",
-                "target": "opponent",
-                "chance": 1,
-                "PAR": 1
-            }
-        ]
-    },
+    "でんじほう": MoveData(
+        type="でんき",
+        category="特殊",
+        pp=5,
+        power=120,
+        accuracy=50,
+        priority=0,
+        flags=["bullet"],
+        handlers={Event.ON_HIT: Handler(on_hit.でんじほう)},
+    ),
     "ときのほうこう": {
         "type": "ドラゴン",
         "category": "特殊",

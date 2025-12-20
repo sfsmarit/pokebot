@@ -1,4 +1,4 @@
-from typing import Self, Literal, TypedDict
+from typing import Self
 
 import time
 from random import Random
@@ -8,15 +8,16 @@ import json
 from pokebot.utils import copy_utils as copyut
 from pokebot.utils.enums import Command, Stat
 
-from pokebot.model import Pokemon, Move
+from pokebot.model import Pokemon, Move, Field
 
 from pokebot.player import Player
 
-from .events import Event, Interrupt, EventManager, EventContext
+from .event import Event, Interrupt, EventManager, EventContext
 from .player_state import PlayerState
 from .logger import Logger
 from .damage import DamageCalculator, DamageContext
-from .field import GlobalFieldManager, SideFieldManager
+from .global_field import GlobalFieldManager
+from .side_field import SideFieldManager
 from .pokedb import PokeDB
 
 
@@ -40,8 +41,8 @@ class Battle:
         self.damage_calculator: DamageCalculator = DamageCalculator()
 
         self.states: list[PlayerState] = [PlayerState() for _ in players]
-        self.field: GlobalFieldManager = GlobalFieldManager(self.events)
-        self.sides: list[SideFieldManager] = [SideFieldManager(self.events) for pl in self.players]
+        self.field: GlobalFieldManager = GlobalFieldManager(self.events, self.players)
+        self.sides: list[SideFieldManager] = [SideFieldManager(self.events, pl) for pl in self.players]
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -73,6 +74,14 @@ class Battle:
     def actives(self) -> list[Pokemon]:
         return [self.active(pl) for pl in self.players]
 
+    @property
+    def weather(self) -> Field:
+        return self.field.fields["weather"]
+
+    @property
+    def terrain(self) -> Field:
+        return self.field.fields["terrain"]
+
     def export_log(self, file):
         data = {
             "seed": self.seed,
@@ -84,7 +93,7 @@ class Battle:
                 "name": player.name,
                 "selection_indexes": state.selected_idxes,
                 "commands": {},
-                "team": [poke.dump() for poke in player.team],
+                "team": [mon.dump() for mon in player.team],
             })
 
         for log in self.logger.command_logs:
@@ -110,8 +119,8 @@ class Battle:
             state.selected_idxes = player_data["selection_indexes"]
 
             for p in player_data["team"]:
-                poke = PokeDB.reconstruct_pokemon_from_log(p)
-                player.team.append(poke)
+                mon = PokeDB.reconstruct_pokemon_from_log(p)
+                player.team.append(mon)
 
             for t, command_names in player_data["commands"].items():
                 for s in command_names:
@@ -129,8 +138,7 @@ class Battle:
     def active(self, player: Player) -> Pokemon:
         if (i := self.state(player).active_idx) is not None:
             return player.team[i]
-        else:
-            return None  # type: ignore
+        return None  # type: ignore
 
     def selected(self, player: Player) -> list[Pokemon]:
         return [player.team[i] for i in self.state(player).selected_idxes]
@@ -140,21 +148,21 @@ class Battle:
             state.reset_turn()
         self.turn += 1
 
-    def find_player(self, poke: Pokemon) -> Player:
+    def find_player(self, mon: Pokemon) -> Player:
         for player in self.players:
-            if poke in player.team:
+            if mon in player.team:
                 return player
         raise Exception("Player not found.")
 
-    def find_player_index(self, poke: Pokemon) -> int:
+    def find_player_index(self, mon: Pokemon) -> int:
         for i, player in enumerate(self.players):
-            if poke in player.team:
+            if mon in player.team:
                 return i
         raise Exception("Player not found.")
 
-    def team_idx(self, poke: Pokemon) -> int:
-        player = self.find_player(poke)
-        return player.team.index(poke)
+    def team_idx(self, mon: Pokemon) -> int:
+        player = self.find_player(mon)
+        return player.team.index(mon)
 
     def foe(self, active: Pokemon) -> Pokemon:
         actives = [self.active(pl) for pl in self.players]
@@ -164,15 +172,15 @@ class Battle:
         return self.players[not self.players.index(player)]
 
     def can_use_terastal(self, player: Player) -> bool:
-        return all(poke.can_terastallize() for poke in self.selected(player))
+        return all(mon.can_terastallize() for mon in self.selected(player))
 
     def get_available_selection_commands(self, player: Player) -> list[Command]:
         return Command.selection_commands()[:len(player.team)]
 
     def get_available_switch_commands(self, player: Player) -> list[Command]:
-        return [cmd for poke, cmd in zip(player.team, Command.switch_commands())
-                if poke in self.selected(player) and
-                poke is not self.active(player)]
+        return [cmd for mon, cmd in zip(player.team, Command.switch_commands())
+                if mon in self.selected(player) and
+                mon is not self.active(player)]
 
     def get_available_action_commands(self, player: Player) -> list[Command]:
         n = len(self.active(player).moves)
@@ -229,20 +237,52 @@ class Battle:
         for idx in self.to_player_idxes(source):
             self.logger.add_damage_log(self.turn, idx, text)
 
-    def get_speed_order(self) -> list[Player]:
-        # TODO get_speed_order
-        return self.players
+    def calc_effective_speed(self, mon: Pokemon) -> int:
+        return self.events.emit(Event.ON_CALC_SPEED, mon.S, EventContext(mon))  # type: ignore
 
-    def get_action_order(self) -> list[Player]:
-        # TODO get_action_order
-        return self.players
+    def get_speed_order(self) -> list[Pokemon]:
+        speeds = [self.calc_effective_speed(p) for p in self.actives]
+        if speeds[0] == speeds[1]:
+            actives = self.active.copy()
+            self.random.shuffle(actives)
+        else:
+            paired = sorted(zip(speeds, self.actives),
+                            key=lambda pair: pair[0], reverse=True)
+            _, actives = zip(*paired)
+        return actives
+
+    def get_action_order(self) -> list[Pokemon]:
+        actives, speeds = [], []
+        for i, mon in enumerate(self.actives):
+            if self.states[i].has_switched:
+                continue
+
+            mon = self.actives[i]
+            speed = self.calc_effective_speed(mon)
+
+            command = self.states[i].reserved_commands[-1]
+            move = self.command_to_move(self.players[i], command)
+            ctx = EventContext(mon, move)
+            action_speed = self.events.emit(Event.ON_CALC_ACTION_SPEED, 0, ctx)
+
+            total_speed = action_speed + speed*1e-5  # type: ignore
+            speeds.append(total_speed)
+            actives.append(mon)
+
+        # Sort by speed
+        if len(actives) > 1:
+            paired = sorted(zip(speeds, actives),
+                            key=lambda pair: pair[0], reverse=True)
+            _, actives = zip(*paired)
+
+        return actives
 
     def TOD_score(self, player: Player, alpha: float = 1):
         n_alive, total_max_hp, total_hp = 0, 0, 0
-        for poke in self.selected(player):
-            total_max_hp += poke.max_hp
-            total_hp += poke.hp
-            if poke.hp:
+        for mon in self.selected(player):
+            total_max_hp += mon.max_hp
+            total_hp += mon.hp
+            if mon.hp:
                 n_alive += 1
         return n_alive + alpha * total_hp / total_max_hp
 
@@ -266,51 +306,58 @@ class Battle:
                 commands = player.choose_selection_commands(self)
                 state.selected_idxes = [c.idx for c in commands]
 
-    def run_move(self, player: Player, move: Move):
-        source = self.active(player)
-        foe = self.foe(source)
+    def check_hit(self, source: Pokemon, move: Move) -> bool:
+        accuracy = self.events.emit(
+            Event.ON_CALC_ACCURACY,
+            move.data.accuracy,
+            EventContext(source, move),
+        )
+        return 100*self.random.random() < accuracy  # type: ignore
+
+    def run_move(self, mon: Pokemon, move: Move):
+        foe = self.foe(mon)
 
         # 技のハンドラを登録
-        move.register_handlers(self.events, source)
+        move.register_handlers(self.events, mon)
 
-        self.add_turn_log(player, f"{move.name}")
+        self.add_turn_log(mon, f"{move.name}")
 
         # 行動成功判定
-        self.events.emit(Event.ON_TRY_ACTION, ctx=EventContext(source))
+        self.events.emit(Event.ON_TRY_ACTION, ctx=EventContext(mon))
 
         # 発動成功判定
-        self.events.emit(Event.ON_TRY_MOVE, ctx=EventContext(source))
+        self.events.emit(Event.ON_TRY_MOVE, ctx=EventContext(mon))
 
-        source.field_status.executed_move = move
+        mon.field_status.executed_move = move
 
         # TODO 命中判定
-        pass
+        self.check_hit(mon, move)
 
         # 無効判定
-        self.events.emit(Event.ON_TRY_IMMUNE, ctx=EventContext(source))
+        self.events.emit(Event.ON_TRY_IMMUNE, ctx=EventContext(mon))
 
         # ダメージ計算
-        damage = self.calc_damage(source, move)
+        damage = self.calc_damage(mon, move)
 
         # HPコストの支払い
-        self.events.emit(Event.ON_PAY_HP, ctx=EventContext(source))
+        self.events.emit(Event.ON_PAY_HP, ctx=EventContext(mon))
 
         # ダメージ修正
-        damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(source))
+        damage = self.events.emit(Event.ON_MODIFY_DAMAGE, value=damage, ctx=EventContext(mon))
 
         if damage:
             # ダメージ付与
             self.modify_hp(foe, -damage)
 
-        self.events.emit(Event.ON_HIT, ctx=EventContext(source))
+        self.events.emit(Event.ON_HIT, ctx=EventContext(mon))
 
         # ダメージを与えたときの処理
         if damage:
-            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(source))
+            self.events.emit(Event.ON_DAMAGE, ctx=EventContext(mon))
 
-        move.unregister_handlers(self.events, source)
+        move.unregister_handlers(self.events, mon)
 
-    def get_move_from_command(self, player: Player, command: Command) -> Move:
+    def command_to_move(self, player: Player, command: Command) -> Move:
         if command == Command.STRUGGLE:
             return PokeDB.create_move("わるあがき")
         elif command.is_zmove():
@@ -359,7 +406,8 @@ class Battle:
         return any(state.interrupt != Interrupt.NONE for state in self.states)
 
     def override_interrupt(self, flag: Interrupt, only_first: bool = True):
-        for player in self.get_speed_order():
+        for mon in self.get_speed_order():
+            player = self.find_player(mon)
             if self.state(player).interrupt == Interrupt.REQUESTED:
                 self.state(player).interrupt = flag
                 if only_first:
@@ -392,7 +440,7 @@ class Battle:
                 self.run_interrupt_switch(flag)
 
         # その他の処理
-        self.state(player).already_switched = True
+        self.state(player).has_switched = True
 
     def run_initial_switch(self):
         # ポケモンを場に出す
@@ -430,10 +478,11 @@ class Battle:
 
         # 全員の着地処理を同時に実行
         if not emit_on_each_switch:
-            for player in self.get_speed_order():
+            for mon in self.get_speed_order():
+                player = self.find_player(mon)
                 if player in switched_players:
-                    self.events.emit(Event.ON_SWITCH_IN,
-                                     ctx=EventContext(self.active(player)))
+                    ctx = EventContext(mon)
+                    self.events.emit(Event.ON_SWITCH_IN, ctx=ctx)
 
     def run_faint_switch(self):
         '''
@@ -497,7 +546,7 @@ class Battle:
             return
 
         if not self.has_interrupt():
-            # コマンドが予約されていなければ、プレイヤーの方策関数に従う
+            # 予約されているコマンドがなければ、方策関数に従ってコマンドを予約する
             for player, state in zip(self.players, self.states):
                 if not state.reserved_commands:
                     self.reserve_command(player, player.choose_action_command(self))
@@ -505,19 +554,19 @@ class Battle:
             # 行動前の処理
             self.events.emit(Event.ON_BEFORE_ACTION)
 
-        # 行動: 交代
-        for player in self.get_action_order():
+        # 交代
+        for mon in self.get_speed_order():
             # 交代フラグ
-            idx = self.players.index(player)
+            idx = self.actives.index(mon)
             interrupt = Interrupt.ejectpack_on_switch(idx)
 
             if not self.has_interrupt():
-                if self.state(player).reserved_commands[0].is_switch():
-                    command = self.state(player).reserved_commands.pop(0)
+                state = self.states[idx]
+                if state.reserved_commands[0].is_switch():
+                    command = state.reserved_commands.pop(0)
+                    player = self.find_player(mon)
                     new = player.team[command.idx]
                     self.run_switch(player, new)
-                else:
-                    self.add_turn_log(player, self.active(player).name)
 
                 # だっしゅつパックによる割り込みフラグを更新
                 self.override_interrupt(interrupt)
@@ -528,21 +577,16 @@ class Battle:
         # 行動前の処理
         self.events.emit(Event.ON_BEFORE_MOVE)
 
-        # 行動順の決定
-        action_order = self.get_action_order()
-
-        # 行動: 技
-        for player in action_order:
-            # このターンに交代済みなら行動不可
-            if self.state(player).already_switched:
-                continue
+        # 技の使用
+        for mon in self.get_action_order():
+            player = self.find_player(mon)
+            self.add_turn_log(player, self.active(player).name)
 
             if not self.has_interrupt():
-                command = self.state(player).reserved_commands.pop(0)
-                move = self.get_move_from_command(player, command)
-
                 # 技の発動
-                self.run_move(player, move)
+                command = self.state(player).reserved_commands.pop(0)
+                move = self.command_to_move(player, command)
+                self.run_move(mon, move)
 
             # だっしゅつボタンによる交代
             self.run_interrupt_switch(Interrupt.EJECTBUTTON)
@@ -567,32 +611,32 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(interrupt)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (1)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_1)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (2)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_2)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (3)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_3)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 ()
+        # ターン終了時の処理 (4)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_4)
 
         # ききかいひによる交代
         self.run_interrupt_switch(Interrupt.EMERGENCY)
 
-        # ターン終了時の処理 (4)
+        # ターン終了時の処理 (5)
         if not self.has_interrupt():
             self.events.emit(Event.ON_TURN_END_5)
 

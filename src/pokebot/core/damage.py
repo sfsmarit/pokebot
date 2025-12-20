@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 from dataclasses import dataclass
 
-from .events import EventManager, Event, EventContext
+from .event import EventManager, Event, EventContext
 from pokebot.utils import copy_utils as copyut, math_utils as mathut
 from pokebot.utils.enums import Stat
 

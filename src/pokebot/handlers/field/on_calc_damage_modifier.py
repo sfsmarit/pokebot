@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pokebot.core.battle import Battle
 
-from pokebot.core.events import EventContext, HandlerResult
+from pokebot.core.event import EventContext, HandlerResultFlag
 
 
 def リフレクター(battle: Battle, value: Any, ctx: EventContext):

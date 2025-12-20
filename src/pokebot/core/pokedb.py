@@ -45,9 +45,9 @@ class PokeDB:
     @classmethod
     def create_pokemon(cls, name: str) -> Pokemon:
         name = name if name in cls.zukan else next(iter(cls.zukan))
-        poke = Pokemon(cls.zukan[name])
-        cls.init_kata(poke)
-        return poke
+        mon = Pokemon(cls.zukan[name])
+        cls.init_kata(mon)
+        return mon
 
     @classmethod
     def create_ability(cls, name: str) -> Ability:
@@ -65,20 +65,20 @@ class PokeDB:
         return Move(MOVES[name], pp)
 
     @classmethod
-    def init_kata(cls, poke: Pokemon):
-        poke.ability = cls.create_ability("")
-        poke.item = cls.create_item("")
+    def init_kata(cls, mon: Pokemon):
+        mon.ability = cls.create_ability("")
+        mon.item = cls.create_item("")
 
     @classmethod
     def reconstruct_pokemon_from_log(cls, data: dict) -> Pokemon:
-        poke = cls.create_pokemon(data["name"])
-        poke.gender = Gender[data["gender"]]
-        poke.level = data["level"]
-        poke.nature = data["nature"]
-        poke.ability = cls.create_ability(data["ability"])
-        poke.item = cls.create_item(data["item"])
-        poke.moves = [cls.create_move(s) for s in data["moves"]]
-        poke.indiv = data["indiv"]
-        poke.effort = data["effort"]
-        poke.terastal = data["terastal"]
-        return poke
+        mon = cls.create_pokemon(data["name"])
+        mon.gender = Gender[data["gender"]]
+        mon.level = data["level"]
+        mon.nature = data["nature"]
+        mon.ability = cls.create_ability(data["ability"])
+        mon.item = cls.create_item(data["item"])
+        mon.moves = [cls.create_move(s) for s in data["moves"]]
+        mon.indiv = data["indiv"]
+        mon.effort = data["effort"]
+        mon.terastal = data["terastal"]
+        return mon
