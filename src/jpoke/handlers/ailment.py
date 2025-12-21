@@ -4,8 +4,6 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.core.event import EventContext
 
-from jpoke.handlers import common
-
 
 def どく(battle: Battle, value: Any, ctx: EventContext):
     if battle.modify_hp(ctx.source, r=-1/8):

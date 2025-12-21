@@ -1,6 +1,7 @@
 from jpoke.core.event import Event, Handler
+from jpoke.utils.enums import Stat
 from .models import MoveData
-from jpoke.handlers.move import on_hit, on_damage
+from jpoke.handlers import common, move as hdl
 
 
 MOVES: dict[str, MoveData] = {
@@ -68,7 +69,8 @@ MOVES: dict[str, MoveData] = {
         power=100,
         accuracy=90,
         flags=["contact", "punch"],
-        handlers={Event.ON_HIT: Handler(on_hit.アームハンマー)}
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "self", Stat.S, -1))}
     ),
     "アイアンテール": {
         "type": "はがね",
@@ -2561,7 +2563,7 @@ MOVES: dict[str, MoveData] = {
         power=70,
         accuracy=100,
         flags=["contact"],
-        handlers={Event.ON_HIT: Handler(on_hit.とんぼがえり)}
+        handlers={Event.ON_HIT: Handler(hdl.pivot)}
     ),
     "なげつける": {
         "type": "あく",
@@ -3830,10 +3832,11 @@ MOVES: dict[str, MoveData] = {
     "わるあがき": MoveData(
         type="ステラ",
         category="物理",
-        pp=1e10,
+        pp=999,
         power=40,
         flags=["contact", "non_encore"],
-        handlers={Event.ON_HIT: Handler(on_hit.わるあがき)}
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.modify_hp(btl, val, ctx, "self", r=-1/4, log="反動"))}
     ),
     "１０まんボルト": {
         "type": "でんき",
@@ -5182,7 +5185,8 @@ MOVES: dict[str, MoveData] = {
         accuracy=50,
         priority=0,
         flags=["bullet"],
-        handlers={Event.ON_HIT: Handler(on_hit.でんじほう)},
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "foe", "まひ"))}
     ),
     "ときのほうこう": {
         "type": "ドラゴン",
@@ -7596,7 +7600,8 @@ MOVES: dict[str, MoveData] = {
             "ignore_substitute",
             "wind"
         ],
-        handlers={Event.ON_HIT: Handler(on_hit.すなあらし)},
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.apply_weather(btl, val, ctx, "すなあらし"))}
     ),
     "すなかけ": {
         "type": "じめん",
@@ -8024,7 +8029,8 @@ MOVES: dict[str, MoveData] = {
             "blocked_by_gold",
             "reflectable"
         ],
-        handlers={Event.ON_HIT: Handler(on_hit.どくどく)}
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "foe", "もうどく"))}
     ),
     "どくのいと": {
         "type": "どく",
@@ -8609,7 +8615,7 @@ MOVES: dict[str, MoveData] = {
             "reflectable",
             "wind",
         ],
-        handlers={Event.ON_HIT: Handler(on_hit.ふきとばし)}
+        handlers={Event.ON_HIT: Handler(hdl.blow)}
     ),
     "フラフラダンス": {
         "type": "ノーマル",
@@ -9059,7 +9065,8 @@ MOVES: dict[str, MoveData] = {
             "unprotectable",
             "ignore_substitute"
         ],
-        handlers={Event.ON_HIT: Handler(on_hit.リフレクター)}
+        handlers={Event.ON_HIT: Handler(
+            lambda btl, val, ctx: common.apply_side_field(btl, val, ctx, "self", "reflector", count=5, extended_count=8))}
     ),
     "リフレッシュ": {
         "type": "ノーマル",

@@ -1,6 +1,8 @@
 from jpoke.core.event import Event, Handler
+from jpoke.utils.enums import Stat
 from .models import AbilityData
-from jpoke.handlers.ability import after_stat_change, on_switch_in, on_trap
+from jpoke.handlers import common, ability as hdl
+
 
 ABILITIES: dict[str, AbilityData] = {
     "": AbilityData(name=""),
@@ -17,10 +19,11 @@ ABILITIES: dict[str, AbilityData] = {
     "あめうけざら": {},
     "あめふらし": {},
     "ありじごく": AbilityData(
-        handlers={Event.ON_CHECK_TRAP: Handler(on_trap.ありじごく)}
+        handlers={Event.ON_CHECK_TRAP: Handler(hdl.ありじごく)}
     ),
     "いかく": AbilityData(
-        handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.いかく, 4, True)}
+        handlers={Event.ON_SWITCH_IN: Handler(
+            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "foe", Stat.A, -1), 4, True)}
     ),
     "いかりのこうら": {},
     "いかりのつぼ": {
@@ -70,7 +73,7 @@ ABILITIES: dict[str, AbilityData] = {
     "かたやぶり": {},
     "かちき": AbilityData(
         flags=["undeniable"],
-        handlers={Event.ON_MODIFY_STAT: Handler(after_stat_change.かちき, 0)}
+        handlers={Event.ON_MODIFY_STAT: Handler(hdl.かちき, 0)}
     ),
     "かるわざ": {},
     "かわりもの": {
@@ -102,7 +105,7 @@ ABILITIES: dict[str, AbilityData] = {
     "きれあじ": {},
     "きんしのちから": {},
     "きんちょうかん": AbilityData(
-        handlers={Event.ON_SWITCH_IN: Handler(on_switch_in.きんちょうかん, 3)}
+        handlers={Event.ON_SWITCH_IN: Handler(hdl.きんちょうかん, 3)}
     ),
     "ぎたい": {
         "flags": [
@@ -225,7 +228,7 @@ ABILITIES: dict[str, AbilityData] = {
             "protected",
             "undeniable"
         ],
-        handlers={Event.ON_SWITCH_IN: on_switch_in.ぜったいねむり}
+        handlers={Event.ON_SWITCH_IN: lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "ねむり")}
     ),
     "そうしょく": {},
     "そうだいしょう": {},
@@ -499,9 +502,7 @@ ABILITIES: dict[str, AbilityData] = {
     },
     "クリアボディ": {},
     "グラスメイカー": AbilityData(
-        handlers={
-            Event.ON_SWITCH_IN: Handler(on_switch_in.グラスメイカー),
-        }
+        handlers={Event.ON_SWITCH_IN: Handler(lambda btl, val, ctx: common.apply_terrain(btl, val, ctx, "グラスフィールド"))}
     ),
     "サイコメイカー": {},
     "サンパワー": {},

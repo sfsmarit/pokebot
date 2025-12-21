@@ -34,10 +34,12 @@ class CustomPlayer(Player):
 
 # ---------------------------------------------------------------------
 
-names = ["リザードン", "ピカチュウ"]
-abilities = ["", ""]
-items = ["", ""]
-move_list = [["たいあたり"], ["たいあたり"]]
+max_turn = 4
+
+names = ["リザードン"]
+abilities = ["いかく"]
+items = [""]
+move_list = [["たいあたり"]]
 
 player = CustomPlayer("Player1")
 for name, ability, item, moves in zip(names, abilities, items, move_list):
@@ -46,7 +48,6 @@ for name, ability, item, moves in zip(names, abilities, items, move_list):
     player.team[-1].item = PokeDB.create_item(item)
     player.team[-1].moves = [PokeDB.create_move(s) for s in moves]
 
-# ---------------------------------------------------------------------
 
 names = ["フシギバナ"]
 abilities = [""]
@@ -63,12 +64,6 @@ for name, ability, item, moves in zip(names, abilities, items, move_list):
 # ---------------------------------------------------------------------
 
 battle = Battle([player, rival])
-
-# ---------------------------------------------------------------------
-
-max_turn = 4
-
-# ---------------------------------------------------------------------
 
 for pl in battle.players:
     for mon in pl.team:

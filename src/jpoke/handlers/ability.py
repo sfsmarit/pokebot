@@ -4,6 +4,18 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
 from jpoke.core.event import EventContext
+from jpoke.utils.enums import Stat
+
+
+def かちき(battle: Battle, value: Any, ctx: EventContext):
+    if value < 0 and ctx.by_foe and \
+            battle.modify_stat(ctx.source, Stat.C, +2):
+        battle.add_turn_log(ctx.source, ctx.source.ability.name)
+
+
+def きんちょうかん(battle: Battle, value: Any, ctx: EventContext):
+    battle.foe(ctx.source).field_status.nervous = True
+    battle.add_turn_log(ctx.source, ctx.source.ability.name)
 
 
 def ありじごく(battle: Battle, value: Any, ctx: EventContext):

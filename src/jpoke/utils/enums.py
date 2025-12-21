@@ -20,17 +20,25 @@ class BaseEnum(Enum):
 
 
 class Stat(BaseEnum):
-    H = ("H", 0, "HP", "HP")
-    A = ("A", 1, "こうげき", "攻撃")
-    B = ("B", 2, "ぼうぎょ", "防御")
-    C = ("C", 3, "とくこう", "特攻")
-    D = ("D", 4, "とくぼう", "特防")
-    S = ("S", 5, "すばやさ", "素早さ")
-    ACC = ("命中", 6, "めいちゅう", "命中")
-    EVA = ("回避", 7, "かいひ", "回避")
+    H = ("HP", "HP")
+    A = ("こうげき", "攻撃")
+    B = ("ぼうぎょ", "防御")
+    C = ("とくこう", "特攻")
+    D = ("とくぼう", "特防")
+    S = ("すばやさ", "素早さ")
+    ACC = ("めいちゅう", "命中")
+    EVA = ("かいひ", "回避")
 
     @property
     def idx(self) -> int:
+        return list(Stat).index(self)
+
+    @property
+    def hiragana(self) -> str:
+        return self.value[0]
+
+    @property
+    def kanji(self) -> str:
         return self.value[1]
 
 

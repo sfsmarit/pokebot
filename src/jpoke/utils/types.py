@@ -1,13 +1,14 @@
 from typing import Literal
 
 
-GLOBAL_FIELDS = Literal["weather", "terrain", "gravity", "trickroom"]
+AILMENT = Literal["", "どく", "もうどく", "まひ", "やけど", "ねむり", "こおり"]
 
-SIDE_FIELDS = Literal["reflector", "lightwall", "shinpi", "whitemist",
-                      "oikaze", "wish",
-                      "makibishi", "dokubishi", "stealthrock", "nebanet"]
+GLOBAL_FIELD = Literal["weather", "terrain", "gravity", "trickroom"]
 
-WEATHERS = Literal["はれ", "あめ", "ゆき", "すなあらし"]
+SIDE_FIELD = Literal["reflector", "lightwall", "shinpi", "whitemist",
+                     "oikaze", "wish",
+                     "makibishi", "dokubishi", "stealthrock", "nebanet"]
 
-TERRAINS = Literal["エレキフィールド", "グラスフィールド",
-                   "サイコフィールド", "ミストフィールド"]
+WEATHER = Literal["はれ", "あめ", "ゆき", "すなあらし"]
+
+TERRAIN = Literal["エレキフィールド", "グラスフィールド", "サイコフィールド", "ミストフィールド"]
