@@ -6,7 +6,6 @@ from .move import Move
 class FieldStatus:
     def __init__(self) -> None:
         self.choice_locked: bool = False
-        self.nervous: bool = False
         self.hidden: bool = False
         self.lockon: bool = False
         self.active_turn: int = 0
@@ -21,8 +20,6 @@ class FieldStatus:
         self.lost_types: list[str] = []
         self.executed_move: Move | None = None
         self.expended_moves: list[Move] = []
-
-        self._trapped: bool = False
 
     def __deepcopy__(self, memo):
         cls = self.__class__

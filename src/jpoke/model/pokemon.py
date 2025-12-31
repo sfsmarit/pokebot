@@ -5,6 +5,7 @@ if TYPE_CHECKING:
 
 from typing import Literal
 
+from jpoke.utils.types import MOVE_CATEGORY
 from jpoke.utils.enums import Gender, Stat
 from jpoke.utils.constants import NATURE_MODIFIER
 import jpoke.utils.copy_utils as copyut
@@ -300,19 +301,13 @@ class Pokemon:
         return False
 
     def trapped(self, events: EventManager) -> bool:
-        self.field_status._trapped = False
-        # self.field_status._trapped |= self.field_status.count[Condition.SWITCH_BLOCK] > 0
-        # self.field_status._trapped |= self.field_status.count[Condition.BIND] > 0
-        events.emit(Event.ON_CHECK_TRAP)
-        self.field_status._trapped &= "ゴースト" not in self.types
-        return self.field_status._trapped
+        trapped = events.emit(Event.ON_CHECK_TRAP, EventContext(self), value=False)
+        trapped &= "ゴースト" not in self.types  # type: ignore
+        return trapped
 
     def effective_move_type(self, move: Move, events: EventManager) -> str:
-        events.emit(Event.ON_CHECK_MOVE_TYPE,
-                    ctx=EventContext(self, move))
+        events.emit(Event.ON_CHECK_MOVE_TYPE, EventContext(self, move))
         return move._type
 
-    def effective_move_category(self, move: Move, events: EventManager) -> Literal["物理", "特殊", "変化"]:
-        events.emit(Event.ON_CHECK_MOVE_CATEGORY,
-                    ctx=EventContext(self, move))
-        return move.category
+    def effective_move_category(self, move: Move, events: EventManager) -> MOVE_CATEGORY:
+        return events.emit(Event.ON_CHECK_MOVE_CATEGORY, EventContext(self, move), value=move.category)

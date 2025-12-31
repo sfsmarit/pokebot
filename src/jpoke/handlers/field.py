@@ -4,30 +4,21 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
 from jpoke.utils.types import GLOBAL_FIELD, SIDE_FIELD
-from jpoke.core.event import EventContext, HandlerResultFlag
+from jpoke.core.event import EventContext, HandlerResult
 
 
-def リフレクター(battle: Battle, value: Any, ctx: EventContext):
-    def_player = battle.rival(battle.find_player(ctx.source))
-    r = 1
-    if battle.side(def_player).fields["reflector"].count and ctx.move.category == "物理":
-        r = 0.5
-        battle.add_damage_log(ctx.source, f"リフレクター x{r}")
-    return value * r
-
-
-def reduce_global_field_count(battle: Battle, value: Any, ctx: EventContext,
+def reduce_global_field_count(battle: Battle, ctx: EventContext, value: Any,
                               name: GLOBAL_FIELD):
-    if battle.field.reduce_count(battle.events, name):
+    if battle.field.reduce_count(name):
         field = battle.field.fields[name]
         battle.add_turn_log(None, f"{field.name} 残り{field.count}ターン")
-    return HandlerResultFlag.STOP_HANDLER
+    return HandlerResult.STOP_HANDLER
 
 
-def reduce_side_field_count(battle: Battle, value: Any, ctx: EventContext,
+def reduce_side_field_count(battle: Battle, ctx: EventContext, value: Any,
                             name: SIDE_FIELD):
     player = battle.find_player(ctx.source)
     side = battle.side(player)
-    if side.reduce_count(battle.events, name):
+    if side.reduce_count(name):
         field = side.fields[name]
         battle.add_turn_log(None, f"{field.name} 残り{field.count}ターン")

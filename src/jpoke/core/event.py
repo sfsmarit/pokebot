@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.model.pokemon import Pokemon
@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 from jpoke.utils import copy_utils as copyut
-from jpoke.handlers import HandlerOutput, HandlerResultFlag
 from jpoke.player import Player
 
 
@@ -37,6 +36,7 @@ class Event(Enum):
     ON_MODIFY_STAT = auto()
     ON_END = auto()
     ON_CHECK_TRAP = auto()
+    ON_CHECK_NERVOUS = auto()
     ON_CHECK_MOVE_TYPE = auto()
     ON_CHECK_MOVE_CATEGORY = auto()
 
@@ -96,6 +96,12 @@ class Handler:
         return self.priority > other.priority
 
 
+class HandlerResult(Enum):
+    NONE = None
+    STOP_HANDLER = auto()
+    STOP_EVENT = auto()
+
+
 class EventManager:
     def __init__(self, battle: Battle) -> None:
         self.battle = battle
@@ -147,11 +153,7 @@ class EventManager:
             if not self.handlers[event][handler]:
                 del self.handlers[event][handler]
 
-    def emit(self,
-             event: Event,
-             value=None,
-             ctx: EventContext | None = None,
-             ):
+    def emit(self, event: Event, ctx: EventContext | None = None, value: Any = None) -> Any:
         """イベントを発火"""
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
             # 引数のコンテキストを優先し、指定がなければ登録されているsourceを参照する
@@ -175,20 +177,23 @@ class EventManager:
 
             # すべての source に対してハンドラを実行する
             for c in ctxs:
-                out: HandlerOutput | None = handler.func(self.battle, value, c)
+                res = handler.func(self.battle, c, value)
 
-                # 単発ハンドラなら削除
+                # 単発ハンドラの削除
                 if handler.once:
                     self.off(event, handler, c.source)
 
-                if isinstance(out, HandlerOutput):
-                    # value を更新
-                    value = out.value
-                    # フラグにしたがって処理を分岐
-                    match out.flag:
-                        case HandlerResultFlag.STOP_HANDLER:
-                            break
-                        case HandlerResultFlag.STOP_EVENT:
-                            return value
+                if isinstance(res, HandlerResult):
+                    flag = res
+                elif isinstance(res, tuple):
+                    value, flag = res
+                else:
+                    value, flag = res, None
+
+                match flag:
+                    case HandlerResult.STOP_HANDLER:
+                        break
+                    case HandlerResult.STOP_EVENT:
+                        return value
 
         return value

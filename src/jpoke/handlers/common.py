@@ -9,7 +9,7 @@ from jpoke.utils.enums import Stat
 from jpoke.utils.types import AILMENT, WEATHER, TERRAIN, SIDE_FIELD
 
 
-def modify_hp(battle: Battle, value: Any, ctx: EventContext,
+def modify_hp(battle: Battle, ctx: EventContext, value: Any,
               target: Literal["self", "foe"], v: int = 0, r: float = 0,
               prob: float = 1, log: str = ""):
     if prob < 1 and battle.random.random() >= prob:
@@ -19,7 +19,7 @@ def modify_hp(battle: Battle, value: Any, ctx: EventContext,
         battle.add_turn_log(mon, log)
 
 
-def modify_stat(battle: Battle, value: Any, ctx: EventContext,
+def modify_stat(battle: Battle, ctx: EventContext, value: Any,
                 target: Literal["self", "foe"], stat: Stat, v: int,
                 prob: float = 1):
     if prob < 1 and battle.random.random() >= prob:
@@ -30,7 +30,7 @@ def modify_stat(battle: Battle, value: Any, ctx: EventContext,
         battle.add_turn_log(ctx.source, ctx.source.ability.name)
 
 
-def apply_ailment(battle: Battle, value: Any, ctx: EventContext,
+def apply_ailment(battle: Battle, ctx: EventContext, value: Any,
                   target: Literal["self", "foe"], ailment: AILMENT,
                   prob: float = 1):
     if prob < 1 and battle.random.random() >= prob:
@@ -44,21 +44,21 @@ def apply_ailment(battle: Battle, value: Any, ctx: EventContext,
             battle.add_turn_log(mon, ailment)
 
 
-def apply_weather(battle: Battle, value: Any, ctx: EventContext,
+def apply_weather(battle: Battle, ctx: EventContext, value: Any,
                   name: WEATHER):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
     if battle.field.activate_weather(name, count):
         battle.add_turn_log(ctx.source, f"{battle.weather.name} {battle.weather.count}ターン")
 
 
-def apply_terrain(battle: Battle, value: Any, ctx: EventContext,
+def apply_terrain(battle: Battle, ctx: EventContext, value: Any,
                   name: TERRAIN):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
     if battle.field.activate_terrain(name, count):
         battle.add_turn_log(ctx.source, f"{battle.terrain.name} {battle.terrain.count}ターン")
 
 
-def apply_side_field(battle: Battle, value: Any, ctx: EventContext,
+def apply_side_field(battle: Battle, ctx: EventContext, value: Any,
                      target: Literal["self", "foe"], name: SIDE_FIELD,
                      count: int = 1, extended_count: int | None = None):
     mon = ctx.source if target == "self" else battle.foe(ctx.source)

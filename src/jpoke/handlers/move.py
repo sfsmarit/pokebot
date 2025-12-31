@@ -6,13 +6,13 @@ if TYPE_CHECKING:
 from jpoke.core.event import EventContext, Interrupt
 
 
-def pivot(battle: Battle, value: Any, ctx: EventContext):
+def pivot(battle: Battle, ctx: EventContext, value: Any):
     player = battle.find_player(ctx.source)
     if battle.get_available_switch_commands(player):
         battle.state(player).interrupt = Interrupt.PIVOT
 
 
-def blow(battle: Battle, value: Any, ctx: EventContext):
+def blow(battle: Battle, ctx: EventContext, value: Any):
     player = battle.find_player(ctx.source)
     rival = battle.rival(player)
     commands = battle.get_available_switch_commands(rival)

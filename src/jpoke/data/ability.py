@@ -105,7 +105,10 @@ ABILITIES: dict[str, AbilityData] = {
     "きれあじ": {},
     "きんしのちから": {},
     "きんちょうかん": AbilityData(
-        handlers={Event.ON_SWITCH_IN: Handler(hdl.きんちょうかん, 3)}
+        handlers={
+            Event.ON_SWITCH_IN: Handler(hdl.notify),
+            Event.ON_CHECK_NERVOUS: Handler(lambda: hdl.check_foe("きんちょうかん")),
+        }
     ),
     "ぎたい": {
         "flags": [

@@ -1,6 +1,8 @@
 from typing import Literal
 
 
+MOVE_CATEGORY = Literal["物理", "特殊", "変化"]
+
 AILMENT = Literal["", "どく", "もうどく", "まひ", "やけど", "ねむり", "こおり"]
 
 GLOBAL_FIELD = Literal["weather", "terrain", "gravity", "trickroom"]

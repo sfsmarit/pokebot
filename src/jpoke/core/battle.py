@@ -238,7 +238,7 @@ class Battle:
             self.logger.add_damage_log(self.turn, idx, text)
 
     def calc_effective_speed(self, mon: Pokemon) -> int:
-        return self.events.emit(Event.ON_CALC_SPEED, mon.S, EventContext(mon))  # type: ignore
+        return self.events.emit(Event.ON_CALC_SPEED, EventContext(mon), mon.S)
 
     def get_speed_order(self) -> list[Pokemon]:
         speeds = [self.calc_effective_speed(p) for p in self.actives]
