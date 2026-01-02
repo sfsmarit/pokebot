@@ -1,6 +1,8 @@
 from typing import Literal
 
 
+STAT = Literal["H", "A", "B", "C", "D", "S", "ACC", "EVA"]
+
 MOVE_CATEGORY = Literal["物理", "特殊", "変化"]
 
 AILMENT = Literal["", "どく", "もうどく", "まひ", "やけど", "ねむり", "こおり"]

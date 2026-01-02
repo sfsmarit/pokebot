@@ -19,11 +19,11 @@ ABILITIES: dict[str, AbilityData] = {
     "あめうけざら": {},
     "あめふらし": {},
     "ありじごく": AbilityData(
-        handlers={Event.ON_CHECK_TRAP: Handler(hdl.ありじごく)}
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.ありじごく, emitted_by_foe=True)}
     ),
     "いかく": AbilityData(
         handlers={Event.ON_SWITCH_IN: Handler(
-            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "foe", Stat.A, -1), 4, True)}
+            lambda b, c, v: hdl.reveal_ability(b, c, v) and common.modify_stat(b, c, v, "foe", Stat.A, -1), 4)}
     ),
     "いかりのこうら": {},
     "いかりのつぼ": {
@@ -66,7 +66,9 @@ ABILITIES: dict[str, AbilityData] = {
             "unreproducible"
         ]
     },
-    "かげふみ": {},
+    "かげふみ": AbilityData(
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.かげふみ, emitted_by_foe=True)}
+    ),
     "かぜのり": {},
     "かそく": {},
     "かたいツメ": {},
@@ -106,8 +108,9 @@ ABILITIES: dict[str, AbilityData] = {
     "きんしのちから": {},
     "きんちょうかん": AbilityData(
         handlers={
-            Event.ON_SWITCH_IN: Handler(hdl.notify),
-            Event.ON_CHECK_NERVOUS: Handler(lambda: hdl.check_foe("きんちょうかん")),
+            Event.ON_SWITCH_IN: Handler(hdl.reveal_ability),
+            Event.ON_CHECK_NERVOUS: Handler(
+                lambda b, c, v: hdl.check_ability(b, c, v, "きんちょうかん", "foe"), emitted_by_foe=True),
         }
     ),
     "ぎたい": {
@@ -196,7 +199,9 @@ ABILITIES: dict[str, AbilityData] = {
         ]
     },
     "じょおうのいげん": {},
-    "じりょく": {},
+    "じりょく": AbilityData(
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.じりょく, emitted_by_foe=True)}
+    ),
     "じんばいったい": {
         "flags": [
             "unreproducible",
@@ -231,7 +236,10 @@ ABILITIES: dict[str, AbilityData] = {
             "protected",
             "undeniable"
         ],
-        handlers={Event.ON_SWITCH_IN: lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "ねむり")}
+        handlers={
+            Event.ON_SWITCH_IN: Handler(
+                lambda b, c, v: hdl.reveal_ability(b, c, v) and common.apply_ailment(b, c, v, "self", "ねむり"))
+        }
     ),
     "そうしょく": {},
     "そうだいしょう": {},
@@ -505,7 +513,8 @@ ABILITIES: dict[str, AbilityData] = {
     },
     "クリアボディ": {},
     "グラスメイカー": AbilityData(
-        handlers={Event.ON_SWITCH_IN: Handler(lambda btl, val, ctx: common.apply_terrain(btl, val, ctx, "グラスフィールド"))}
+        handlers={Event.ON_SWITCH_IN: Handler(
+            lambda b, c, v: common.apply_terrain(b, c, v, "グラスフィールド") and hdl.reveal_ability(b, c, v))}
     ),
     "サイコメイカー": {},
     "サンパワー": {},

@@ -96,7 +96,7 @@ ITEMS: dict[str, ItemData] = {
     "きれいなぬけがら": ItemData(
         consumable=False,
         throw_power=10,
-        handlers={Event.ON_CHECK_TRAP: Handler(
+        handlers={Event.ON_CHECK_TRAPPED: Handler(
             lambda btl, val, ctx: (False, HandlerResult.STOP_EVENT), -100)}
     ),
     "ぎんのこな": {
@@ -230,12 +230,12 @@ ITEMS: dict[str, ItemData] = {
     "だっしゅつパック": ItemData(
         consumable=True,
         throw_power=50,
-        handlers={Event.ON_MODIFY_STAT: Handler(on_modify_stat.だっしゅつパック)}
+        handlers={Event.ON_MODIFY_STAT: Handler(hdl.だっしゅつパック)}
     ),
     "だっしゅつボタン": ItemData(
         consumable=True,
         throw_power=30,
-        handlers={Event.ON_DAMAGE: Handler(item.だっしゅつボタン)}
+        handlers={Event.ON_DAMAGE: Handler(hdl.だっしゅつボタン)}
     ),
     "たつじんのおび": {
         "consumable": False,

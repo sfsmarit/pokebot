@@ -11,4 +11,8 @@ AILMENTS: dict[str, AilmentData] = {
     "もうどく": AilmentData(
         handlers={Event.ON_TURN_END_4: Handler(hdl.もうどく)},
     ),
+    "まひ": AilmentData(),
+    "やけど": AilmentData(),
+    "ねむり": AilmentData(),
+    "こおり": AilmentData(),
 }

@@ -9066,7 +9066,8 @@ MOVES: dict[str, MoveData] = {
             "ignore_substitute"
         ],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.apply_side_field(btl, val, ctx, "self", "reflector", count=5, extended_count=8))}
+            lambda btl, val, ctx: common.apply_side_field(
+                btl, val, ctx, "self", "reflector", count=5, extended_count=8))}
     ),
     "リフレッシュ": {
         "type": "ノーマル",

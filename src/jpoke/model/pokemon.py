@@ -43,7 +43,7 @@ class Pokemon:
         self._effort: list[int] = [0]*6
         self._stats: list[int] = [100]*6
         self._terastal: str = ""
-        self.is_terastallized: bool = False
+        self.terastallized: bool = False
 
         self.sleep_count: int
         self.ailment: Ailment = Ailment(self)
@@ -164,18 +164,18 @@ class Pokemon:
 
     @property
     def terastal(self) -> str | None:
-        return self._terastal if self.is_terastallized else None
+        return self._terastal if self.terastallized else None
 
     @terastal.setter
     def terastal(self, type: str):
         self._terastal = type
 
     def can_terastallize(self) -> bool:
-        return not self.is_terastallized and self._terastal is not None
+        return not self.terastallized and self._terastal is not None
 
     def terastallize(self) -> bool:
-        self.is_terastallized = self.can_terastallize()
-        return self.is_terastallized
+        self.terastallized = self.can_terastallize()
+        return self.terastallized
 
     @property
     def stats(self) -> list[int]:
@@ -298,12 +298,17 @@ class Pokemon:
         return self.find_move(move) is not None
 
     def floating(self, events: EventManager) -> bool:
-        return False
+        floating = "ひこう" in self.types
+        floating &= events.emit(Event.ON_CHECK_FLOATING, EventContext(self), floating)
+        return floating
 
     def trapped(self, events: EventManager) -> bool:
-        trapped = events.emit(Event.ON_CHECK_TRAP, EventContext(self), value=False)
+        trapped = events.emit(Event.ON_CHECK_TRAPPED, EventContext(self), False)
         trapped &= "ゴースト" not in self.types  # type: ignore
         return trapped
+
+    def nervous(self, events: EventManager) -> bool:
+        return events.emit(Event.ON_CHECK_NERVOUS, EventContext(self), False)
 
     def effective_move_type(self, move: Move, events: EventManager) -> str:
         events.emit(Event.ON_CHECK_MOVE_TYPE, EventContext(self, move))

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.model.pokemon import Pokemon
@@ -35,7 +35,9 @@ class Event(Enum):
     ON_TURN_END_6 = auto()
     ON_MODIFY_STAT = auto()
     ON_END = auto()
-    ON_CHECK_TRAP = auto()
+
+    ON_CHECK_FLOATING = auto()
+    ON_CHECK_TRAPPED = auto()
     ON_CHECK_NERVOUS = auto()
     ON_CHECK_MOVE_TYPE = auto()
     ON_CHECK_MOVE_CATEGORY = auto()
@@ -48,7 +50,8 @@ class Event(Enum):
     ON_CALC_DEF_MODIFIER = auto()
     ON_CALC_ATK_TYPE_MODIFIER = auto()
     ON_CALC_DEF_TYPE_MODIFIER = auto()
-    ON_CALC_DAMAGE_MODIFIER = auto()
+    ON_CALC_DAMAGE_MODIFIER_BY_ATK = auto()
+    ON_CALC_DAMAGE_MODIFIER_BY_DEF = auto()
     ON_CHECK_DEF_ABILITY = auto()
 
 
@@ -90,6 +93,7 @@ class EventContext:
 class Handler:
     func: Callable
     priority: int = 0
+    emitted_by_foe: bool = False
     once: bool = False
 
     def __lt__(self, other):
@@ -156,11 +160,15 @@ class EventManager:
     def emit(self, event: Event, ctx: EventContext | None = None, value: Any = None) -> Any:
         """イベントを発火"""
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
-            # 引数のコンテキストを優先し、指定がなければ登録されているsourceを参照する
             if ctx:
-                ctxs = [ctx]
+                # 引数のコンテキストに合致するハンドラがあるか検証する
+                if (not handler.emitted_by_foe and ctx.source in sources) or \
+                        (handler.emitted_by_foe and any(ctx.source is not mon for mon in sources)):
+                    ctxs = [ctx]
+                else:
+                    continue
             else:
-                # sources: list[Pokemon | Player] の全要素を場のポケモンに置き換える
+                # 引数のコンテキストに指定がなければ、登録されている source からコンテキストを生成する
                 new_sources = []
                 for source in sources:
                     if isinstance(source, Player):
@@ -170,7 +178,7 @@ class EventManager:
 
                 # 素早さ順に並び変える
                 if len(new_sources) > 1:
-                    order = self.battle.get_speed_order()
+                    order = self.battle.calc_speed_order()
                     new_sources = [p for p in order if p in new_sources]
 
                 ctxs = [EventContext(source) for source in new_sources]
