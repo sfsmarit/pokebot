@@ -4,7 +4,8 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.model import Pokemon
 
-from jpoke.core.event import EventContext, HandlerResult, Interrupt
+from jpoke.utils.enums import Interrupt
+from jpoke.core.event import EventContext, HandlerResult
 from . import common
 
 
@@ -29,10 +30,11 @@ def だっしゅつボタン(battle: Battle, ctx: EventContext, value: Any):
     target = battle.foe(ctx.source)
     if target.item == "だっしゅつボタン":
         player = battle.find_player(target)
-        battle.state(player).interrupt = Interrupt.EJECTBUTTON
+        player.interrupt = Interrupt.EJECTBUTTON
 
 
 def だっしゅつパック(battle: Battle, ctx: EventContext, value: Any):
     player = battle.find_player(ctx.source)
-    if battle.get_available_switch_commands(player):
-        battle.state(player).interrupt = Interrupt.REQUESTED
+    if value < 0 and battle.get_available_switch_commands(player):
+        player.interrupt = Interrupt.REQUESTED
+        reveal_item(battle, ctx, value)

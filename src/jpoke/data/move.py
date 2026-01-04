@@ -69,7 +69,7 @@ MOVES: dict[str, MoveData] = {
         accuracy=90,
         flags=["contact", "punch"],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "self", "S", -1))}
+            lambda b, c, v: common.modify_stat(b, c, v, "self", "S", -1))}
     ),
     "アイアンテール": {
         "type": "はがね",
@@ -3835,7 +3835,7 @@ MOVES: dict[str, MoveData] = {
         power=40,
         flags=["contact", "non_encore"],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.modify_hp(btl, val, ctx, "self", r=-1/4))}
+            lambda b, c, v: common.modify_hp(b, c, v, "self", r=-1/4))}
     ),
     "１０まんボルト": {
         "type": "でんき",
@@ -5185,7 +5185,7 @@ MOVES: dict[str, MoveData] = {
         priority=0,
         flags=["bullet"],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "foe", "まひ"))}
+            lambda b, c, v: common.apply_ailment(b, c, v, "foe", "まひ"))}
     ),
     "ときのほうこう": {
         "type": "ドラゴン",
@@ -7600,7 +7600,7 @@ MOVES: dict[str, MoveData] = {
             "wind"
         ],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.apply_weather(btl, val, ctx, "すなあらし"))}
+            lambda b, c, v: common.apply_weather(b, c, v, "すなあらし"))}
     ),
     "すなかけ": {
         "type": "じめん",
@@ -7849,18 +7849,17 @@ MOVES: dict[str, MoveData] = {
             "ignore_substitute"
         ]
     },
-    "つるぎのまい": {
-        "type": "ノーマル",
-        "category": "変化",
-        "pp": 20,
-        "power": 0,
-        "accuracy": 0,
-        "priority": 0,
-        "flags": [
+    "つるぎのまい": MoveData(
+        type="ノーマル",
+        category="変化",
+        pp=20,
+        flags=[
             "unprotectable",
             "ignore_substitute"
-        ]
-    },
+        ],
+        handlers={Event.ON_HIT: Handler(
+            lambda b, c, v: common.modify_stat(b, c, v, "self", "A", +2))}
+    ),
     "テクスチャー": {
         "type": "ノーマル",
         "category": "変化",
@@ -8029,7 +8028,7 @@ MOVES: dict[str, MoveData] = {
             "reflectable"
         ],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.apply_ailment(btl, val, ctx, "foe", "もうどく"))}
+            lambda b, c, v: common.apply_ailment(b, c, v, "foe", "もうどく"))}
     ),
     "どくのいと": {
         "type": "どく",
@@ -9065,8 +9064,8 @@ MOVES: dict[str, MoveData] = {
             "ignore_substitute"
         ],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.apply_side_field(
-                btl, val, ctx, "self", "reflector", count=5, extended_count=8))}
+            lambda b, c, v: common.apply_side_field(
+                b, c, v, "self", "reflector", count=5, extended_count=8))}
     ),
     "リフレッシュ": {
         "type": "ノーマル",

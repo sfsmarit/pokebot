@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
-from jpoke.core.event import EventContext, Interrupt
+from jpoke.utils.enums import Interrupt
+from jpoke.core.event import EventContext
 
 
 def pivot(battle: Battle, ctx: EventContext, value: Any):
     player = battle.find_player(ctx.source)
     if battle.get_available_switch_commands(player):
-        battle.state(player).interrupt = Interrupt.PIVOT
+        player.interrupt = Interrupt.PIVOT
 
 
 def blow(battle: Battle, ctx: EventContext, value: Any):

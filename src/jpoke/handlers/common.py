@@ -21,7 +21,7 @@ def reveal(
             target = mon.item
         case "move":
             target = ctx.move
-    target.observed = True
+    target.revealed = True
     battle.add_turn_log(ctx.source, target.name)
     return True
 

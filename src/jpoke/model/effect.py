@@ -10,7 +10,7 @@ class BaseEffect:
     def __init__(self, data) -> None:
         self.data = data
         self.active: bool = True
-        self.observed: bool = False
+        self.revealed: bool = False
 
     @property
     def name(self) -> str:

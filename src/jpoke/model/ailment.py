@@ -15,7 +15,7 @@ class Ailment(BaseEffect):
     def __init__(self, owner: Pokemon, name: AilmentName = "") -> None:
         self.owner: Pokemon = owner
         self.init(name)
-        self.observed = True
+        self.revealed = True
 
     def init(self, name: str):
         super().__init__(AILMENTS[name])

@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime
 
-from . import str_utils as strut
+from . import text as strut
 
 
 def today() -> str:

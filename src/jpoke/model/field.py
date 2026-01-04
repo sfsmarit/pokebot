@@ -18,7 +18,7 @@ class Field(BaseEffect):
     def init(self, name: str, count: int):
         super().__init__(FIELDS[name])
         self.count = count
-        self.observed = True
+        self.revealed = True
         self.data: FieldData
 
     def __deepcopy__(self, memo):

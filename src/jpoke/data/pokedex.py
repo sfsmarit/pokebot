@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta, timezone
 
 from jpoke import config
-from jpoke.utils import file_utils as fileut
+from jpoke.utils import file_io as fileut
 from jpoke.data.models import PokemonData
 
 

@@ -1,5 +1,4 @@
 from jpoke.core.event import Event, Handler, HandlerResult
-from jpoke.handlers import item
 from .models import ItemData
 
 from jpoke.handlers import common, item as hdl
@@ -234,7 +233,7 @@ ITEMS: dict[str, ItemData] = {
     "だっしゅつボタン": ItemData(
         consumable=True,
         throw_power=30,
-        handlers={Event.ON_DAMAGE: Handler(hdl.だっしゅつボタン)}
+        handlers={Event.ON_DAMAGE: Handler(hdl.だっしゅつボタン, emitted_by_foe=True)}
     ),
     "たつじんのおび": {
         "consumable": False,

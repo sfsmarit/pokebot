@@ -16,4 +16,4 @@ class Item(BaseEffect):
 
     def consume(self):
         self.active = False
-        self.observed = True
+        self.revealed = True

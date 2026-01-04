@@ -6,8 +6,8 @@ if TYPE_CHECKING:
 
 import random
 
-from jpoke.utils.enums import Command
-import jpoke.utils.copy_utils as copyut
+from jpoke.utils.enums import Command, Interrupt
+from jpoke.utils import copy_utils as copyut
 
 
 class Player:
@@ -19,11 +19,28 @@ class Player:
         self.n_won: int = 0
         self.rating: float = 1500
 
+        self.reset_game()
+
     def __deepcopy__(self, memo):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
         return copyut.fast_copy(self, new, keys_to_deepcopy=["team"])
+
+    def reset_game(self):
+        self.selection_idxes: list[int] = []
+        self.active_idx: int = None  # type: ignore
+        self.interrupt: Interrupt = Interrupt.NONE
+        self.reserved_commands: list[Command] = []
+
+        self.reset_turn()
+
+    def reset_turn(self):
+        self.has_switched = False
+
+    def reserve_command(self, command: Command) -> Command:
+        self.reserved_commands.append(command)
+        return self.reserved_commands[-1]
 
     def choose_selection_commands(self, battle: Battle) -> list[Command]:
         n = min(3, len(self.team))
@@ -34,3 +51,16 @@ class Player:
 
     def choose_switch_command(self, battle: Battle) -> Command:
         return random.choice(battle.get_available_switch_commands(self))
+
+    @property
+    def active(self) -> Pokemon:
+        if self.active_idx is not None:
+            return self.team[self.active_idx]
+        return None  # type: ignore
+
+    @property
+    def selection(self) -> list[Pokemon]:
+        return [self.team[i] for i in self.selection_idxes]
+
+    def can_use_terastal(self) -> bool:
+        return all(mon.can_terastallize() for mon in self.selection)
