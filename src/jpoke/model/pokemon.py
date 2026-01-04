@@ -3,15 +3,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from jpoke.core.event import EventManager
 
-from typing import Literal
-
-from jpoke.utils.types import MOVE_CATEGORY
-from jpoke.utils.enums import Gender, Stat
+from jpoke.utils.types import Stat, MoveCategory, Gender, get_stats
 from jpoke.utils.constants import NATURE_MODIFIER
-import jpoke.utils.copy_utils as copyut
+from jpoke.utils import copy_utils as copyut
 
 from jpoke.core.event import Event, EventContext
-from jpoke.data.models import PokemonData
+from jpoke.data import pokedex
 
 from .ability import Ability
 from .item import Item
@@ -29,16 +26,20 @@ def calc_stat(level, base, indiv, effort, nc):
 
 
 class Pokemon:
-    def __init__(self, data: PokemonData):
-        self.data: PokemonData = data
-        self.observed: bool
+    def __init__(self,
+                 name: str,
+                 ability: str | Ability = "",
+                 item: str | Item = "",
+                 moves: list[str | Move] = ["はねる"]):
+        self.data = pokedex[name]
 
-        self.gender: Gender = Gender.NONE
+        self.observed: bool
+        self.gender: Gender = ""
         self._level: int = 50
         self._nature: str = "まじめ"
-        self.ability: Ability = None  # type: ignore
-        self.item: Item = None  # type: ignore
-        self.moves: list[Move] = []
+        self._ability: Ability = Ability()
+        self._item: Item = Item()
+        self._moves: list[Move] = []
         self._indiv: list[int] = [31]*6
         self._effort: list[int] = [0]*6
         self._stats: list[int] = [100]*6
@@ -47,14 +48,31 @@ class Pokemon:
 
         self.sleep_count: int
         self.ailment: Ailment = Ailment(self)
-
         self.field_status: FieldStatus = FieldStatus()
+
+        self.added_types: list[str] = []
+        self.lost_types: list[str] = []
+
+        self.ability = ability
+        self.item = item
+        self.moves = moves
 
         self.update_stats()
         self.hp: int = self.max_hp
 
-        self.added_types: list[str] = []
-        self.lost_types: list[str] = []
+    @classmethod
+    def reconstruct_from_log(cls, data: dict) -> Pokemon:
+        mon = cls(data["name"])
+        mon.gender = data["gender"]
+        mon.level = data["level"]
+        mon.nature = data["nature"]
+        # mon.ability = cls.create_ability(data["ability"])
+        # mon.item = cls.create_item(data["item"])
+        # mon.moves = [cls.create_move(s) for s in data["moves"]]
+        mon.indiv = data["indiv"]
+        mon.effort = data["effort"]
+        mon.terastal = data["terastal"]
+        return mon
 
     def __str__(self):
         sep = '\n\t'
@@ -83,12 +101,12 @@ class Pokemon:
     def dump(self) -> dict:
         return {
             "name": self.data.name,
-            "gender": self.gender.name,
+            "gender": self.gender,
             "level": self._level,
             "nature": self._nature,
-            "ability": self.ability.data.name,
-            "item": self.item.data.name,
-            "moves": [move.data.name for move in self.moves],
+            "ability": self.ability.name,
+            "item": self.item.name,
+            "moves": [move.name for move in self.moves],
             "indiv": self._indiv,
             "effort": self._effort,
             "terastal": self._terastal,
@@ -106,8 +124,37 @@ class Pokemon:
         self.item.unregister_handlers(events, self)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.data.name
+
+    @property
+    def ability(self) -> Ability:
+        return self._ability
+
+    @ability.setter
+    def ability(self, obj: str | Ability):
+        if isinstance(obj, str):
+            obj = Ability(obj)
+        self._ability = obj
+
+    @property
+    def item(self) -> Item:
+        return self._item
+
+    @item.setter
+    def item(self, obj: str | Item):
+        if isinstance(obj, str):
+            obj = Item(obj)
+        self._item = obj
+
+    @property
+    def moves(self) -> list[Move]:
+        return self._moves
+
+    @moves.setter
+    def moves(self, objs: list[str | Move]):
+        self._moves = [Move(obj) if isinstance(obj, str) else obj
+                       for obj in objs]
 
     @property
     def types(self) -> list[str]:
@@ -126,11 +173,15 @@ class Pokemon:
 
     @property
     def max_hp(self) -> int:
-        return self.stats[0]
+        return self.stats["H"]
 
     @property
     def hp_ratio(self) -> float:
         return self.hp / self.max_hp
+
+    @hp_ratio.setter
+    def hp_ratio(self, v: float):
+        self.hp = int(self.max_hp * v)
 
     @property
     def level(self) -> int:
@@ -178,11 +229,13 @@ class Pokemon:
         return self.terastallized
 
     @property
-    def stats(self) -> list[int]:
-        return self._stats
+    def stats(self) -> dict[Stat, int]:
+        labels = get_stats()[:6]
+        return {s: v for s, v in zip(labels, self._stats)}  # type: ignore
 
     @stats.setter
-    def stats(self, stats: list[int]):
+    def stats(self, stats: dict[Stat, int]):
+        stat_values = list(stats.values())
         nc = NATURE_MODIFIER[self._nature]
         efforts_50 = [0] + [4+8*i for i in range(32)]
 
@@ -192,7 +245,7 @@ class Pokemon:
                     v = calc_hp(self._level, self.data.base[i], self._indiv[i], self._effort[i])
                 else:
                     v = calc_stat(self._level, self.data.base[i], self._indiv[i], self._effort[i], nc)
-                if v == stats[i]:
+                if v == stat_values[i]:
                     self._effort[i] = eff
                     self._stats[i] = v
                     break
@@ -223,30 +276,6 @@ class Pokemon:
     def effort(self, effort: list[int]):
         self._effort = effort
         self.update_stats()
-
-    @property
-    def H(self) -> int:
-        return self.stats[0]
-
-    @property
-    def A(self) -> int:
-        return self.stats[1]
-
-    @property
-    def B(self) -> int:
-        return self.stats[2]
-
-    @property
-    def C(self) -> int:
-        return self.stats[3]
-
-    @property
-    def D(self) -> int:
-        return self.stats[4]
-
-    @property
-    def S(self) -> int:
-        return self.stats[5]
 
     def update_stats(self, keep_damage: bool = False):
         if keep_damage:
@@ -285,9 +314,9 @@ class Pokemon:
         return self.hp - old
 
     def modify_stat(self, stat: Stat, v: int) -> int:
-        old = self.field_status.rank[stat.idx]
-        self.field_status.rank[stat.idx] = max(-6, min(6, old + v))
-        return self.field_status.rank[stat.idx] - old
+        old = self.field_status.rank[stat]
+        self.field_status.rank[stat] = max(-6, min(6, old + v))
+        return self.field_status.rank[stat] - old
 
     def find_move(self, move: Move | str) -> Move | None:
         for mv in self.moves:
@@ -314,5 +343,5 @@ class Pokemon:
         events.emit(Event.ON_CHECK_MOVE_TYPE, EventContext(self, move))
         return move._type
 
-    def effective_move_category(self, move: Move, events: EventManager) -> MOVE_CATEGORY:
+    def effective_move_category(self, move: Move, events: EventManager) -> MoveCategory:
         return events.emit(Event.ON_CHECK_MOVE_CATEGORY, EventContext(self, move), value=move.category)

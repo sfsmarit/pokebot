@@ -1,12 +1,12 @@
 import jpoke.utils.copy_utils as copyut
-from jpoke.data.models import ItemData
+from jpoke.data import ITEMS
 
 from .effect import BaseEffect
 
 
 class Item(BaseEffect):
-    def __init__(self, data: ItemData) -> None:
-        super().__init__(data)
+    def __init__(self, name: str = "") -> None:
+        super().__init__(ITEMS[name])
 
     def __deepcopy__(self, memo):
         cls = self.__class__

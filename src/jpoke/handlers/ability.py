@@ -4,7 +4,6 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
 from jpoke.core.event import EventContext
-from jpoke.utils.enums import Stat
 from . import common
 
 
@@ -33,5 +32,5 @@ def じりょく(battle: Battle, ctx: EventContext, value: Any) -> bool:
 
 def かちき(battle: Battle, ctx: EventContext, value: Any):
     if value < 0 and ctx.by_foe:
-        battle.modify_stat(ctx.source, Stat.C, +2)
+        battle.modify_stat(ctx.source, "C", +2)
         reveal_ability(battle, ctx, value)

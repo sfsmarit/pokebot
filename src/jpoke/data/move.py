@@ -1,5 +1,4 @@
 from jpoke.core.event import Event, Handler
-from jpoke.utils.enums import Stat
 from .models import MoveData
 from jpoke.handlers import common, move as hdl
 
@@ -70,7 +69,7 @@ MOVES: dict[str, MoveData] = {
         accuracy=90,
         flags=["contact", "punch"],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "self", Stat.S, -1))}
+            lambda btl, val, ctx: common.modify_stat(btl, val, ctx, "self", "S", -1))}
     ),
     "アイアンテール": {
         "type": "はがね",
@@ -3836,7 +3835,7 @@ MOVES: dict[str, MoveData] = {
         power=40,
         flags=["contact", "non_encore"],
         handlers={Event.ON_HIT: Handler(
-            lambda btl, val, ctx: common.modify_hp(btl, val, ctx, "self", r=-1/4, log="反動"))}
+            lambda btl, val, ctx: common.modify_hp(btl, val, ctx, "self", r=-1/4))}
     ),
     "１０まんボルト": {
         "type": "でんき",

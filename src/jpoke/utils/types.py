@@ -1,18 +1,25 @@
-from typing import Literal
+from typing import Literal, get_args
 
 
-STAT = Literal["H", "A", "B", "C", "D", "S", "ACC", "EVA"]
+Stat = Literal["H", "A", "B", "C", "D", "S", "ACC", "EVA"]
 
-MOVE_CATEGORY = Literal["物理", "特殊", "変化"]
+Gender = Literal["", "オス", "メス"]
 
-AILMENT = Literal["", "どく", "もうどく", "まひ", "やけど", "ねむり", "こおり"]
+MoveCategory = Literal["物理", "特殊", "変化"]
 
-GLOBAL_FIELD = Literal["weather", "terrain", "gravity", "trickroom"]
+AilmentName = Literal["", "どく", "もうどく", "まひ", "やけど", "ねむり", "こおり"]
 
-SIDE_FIELD = Literal["reflector", "lightwall", "shinpi", "whitemist",
-                     "oikaze", "wish",
-                     "makibishi", "dokubishi", "stealthrock", "nebanet"]
+GlobalField = Literal["weather", "terrain", "gravity", "trickroom"]
 
-WEATHER = Literal["はれ", "あめ", "ゆき", "すなあらし"]
+SideField = Literal["reflector", "lightwall", "shinpi", "whitemist", "oikaze", "wish",
+                    "makibishi", "dokubishi", "stealthrock", "nebanet"]
 
-TERRAIN = Literal["エレキフィールド", "グラスフィールド", "サイコフィールド", "ミストフィールド"]
+Weather = Literal["はれ", "あめ", "ゆき", "すなあらし"]
+
+Terrain = Literal["エレキフィールド", "グラスフィールド", "サイコフィールド", "ミストフィールド"]
+
+BoostSource = Literal["", "ability", "item", "weather", "terrain"]
+
+
+def get_stats() -> list[str]:
+    return list(get_args(Stat))

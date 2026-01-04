@@ -1,12 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Literal, Any, TypedDict
+from typing import TYPE_CHECKING, Literal, Any
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.core.event import EventContext
 
 from jpoke.data.field import FIELDS
-from jpoke.utils.enums import Stat
-from jpoke.utils.types import AILMENT, WEATHER, TERRAIN, SIDE_FIELD
+from jpoke.utils.types import Stat, AilmentName, Weather, Terrain, SideField
 
 
 def reveal(
@@ -58,7 +57,7 @@ def modify_stat(
 def apply_ailment(
         battle: Battle, ctx: EventContext, value: Any,
         target_side: Literal["self", "foe"],
-        ailment: AILMENT,
+        ailment: AilmentName,
         prob: float = 1
 ) -> bool:
     if prob < 1 and battle.random.random() >= prob:
@@ -72,7 +71,7 @@ def apply_ailment(
 
 def apply_weather(
     battle: Battle, ctx: EventContext, value: Any,
-    name: WEATHER
+    name: Weather
 ):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
     return battle.field.activate_weather(name, count)
@@ -80,7 +79,7 @@ def apply_weather(
 
 def apply_terrain(
     battle: Battle, ctx: EventContext, value: Any,
-    name: TERRAIN
+    name: Terrain
 ):
     count = 5 + 3*(ctx.source.item == FIELDS[name].turn_extension_item)
     return battle.field.activate_terrain(name, count)
@@ -89,7 +88,7 @@ def apply_terrain(
 def apply_side_field(
     battle: Battle, ctx: EventContext, value: Any,
     target_side: Literal["self", "foe"],
-    name: SIDE_FIELD,
+    name: SideField,
     count: int = 1,
     extended_count: int | None = None
 ):

@@ -1,5 +1,5 @@
 from jpoke.core.event import Event, Handler
-from jpoke.utils.enums import Stat
+from jpoke.utils.types import Stat
 from .models import AbilityData
 from jpoke.handlers import common, ability as hdl
 
@@ -23,7 +23,7 @@ ABILITIES: dict[str, AbilityData] = {
     ),
     "いかく": AbilityData(
         handlers={Event.ON_SWITCH_IN: Handler(
-            lambda b, c, v: hdl.reveal_ability(b, c, v) and common.modify_stat(b, c, v, "foe", Stat.A, -1), 4)}
+            lambda b, c, v: hdl.reveal_ability(b, c, v) and common.modify_stat(b, c, v, "foe", "A", -1), 4)}
     ),
     "いかりのこうら": {},
     "いかりのつぼ": {

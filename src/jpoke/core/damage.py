@@ -6,10 +6,10 @@ if TYPE_CHECKING:
     from jpoke.model.move import Move
 
 from dataclasses import dataclass
+from jpoke.utils.types import Stat
+from jpoke.utils import copy_utils as copyut, math_utils as mathut
 
 from .event import EventManager, Event, EventContext
-from jpoke.utils import copy_utils as copyut, math_utils as mathut
-from jpoke.utils.enums import Stat
 
 
 @dataclass
@@ -70,17 +70,17 @@ class DamageCalculator:
         # ---------------- 最終攻撃 ----------------
         # ステータス
         if move == 'イカサマ':
-            final_atk = defender.stats[Stat.A.idx]
-            r_rank = rank_modifier(defender.field_status.rank[Stat.A.idx])
+            final_atk = defender.stats["A"]
+            r_rank = rank_modifier(defender.field_status.rank["A"])
         else:
             if move == 'ボディプレス':
-                stat = Stat.B
+                stat = "B"
             elif move_category == "物理":
-                stat = Stat.A
+                stat = "A"
             else:
-                stat = Stat.C
-            final_atk = attacker.stats[stat.idx]
-            r_rank = rank_modifier(attacker.field_status.rank[stat.idx])
+                stat = "C"
+            final_atk = attacker.stats[stat]
+            r_rank = rank_modifier(attacker.field_status.rank[stat])
 
         # ランク補正の修正
         def_ability: Ability = events.emit(
@@ -109,12 +109,12 @@ class DamageCalculator:
         # ---------------- 最終防御 ----------------
         # ステータス
         if move_category == "物理" or "physical" in move.data.flags:
-            stat = Stat.B
+            stat = "B"
         else:
-            stat = Stat.D
+            stat = "D"
 
-        final_def = defender.stats[stat.idx]
-        r_rank = rank_modifier(defender.field_status.rank[stat.idx])
+        final_def = defender.stats[stat]
+        r_rank = rank_modifier(defender.field_status.rank[stat])
 
         # ランク補正の修正
         if "ignore_rank" in move.data.flags and r_rank != 1:

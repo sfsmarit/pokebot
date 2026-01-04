@@ -3,7 +3,7 @@ from .item import ITEMS
 from .move import MOVES
 from .field import FIELDS
 from .ailment import AILMENTS
-
+from .pokedex import pokedex, get_season
 
 # 名前を追加
 for data in [

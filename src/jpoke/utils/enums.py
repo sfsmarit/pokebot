@@ -19,35 +19,6 @@ class BaseEnum(Enum):
         return [x.name for x in cls]
 
 
-class Stat(BaseEnum):
-    H = ("HP", "HP")
-    A = ("こうげき", "攻撃")
-    B = ("ぼうぎょ", "防御")
-    C = ("とくこう", "特攻")
-    D = ("とくぼう", "特防")
-    S = ("すばやさ", "素早さ")
-    ACC = ("めいちゅう", "命中")
-    EVA = ("かいひ", "回避")
-
-    @property
-    def idx(self) -> int:
-        return list(Stat).index(self)
-
-    @property
-    def hiragana(self) -> str:
-        return self.value[0]
-
-    @property
-    def kanji(self) -> str:
-        return self.value[1]
-
-
-class Gender(BaseEnum):
-    NONE = None
-    MALE = "オス"
-    FEMALE = "メス"
-
-
 class Condition(BaseEnum):
     AQUA_RING = ("アクアリング", 1, True, False)
     AME_MAMIRE = ("あめまみれ", 3, False, True)
@@ -85,15 +56,6 @@ class Condition(BaseEnum):
     @property
     def expirable(self) -> bool:
         return self.value[3]
-
-
-class BoostSource(BaseEnum):
-    """能力ブーストの発動要因"""
-    NONE = None
-    ABILITY = auto()
-    ITEM = auto()
-    WEATHER = auto()
-    FIELD = auto()
 
 
 class Time(BaseEnum):

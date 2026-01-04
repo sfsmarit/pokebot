@@ -1,5 +1,5 @@
-import jpoke.utils.copy_utils as copyut
-from jpoke.utils.enums import Stat, BoostSource
+from jpoke.utils.types import Stat, BoostSource, get_stats
+from jpoke.utils import copy_utils as copyut
 from .move import Move
 
 
@@ -14,8 +14,8 @@ class FieldStatus:
         self.bind_damage_denom: int = 0
         self.hits_taken: int = 0
         self.boosted_stat: Stat | None = None
-        self.boost_source: BoostSource = BoostSource.NONE
-        self.rank: list[int] = [0] * len(Stat)
+        self.boost_source: BoostSource = ""
+        self.rank: dict[Stat, int] = {k: 0 for k in get_stats()}  # type: ignore
         self.added_types: list[str] = []
         self.lost_types: list[str] = []
         self.executed_move: Move | None = None

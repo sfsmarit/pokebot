@@ -1,13 +1,12 @@
 import jpoke.utils.copy_utils as copyut
-from jpoke.data.models import AbilityData
+from jpoke.data import ABILITIES
 
 from .effect import BaseEffect
 
 
 class Ability(BaseEffect):
-    def __init__(self, data: AbilityData) -> None:
-        self.data: AbilityData
-        super().__init__(data)
+    def __init__(self, name: str = "") -> None:
+        super().__init__(ABILITIES[name])
 
         self.bench_reset()
 

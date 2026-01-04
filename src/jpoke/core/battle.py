@@ -5,8 +5,9 @@ from random import Random
 from copy import deepcopy
 import json
 
+from jpoke.utils.types import Stat
+from jpoke.utils.enums import Command
 from jpoke.utils import copy_utils as copyut
-from jpoke.utils.enums import Command, Stat
 
 from jpoke.model import Pokemon, Move, Field
 
@@ -18,7 +19,6 @@ from .logger import Logger
 from .damage import DamageCalculator, DamageContext
 from .global_field import GlobalFieldManager
 from .side_field import SideFieldManager
-from .pokedb import PokeDB
 
 
 class Battle:
@@ -119,7 +119,7 @@ class Battle:
             state.selected_idxes = player_data["selection_indexes"]
 
             for p in player_data["team"]:
-                mon = PokeDB.reconstruct_pokemon_from_log(p)
+                mon = Pokemon.reconstruct_from_log(p)
                 player.team.append(mon)
 
             for t, command_names in player_data["commands"].items():
@@ -187,7 +187,7 @@ class Battle:
         if active.trapped(self.events):
             return []
         return [cmd for mon, cmd in zip(player.team, Command.switch_commands())
-                if mon in self.selected(player) and mon is not self.active(player)]
+                if mon in self.selected(player) and mon is not active]
 
     def get_available_action_commands(self, player: Player) -> list[Command]:
         n = len(self.active(player).moves)
@@ -215,16 +215,6 @@ class Battle:
         idx = self.players.index(player)
         self.logger.add_command_log(self.turn, idx, command)
 
-    def get_turn_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
-        if turn is None:
-            turn = self.turn
-        return {pl: self.logger.get_turn_logs(turn, i) for i, pl in enumerate(self.players)}
-
-    def get_damage_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
-        if turn is None:
-            turn = self.turn
-        return {pl: self.logger.get_damage_logs(turn, i) for i, pl in enumerate(self.players)}
-
     def to_player_idxes(self, source: Player | list[Player] | Pokemon | None) -> list[int]:
         if isinstance(source, Player):
             return [self.players.index(source)]
@@ -236,16 +226,8 @@ class Battle:
             return list(range(len(self.players)))
         return []
 
-    def add_turn_log(self, source: Player | list[Player] | Pokemon | None, text: str):
-        for idx in self.to_player_idxes(source):
-            self.logger.add_turn_log(self.turn, idx, text)
-
-    def add_damage_log(self, source: Player | list[Player] | Pokemon | None, text: str):
-        for idx in self.to_player_idxes(source):
-            self.logger.add_damage_log(self.turn, idx, text)
-
     def calc_effective_speed(self, mon: Pokemon) -> int:
-        return self.events.emit(Event.ON_CALC_SPEED, EventContext(mon), mon.S)
+        return self.events.emit(Event.ON_CALC_SPEED, EventContext(mon), mon.stats["S"])
 
     def calc_speed_order(self) -> list[Pokemon]:
         speeds = [self.calc_effective_speed(p) for p in self.actives]
@@ -314,6 +296,9 @@ class Battle:
                 state.selected_idxes = [c.idx for c in commands]
 
     def check_hit(self, source: Pokemon, move: Move) -> bool:
+        if not move.data.accuracy:
+            return True
+
         accuracy = self.events.emit(
             Event.ON_CALC_ACCURACY,
             EventContext(source, move),
@@ -356,7 +341,7 @@ class Battle:
             # ダメージ付与
             self.modify_hp(foe, -damage)
 
-        self.events.emit(Event.ON_HIT, EventContext(mon))
+        self.events.emit(Event.ON_HIT, EventContext(mon, move=move))
 
         # ダメージを与えたときの処理
         if damage:
@@ -366,9 +351,9 @@ class Battle:
 
     def command_to_move(self, player: Player, command: Command) -> Move:
         if command == Command.STRUGGLE:
-            return PokeDB.create_move("わるあがき")
+            return Move("わるあがき")
         elif command.is_zmove():
-            return PokeDB.create_move("わるあがき")
+            return Move("わるあがき")
         else:
             return self.active(player).moves[command.idx]
 
@@ -404,7 +389,7 @@ class Battle:
                      self_harm: bool = False,
                      ) -> list[int]:
         if isinstance(move, str):
-            move = PokeDB.create_move(move)
+            move = Move(move)
         defender = attacker if self_harm else self.foe(attacker)
         ctx = DamageContext(critical, self_harm)
         return self.damage_calculator.single_hit_damages(self.events, attacker, defender, move, ctx)
@@ -529,7 +514,36 @@ class Battle:
         # すべての死に出しが完了するまで再帰的に実行
         self.run_faint_switch()
 
-    def advance_turn(self, commands: dict[Player, Command] | None = None):
+    def add_turn_log(self, source: Player | list[Player] | Pokemon | None, text: str):
+        for idx in self.to_player_idxes(source):
+            self.logger.add_turn_log(self.turn, idx, text)
+
+    def add_damage_log(self, source: Player | list[Player] | Pokemon | None, text: str):
+        for idx in self.to_player_idxes(source):
+            self.logger.add_damage_log(self.turn, idx, text)
+
+    def get_turn_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
+        if turn is None:
+            turn = self.turn
+        return {pl: self.logger.get_turn_logs(turn, i) for i, pl in enumerate(self.players)}
+
+    def get_damage_logs(self, turn: int | None = None) -> dict[Player, list[str]]:
+        if turn is None:
+            turn = self.turn
+        return {pl: self.logger.get_damage_logs(turn, i) for i, pl in enumerate(self.players)}
+
+    def print_turn_log(self, turn: int | None = None):
+        if turn is None:
+            turn = self.turn
+        turn_logs = self.get_turn_logs(turn)
+        damage_logs = self.get_damage_logs(turn)
+        print(f"Turn {turn}")
+        for player in self.players:
+            print(f"\t{player.name}\t{turn_logs[player]} {damage_logs[player]}")
+
+    def advance_turn(self,
+                     commands: dict[Player, Command] | None = None,
+                     print_log: bool = False):
         # 引数に指定されたコマンドを優先させる
         if commands:
             for player, command in commands.items():
@@ -548,6 +562,8 @@ class Battle:
             # だっしゅつパックによる交代
             self.run_interrupt_switch(Interrupt.EJECTPACK_ON_START)
 
+            if print_log:
+                self.print_turn_log()
             return
 
         if not self.has_interrupt():
@@ -658,3 +674,6 @@ class Battle:
 
         # 瀕死による交代
         self.run_faint_switch()
+
+        if print_log:
+            self.print_turn_log()

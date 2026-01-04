@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from jpoke.player import Player
 
 from jpoke.utils import copy_utils as copyut
-from jpoke.utils.types import SIDE_FIELD
+from jpoke.utils.types import SideField
 from jpoke.model import Field
 
 
@@ -50,19 +50,19 @@ class SideFieldManager:
         for field in self.fields.values():
             field.update_reference([player])  # type: ignore
 
-    def activate(self, name: SIDE_FIELD, count: int) -> bool:
+    def activate(self, name: SideField, count: int) -> bool:
         if not self.fields[name].count:
             self.fields[name].activate(self.events, count)
             return True
         return False
 
-    def deactivate(self, name: SIDE_FIELD) -> bool:
+    def deactivate(self, name: SideField) -> bool:
         if self.fields[name].count:
             self.fields[name].deactivate(self.events)
             return True
         return False
 
-    def reduce_count(self, name: SIDE_FIELD, by: int = 1) -> bool:
+    def reduce_count(self, name: SideField, by: int = 1) -> bool:
         field = self.fields[name]
         new_count = max(0, field.count - by)
         if new_count != field.count:

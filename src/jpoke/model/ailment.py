@@ -4,14 +4,15 @@ if TYPE_CHECKING:
     from jpoke.core.event import EventManager
     from jpoke.model.pokemon import Pokemon
 
-import jpoke.utils.copy_utils as copyut
+from jpoke.utils.types import AilmentName
+from jpoke.utils import copy_utils as copyut
 from jpoke.data.ailment import AILMENTS
 
 from .effect import BaseEffect
 
 
 class Ailment(BaseEffect):
-    def __init__(self, owner: Pokemon, name: str = "") -> None:
+    def __init__(self, owner: Pokemon, name: AilmentName = "") -> None:
         self.owner: Pokemon = owner
         self.init(name)
         self.observed = True

@@ -20,7 +20,7 @@ def resource_path(*path_parts: str):
 def download(url: str, dst) -> bool:
     try:
         print(f"Downloading {url} ... ", end="")
-        res = requests.get(url)
+        res = requests.get(url, timeout=10)
         with open(dst, 'w', encoding='utf-8') as fout:
             fout.write(res.text)
         print("Done")

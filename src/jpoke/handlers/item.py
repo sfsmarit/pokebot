@@ -1,10 +1,28 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
     from jpoke.model import Pokemon
 
 from jpoke.core.event import EventContext, HandlerResult, Interrupt
+from . import common
+
+
+def reveal_item(battle: Battle, ctx: EventContext, value: Any,
+                whose: Literal["self", "foe"] = "self"):
+    return common.reveal(battle, ctx, value, what="item", whose=whose)
+
+
+def check_item(battle: Battle, ctx: EventContext, value: Any,
+               item: str, whose: Literal["self", "foe"] = "self"):
+    mon = ctx.source if whose == "self" else battle.foe(ctx.source)
+    return mon.item == item
+
+
+def いのちのたま(battle: Battle, ctx: EventContext, value: Any):
+    if ctx.move.category != "変化" and \
+            common.modify_hp(battle, ctx, value, "self", r=-1/8):
+        reveal_item(battle, ctx, value)
 
 
 def だっしゅつボタン(battle: Battle, ctx: EventContext, value: Any):

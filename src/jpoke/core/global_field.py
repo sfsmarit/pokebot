@@ -5,7 +5,7 @@ if TYPE_CHECKING:
     from jpoke.player import Player
 
 from jpoke.utils import copy_utils as copyut
-from jpoke.utils.types import GLOBAL_FIELD, WEATHER, TERRAIN
+from jpoke.utils.types import GlobalField, Weather, Terrain
 from jpoke.model import Field
 
 
@@ -38,7 +38,7 @@ class GlobalFieldManager:
         for field in self.fields.values():
             field.update_reference(players)  # type: ignore
 
-    def activate_weather(self, name: WEATHER, count: int) -> bool:
+    def activate_weather(self, name: Weather, count: int) -> bool:
         field = self.fields["weather"]
 
         # 重ねがけ不可
@@ -52,7 +52,7 @@ class GlobalFieldManager:
 
         return True
 
-    def activate_terrain(self, name: TERRAIN, count: int) -> bool:
+    def activate_terrain(self, name: Terrain, count: int) -> bool:
         field = self.fields["terrain"]
 
         # 重ねがけ不可
@@ -66,14 +66,14 @@ class GlobalFieldManager:
 
         return True
 
-    def deactivate(self, name: GLOBAL_FIELD) -> bool:
+    def deactivate(self, name: GlobalField) -> bool:
         field = self.fields[name]
         if field.count:
             field.deactivate(self.events)
             return True
         return False
 
-    def reduce_count(self, name: GLOBAL_FIELD, by: int = 1) -> bool:
+    def reduce_count(self, name: GlobalField, by: int = 1) -> bool:
         field = self.fields[name]
         new_count = max(0, field.count - by)
         if new_count != field.count:
