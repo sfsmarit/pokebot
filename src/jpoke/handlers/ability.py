@@ -1,19 +1,18 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
+from jpoke.utils.types import Side
 from jpoke.core.event import EventContext
 from . import common
 
 
-def reveal_ability(battle: Battle, ctx: EventContext, value: Any,
-                   whose: Literal["self", "foe"] = "self"):
-    return common.reveal(battle, ctx, value, what="ability", whose=whose)
+def reveal_ability(battle: Battle, ctx: EventContext, value: Any, whose: Side = "self"):
+    return common.reveal(battle, ctx, what="ability", whose=whose)
 
 
-def check_ability(battle: Battle, ctx: EventContext, value: Any,
-                  ability: str, whose: Literal["self", "foe"] = "self"):
+def check_ability(battle: Battle, ctx: EventContext, ability: str, whose: Side = "self"):
     mon = ctx.source if whose == "self" else battle.foe(ctx.source)
     return mon.ability == ability
 
@@ -31,6 +30,6 @@ def じりょく(battle: Battle, ctx: EventContext, value: Any) -> bool:
 
 
 def かちき(battle: Battle, ctx: EventContext, value: Any):
-    if value < 0 and ctx.by_foe:
+    if value < 0 and ctx.by == "self":
         battle.modify_stat(ctx.source, "C", +2)
         reveal_ability(battle, ctx, value)

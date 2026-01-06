@@ -4,7 +4,22 @@ if TYPE_CHECKING:
     from jpoke.core.battle import Battle
 
 from jpoke.utils.enums import Interrupt
-from jpoke.core.event import EventContext
+from jpoke.core.event import Event, EventContext
+from . import common
+
+
+def reveal_move(battle: Battle, ctx: EventContext, value: Any):
+    ctx.move.revealed = True
+    battle.add_turn_log(ctx.source, ctx.move.name)
+    return True
+
+
+def consume_pp(battle: Battle, ctx: EventContext, value: Any):
+    v = battle.events.emit(Event.ON_CHECK_PP_CONSUMED, ctx, 1)
+    ctx.move.pp = max(0, ctx.move.pp - v)
+    battle.add_turn_log(ctx.source, f"PP -{v} >> {ctx.move.pp}")
+    ctx.source.expended_moves.append(ctx.move)
+    return True
 
 
 def pivot(battle: Battle, ctx: EventContext, value: Any):

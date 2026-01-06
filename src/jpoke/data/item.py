@@ -233,7 +233,7 @@ ITEMS: dict[str, ItemData] = {
     "だっしゅつボタン": ItemData(
         consumable=True,
         throw_power=30,
-        handlers={Event.ON_DAMAGE: Handler(hdl.だっしゅつボタン, emitted_by_foe=True)}
+        handlers={Event.ON_DAMAGE: Handler(hdl.だっしゅつボタン, by="foe")}
     ),
     "たつじんのおび": {
         "consumable": False,

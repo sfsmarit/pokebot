@@ -13,10 +13,14 @@ class CustomPlayer(Player):
 PRINT_LOG = True
 
 
-def generate_battle(ally: list[Pokemon] = [Pokemon("ピカチュウ")],
-                    foe: list[Pokemon] = [Pokemon("ピカチュウ")],
+def generate_battle(ally: list[Pokemon] | None = None,
+                    foe: list[Pokemon] | None = None,
                     turn: int = 0,
-                    ) -> Battle:
+                    accuracy: int | None = 100) -> Battle:
+    if not ally:
+        ally = [Pokemon("ピカチュウ")]
+    if not foe:
+        foe = [Pokemon("ピカチュウ")]
     players = [CustomPlayer() for _ in range(2)]
     for player, mons in zip(players, [ally, foe]):
         for mon in mons:
@@ -24,7 +28,16 @@ def generate_battle(ally: list[Pokemon] = [Pokemon("ピカチュウ")],
 
     battle = Battle(players)  # type: ignore
 
+    if accuracy is not None:
+        battle.test_option.accuracy = accuracy
+
     while True:
         battle.advance_turn(print_log=PRINT_LOG)
         if battle.winner() or battle.turn == turn:
             return battle
+
+
+def check_switch(battle, idx=1) -> bool:
+    """交代可能ならTrueを返す"""
+    commands = battle.get_available_action_commands(battle.players[idx])
+    return any(c.is_switch() for c in commands)

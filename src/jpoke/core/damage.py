@@ -74,7 +74,7 @@ class DamageCalculator:
         # ステータス
         if move == 'イカサマ':
             final_atk = defender.stats["A"]
-            r_rank = rank_modifier(defender.field_status.rank["A"])
+            r_rank = rank_modifier(defender.rank["A"])
         else:
             if move == 'ボディプレス':
                 stat = "B"
@@ -83,7 +83,7 @@ class DamageCalculator:
             else:
                 stat = "C"
             final_atk = attacker.stats[stat]
-            r_rank = rank_modifier(attacker.field_status.rank[stat])
+            r_rank = rank_modifier(attacker.rank[stat])
 
         # ランク補正の修正
         def_ability: Ability = events.emit(
@@ -117,7 +117,7 @@ class DamageCalculator:
             stat = "D"
 
         final_def = defender.stats[stat]
-        r_rank = rank_modifier(defender.field_status.rank[stat])
+        r_rank = rank_modifier(defender.rank[stat])
 
         # ランク補正の修正
         if "ignore_rank" in move.data.flags and r_rank != 1:

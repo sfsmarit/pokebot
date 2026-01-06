@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import random
 
 from jpoke.utils.enums import Command, Interrupt
-from jpoke.utils import copy_utils as copyut
+from jpoke.utils import fast_copy
 
 
 class Player:
@@ -25,7 +25,7 @@ class Player:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return copyut.fast_copy(self, new, keys_to_deepcopy=["team"])
+        return fast_copy(self, new, keys_to_deepcopy=["team"])
 
     def reset_game(self):
         self.selection_idxes: list[int] = []

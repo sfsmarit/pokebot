@@ -1,11 +1,12 @@
 from typing import Self
+from dataclasses import dataclass
 
 import time
 from random import Random
 from copy import deepcopy
 import json
 
-from jpoke.utils.types import Stat
+from jpoke.utils.types import Stat, Side
 from jpoke.utils.enums import Command, Interrupt
 from jpoke.utils import fast_copy
 
@@ -15,8 +16,12 @@ from .event import Event, EventManager, EventContext
 from .player import Player
 from .logger import Logger
 from .damage import DamageCalculator, DamageContext
-from .global_field import GlobalFieldManager
-from .side_field import SideFieldManager
+from .field import GlobalFieldManager, SideFieldManager
+
+
+@dataclass
+class TestOption:
+    accuracy: int | None = None
 
 
 class Battle:
@@ -40,6 +45,8 @@ class Battle:
 
         self.field: GlobalFieldManager = GlobalFieldManager(self.events, self.players)
         self.sides: list[SideFieldManager] = [SideFieldManager(self.events, pl) for pl in self.players]
+
+        self.test_option: TestOption = TestOption()
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -225,7 +232,7 @@ class Battle:
 
             command = player.reserved_commands[-1]
             move = self.command_to_move(self.players[i], command)
-            ctx = EventContext(mon, move)
+            ctx = EventContext(mon, move=move)
             action_speed = self.events.emit(Event.ON_CALC_ACTION_SPEED, ctx, 0)
 
             total_speed = action_speed + speed*1e-5  # type: ignore
@@ -270,44 +277,52 @@ class Battle:
                 pl.selection_idxes = [c.idx for c in commands]
 
     def check_hit(self, source: Pokemon, move: Move) -> bool:
-        if not move.data.accuracy:
-            return True
-
-        accuracy = self.events.emit(
-            Event.ON_CALC_ACCURACY,
-            EventContext(source, move),
-            move.data.accuracy
-        )
+        if self.test_option.accuracy is not None:
+            accuracy = self.test_option.accuracy
+        else:
+            if not move.data.accuracy:
+                return True
+            accuracy = self.events.emit(
+                Event.ON_CALC_ACCURACY,
+                EventContext(source, move=move),
+                move.data.accuracy
+            )
         return 100*self.random.random() < accuracy  # type: ignore
 
     def run_move(self, attacker: Pokemon, move: Move):
         # 技のハンドラを登録
         move.register_handlers(self.events, attacker)
 
-        self.add_turn_log(attacker, f"{move.name}")
+        ctx = EventContext(attacker, move=move)
 
         # 行動成功判定
-        self.events.emit(Event.ON_TRY_ACTION, EventContext(attacker))
+        self.events.emit(Event.ON_TRY_ACTION, ctx)
+
+        # 技の宣言、PP消費
+        self.events.emit(Event.ON_DECLARE_MOVE, ctx)
+        self.events.emit(Event.ON_CONSUME_PP, ctx)
 
         # 発動成功判定
-        self.events.emit(Event.ON_TRY_MOVE, EventContext(attacker))
+        self.events.emit(Event.ON_TRY_MOVE, ctx)
 
-        attacker.field_status.executed_move = move
+        # 発動した技の確定
+        attacker.executed_move = move
 
         # TODO 命中判定
-        self.check_hit(attacker, move)
+        if not self.check_hit(attacker, move):
+            return
 
         # 無効判定
-        self.events.emit(Event.ON_TRY_IMMUNE, EventContext(attacker))
+        self.events.emit(Event.ON_TRY_IMMUNE, ctx)
 
         # ダメージ計算
         damage = self.calc_damage(attacker, move)
 
         # HPコストの支払い
-        self.events.emit(Event.ON_PAY_HP, EventContext(attacker))
+        self.events.emit(Event.ON_PAY_HP, ctx)
 
         # ダメージ修正
-        damage = self.events.emit(Event.ON_MODIFY_DAMAGE, EventContext(attacker), damage)
+        damage = self.events.emit(Event.ON_MODIFY_DAMAGE, ctx, damage)
 
         if damage:
             # ダメージ付与
@@ -318,7 +333,7 @@ class Battle:
 
         # ダメージを与えたときの処理
         if damage:
-            self.events.emit(Event.ON_DAMAGE, EventContext(attacker))
+            self.events.emit(Event.ON_DAMAGE, ctx)
 
         move.unregister_handlers(self.events, attacker)
 
@@ -338,11 +353,11 @@ class Battle:
                               f"HP {'+' if v >= 0 else ''}{v} >> {target.hp}")
         return bool(v)
 
-    def modify_stat(self, target: Pokemon, stat: Stat, v: int, by_foe: bool = False) -> bool:
+    def modify_stat(self, target: Pokemon, stat: Stat, v: int, by: Side = "self") -> bool:
         if v and (result := target.modify_stat(stat, v)):
             self.add_turn_log(self.find_player(target),
                               f"{stat}{'+' if result >= 0 else ''}{result}")
-            self.events.emit(Event.ON_MODIFY_STAT, EventContext(target, by_foe=by_foe), result)
+            self.events.emit(Event.ON_MODIFY_STAT, EventContext(target, by=by), result)
         return bool(result)
 
     def calc_damage(self,

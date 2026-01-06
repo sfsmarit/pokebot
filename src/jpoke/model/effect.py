@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Self
 if TYPE_CHECKING:
     from jpoke.core.event import EventManager
     from jpoke.model.pokemon import Pokemon
-    from jpoke.player import Player
+    from jpoke.core.player import Player
 
 
 class BaseEffect:

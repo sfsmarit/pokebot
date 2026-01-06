@@ -1,28 +1,26 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
-    from jpoke.core.battle import Battle
+    from jpoke.core import Battle
     from jpoke.model import Pokemon
 
+from jpoke.utils.types import Side
 from jpoke.utils.enums import Interrupt
 from jpoke.core.event import EventContext, HandlerResult
 from . import common
 
 
-def reveal_item(battle: Battle, ctx: EventContext, value: Any,
-                whose: Literal["self", "foe"] = "self"):
-    return common.reveal(battle, ctx, value, what="item", whose=whose)
+def reveal_item(battle: Battle, ctx: EventContext, value: Any, whose: Side = "self"):
+    return common.reveal(battle, ctx, what="item", whose=whose)
 
 
-def check_item(battle: Battle, ctx: EventContext, value: Any,
-               item: str, whose: Literal["self", "foe"] = "self"):
+def check_item(battle: Battle, ctx: EventContext, item: str, whose: Side = "self"):
     mon = ctx.source if whose == "self" else battle.foe(ctx.source)
     return mon.item == item
 
 
 def いのちのたま(battle: Battle, ctx: EventContext, value: Any):
-    if ctx.move.category != "変化" and \
-            common.modify_hp(battle, ctx, value, "self", r=-1/8):
+    if ctx.move.category != "変化" and common.modify_hp(battle, ctx, "self", r=-1/8):
         reveal_item(battle, ctx, value)
 
 

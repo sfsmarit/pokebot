@@ -1,24 +1,6 @@
 from enum import Enum, auto
 
 
-class BaseEnum(Enum):
-    def __str__(self):
-        if isinstance(self.value, tuple):
-            return self.value[0]
-        else:
-            return str(self.value)
-
-    def is_none(self) -> bool:
-        if isinstance(self.value, tuple):
-            return self.value[0] is None
-        else:
-            return self.value is None
-
-    @classmethod
-    def names(cls) -> list[str]:
-        return [x.name for x in cls]
-
-
 class HandlerResult(Enum):
     NONE = None
     STOP_HANDLER = auto()
@@ -31,6 +13,8 @@ class Event(Enum):
     ON_SWITCH_OUT = auto()
     ON_BEFORE_MOVE = auto()
     ON_TRY_ACTION = auto()
+    ON_DECLARE_MOVE = auto()
+    ON_CONSUME_PP = auto()
     ON_TRY_MOVE = auto()
     ON_TRY_IMMUNE = auto()
     ON_HIT = auto()
@@ -48,6 +32,8 @@ class Event(Enum):
     ON_MODIFY_STAT = auto()
     ON_END = auto()
 
+    ON_CHECK_PP_CONSUMED = auto()
+    ON_CHECK_DURATION = auto()
     ON_CHECK_FLOATING = auto()
     ON_CHECK_TRAPPED = auto()
     ON_CHECK_NERVOUS = auto()
@@ -93,7 +79,7 @@ class Interrupt(Enum):
         return cls[f"EJECTPACK_ON_AFTER_MOVE_{idx}"]
 
 
-class Condition(BaseEnum):
+class Condition(Enum):
     AQUA_RING = ("アクアリング", 1, True, False)
     AME_MAMIRE = ("あめまみれ", 3, False, True)
     ENCORE = ("アンコール", 3, False, True)
@@ -132,7 +118,7 @@ class Condition(BaseEnum):
         return self.value[3]
 
 
-class Time(BaseEnum):
+class Time(Enum):
     """時間 [s]"""
     GAME = 20*60                # 試合
     SELECTION = 90              # 選出
@@ -142,7 +128,7 @@ class Time(BaseEnum):
     TIMEOUT = 60                # 実機対戦でのタイムアウト
 
 
-class Command(BaseEnum):
+class Command(Enum):
     NONE = None
     STRUGGLE = auto()
     FORCED = auto()
@@ -218,8 +204,15 @@ class Command(BaseEnum):
     ZMOVE_8 = auto()
     ZMOVE_9 = auto()
 
+    @classmethod
+    def names(cls) -> list[str]:
+        return [x.name for x in cls]
+
     def __str__(self):
         return self.name
+
+    def is_none(self) -> bool:
+        return self.value is None
 
     @property
     def idx(self) -> int:

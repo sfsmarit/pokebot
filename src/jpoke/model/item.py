@@ -1,4 +1,4 @@
-import jpoke.utils.copy_utils as copyut
+from jpoke.utils import fast_copy
 from jpoke.data import ITEMS
 
 from .effect import BaseEffect
@@ -12,7 +12,7 @@ class Item(BaseEffect):
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return copyut.fast_copy(self, new)
+        return fast_copy(self, new)
 
     def consume(self):
         self.active = False

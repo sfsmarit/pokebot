@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from jpoke.core.event import EventManager
 
-from jpoke.utils.types import Stat, MoveCategory, Gender, get_stats
+from jpoke.utils.types import Stat, MoveCategory, Gender, BoostSource, get_stats
 from jpoke.utils.constants import NATURE_MODIFIER
-from jpoke.utils import copy_utils as copyut
+from jpoke.utils import fast_copy
 
 from jpoke.core.event import Event, EventContext
 from jpoke.data import pokedex
@@ -14,7 +14,6 @@ from .ability import Ability
 from .item import Item
 from .move import Move
 from .ailment import Ailment
-from .active_status import FieldStatus
 
 
 def calc_hp(level, base, indiv, effort):
@@ -48,10 +47,7 @@ class Pokemon:
 
         self.sleep_count: int
         self.ailment: Ailment = Ailment(self)
-        self.field_status: FieldStatus = FieldStatus()
-
-        self.added_types: list[str] = []
-        self.lost_types: list[str] = []
+        # self.field_status: FieldStatus = FieldStatus()
 
         self.ability = ability
         self.item = item
@@ -59,6 +55,25 @@ class Pokemon:
 
         self.update_stats()
         self.hp: int = self.max_hp
+
+        self.bench_reset()
+
+    def bench_reset(self):
+        self.choice_locked: bool = False
+        self.hidden: bool = False
+        self.lockon: bool = False
+        self.active_turn: int = 0
+        self.forced_turn: int = 0
+        self.sub_hp: int = 0
+        self.bind_damage_denom: int = 0
+        self.hits_taken: int = 0
+        self.boosted_stat: Stat | None = None
+        self.boost_source: BoostSource = ""
+        self.rank: dict[Stat, int] = {k: 0 for k in get_stats()}  # type: ignore
+        self.added_types: list[str] = []
+        self.lost_types: list[str] = []
+        self.executed_move: Move | None = None
+        self.expended_moves: list[Move] = []
 
     @classmethod
     def reconstruct_from_log(cls, data: dict) -> Pokemon:
@@ -95,7 +110,7 @@ class Pokemon:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        copyut.fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status'])
+        fast_copy(self, new, keys_to_deepcopy=['ability', 'item', 'moves', 'field_status', 'executed_move', 'expended_moves'])
         return new
 
     def dump(self) -> dict:
@@ -120,6 +135,7 @@ class Pokemon:
             self.item.register_handlers(events, self)
 
     def switch_out(self, events: EventManager):
+        self.bench_reset()
         self.ability.unregister_handlers(events, self)
         self.item.unregister_handlers(events, self)
 
@@ -314,9 +330,9 @@ class Pokemon:
         return self.hp - old
 
     def modify_stat(self, stat: Stat, v: int) -> int:
-        old = self.field_status.rank[stat]
-        self.field_status.rank[stat] = max(-6, min(6, old + v))
-        return self.field_status.rank[stat] - old
+        old = self.rank[stat]
+        self.rank[stat] = max(-6, min(6, old + v))
+        return self.rank[stat] - old
 
     def find_move(self, move: Move | str) -> Move | None:
         for mv in self.moves:

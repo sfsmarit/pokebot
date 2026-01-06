@@ -2,28 +2,30 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from jpoke.core import Battle
-    from jpoke.model import Pokemon, Move
+    from jpoke.model import Pokemon, Move, Field
 
 from typing import Callable
 from dataclasses import dataclass
 
+from jpoke.utils.types import Side, GlobalField, SideField, Weather, Terrain
 from jpoke.utils.enums import Event, HandlerResult
-from jpoke.utils import copy_utils as copyut
+from jpoke.utils import fast_copy
 from .player import Player
 
 
 @dataclass
 class EventContext:
     source: Pokemon
+    by: Side = "self"
     move: Move = None  # type: ignore
-    by_foe: bool = False
+    field: GlobalField | SideField | Weather | Terrain = ""
 
 
 @dataclass(frozen=True)
 class Handler:
     func: Callable
     priority: int = 0
-    emitted_by_foe: bool = False
+    by: Side = "self"
     once: bool = False
 
     def __lt__(self, other):
@@ -39,7 +41,7 @@ class EventManager:
         cls = self.__class__
         new = cls.__new__(cls)
         memo[id(self)] = new
-        return copyut.fast_copy(self, new)
+        return fast_copy(self, new)
 
     def update_reference(self, new: Battle):
         old = self.battle
@@ -86,8 +88,8 @@ class EventManager:
         for handler, sources in sorted(self.handlers.get(event, {}).items()):
             if ctx:
                 # 引数のコンテキストに合致するハンドラがあるか検証する
-                if (not handler.emitted_by_foe and ctx.source in sources) or \
-                        (handler.emitted_by_foe and any(ctx.source is not mon for mon in sources)):
+                if (not handler.by and ctx.source in sources) or \
+                        (handler.by and any(ctx.source is not mon for mon in sources)):
                     ctxs = [ctx]
                 else:
                     continue

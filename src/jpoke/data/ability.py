@@ -19,7 +19,7 @@ ABILITIES: dict[str, AbilityData] = {
     "あめうけざら": {},
     "あめふらし": {},
     "ありじごく": AbilityData(
-        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.ありじごく, emitted_by_foe=True)}
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.ありじごく, by="foe")}
     ),
     "いかく": AbilityData(
         handlers={Event.ON_SWITCH_IN: Handler(
@@ -67,7 +67,7 @@ ABILITIES: dict[str, AbilityData] = {
         ]
     },
     "かげふみ": AbilityData(
-        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.かげふみ, emitted_by_foe=True)}
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.かげふみ, by="foe")}
     ),
     "かぜのり": {},
     "かそく": {},
@@ -110,7 +110,7 @@ ABILITIES: dict[str, AbilityData] = {
         handlers={
             Event.ON_SWITCH_IN: Handler(hdl.reveal_ability),
             Event.ON_CHECK_NERVOUS: Handler(
-                lambda b, c, v: hdl.check_ability(b, c, v, "きんちょうかん", "foe"), emitted_by_foe=True),
+                lambda b, c, v: hdl.check_ability(b, c, v, "きんちょうかん", "foe"), by="foe"),
         }
     ),
     "ぎたい": {
@@ -200,7 +200,7 @@ ABILITIES: dict[str, AbilityData] = {
     },
     "じょおうのいげん": {},
     "じりょく": AbilityData(
-        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.じりょく, emitted_by_foe=True)}
+        handlers={Event.ON_CHECK_TRAPPED: Handler(hdl.じりょく, by="foe")}
     ),
     "じんばいったい": {
         "flags": [
